@@ -1,0 +1,15 @@
+/**
+* Copyright 2015, Digital Optimization Group, LLC.
+* Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
+*/
+// First we can import bootstrap.less to use its classes and mixins.
+// After that we can import a custom_variables.less file, which right now is an exact copy of
+// the Bootstrap variables.less file. It can be altered to make a custom skin while leaving boostrap untouched. 
+// We have also npm installed the bootstrap css and access it from "~bootstrap/less/bootstrap"
+@import "~bootstrap/less/bootstrap";
+@import "~react-select/less/default"; // included css for react-select widget as an example of including in the webpack build workflow
+@import "custom_variables.less";
+
+// Can add any number of custom css properties below
+.myCustomCss {font-size: 16px; border: 1px dashed grey; margin: 30 0 30 0; padding: 5;}
+
