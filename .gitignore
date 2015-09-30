@@ -20,3 +20,5 @@ webpack/utils/webpack-stats.json
 .idea/modules.xml
 
 .idea/vcs.xml
+
+.idea/watcherTasks.xml
