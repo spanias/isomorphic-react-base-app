@@ -44,6 +44,7 @@ server.use(csrf({cookie: true}));
 
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
 fetchrPlugin.registerService(require('./app/services/exampleService'));
+fetchrPlugin.registerService(require('isomorphic-react-authentication').AuthenticationService);
 server.use(fetchrPlugin.getXhrPath(), fetchrPlugin.getMiddleware());
 
 var webpackStats;

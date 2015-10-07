@@ -28,6 +28,7 @@
     "fluxible-addons-react": "0.1.6",
     "fluxible-plugin-fetchr": "^0.3.6",
     "fs": "",
+    "isomorphic-react-authentication": "git+https://github.com/spanias/isomorphic-react-authentication.git",
     "less-loader": "^2.2.0",
     "passport": "^0.3.0",
     "react": "0.13.x",

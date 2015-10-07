@@ -9,6 +9,8 @@ import SaveState from '../elements/SaveState';
 import ModalExample from '../elements/ModalExample';
 import ReactSelectExample from '../elements/ReactSelectExample';
 
+var AuthenticationComponent = require('isomorphic-react-authentication').AuthenticationComponent;
+
 class Home extends React.Component {
 
 	render() {
@@ -28,6 +30,7 @@ class Home extends React.Component {
 				<h3>react-select widget example <a href="https://github.com/JedWatson/react-select">(github)</a></h3> 
 				<ReactSelectExample/>
 
+				<AuthenticationComponent />
 			</div>
 		);
   	}
