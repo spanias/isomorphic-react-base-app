@@ -30,7 +30,6 @@
     "fs": "",
     "isomorphic-react-authentication": "git+https://github.com/spanias/isomorphic-react-authentication.git",
     "less-loader": "^2.2.0",
-    "passport": "^0.3.0",
     "react": "0.13.x",
     "react-bootstrap": "0.25.2",
     "react-dnd": "1.1.1",
