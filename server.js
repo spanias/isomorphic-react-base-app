@@ -14,6 +14,7 @@ var app = require('./app');
 var HtmlComponent = React.createFactory(require('./Html.js'));
 var Router = require('react-router');
 var FluxibleComponent = require('fluxible-addons-react/FluxibleComponent');
+var jwt = require('jsonwebtoken');
 
 // Needed to parse posts
 var bodyParser = require('body-parser');
@@ -42,9 +43,31 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.use(csrf({cookie: true}));
 
+var AuthenticationService = require('isomorphic-react-authentication').AuthenticationService;
+var authFunc = function(params,callback){
+    var key = 'private';
+    if (params.username === "spanias" && params.password === "itworks") {
+        console.log("AuthenticationService: Authentication Successful!");
+        var token = jwt.sign({
+            user: 'spanias',
+            group: 'administrator',
+            email: 'demetris@spanias.com',
+            verified: false
+        }, key);
+        callback(null, token);
+    }
+    else {
+        console.log("AuthenticationService: Authentication Failed!");
+        var err = {errorID: 1, message: 'Authentication Failed'};
+        callback(err, null)
+    }
+};
+
+AuthenticationService.setAuthenticateMethod(authFunc);
+
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
 fetchrPlugin.registerService(require('./app/services/exampleService'));
-fetchrPlugin.registerService(require('isomorphic-react-authentication').AuthenticationService);
+fetchrPlugin.registerService(AuthenticationService);
 server.use(fetchrPlugin.getXhrPath(), fetchrPlugin.getMiddleware());
 
 var webpackStats;
