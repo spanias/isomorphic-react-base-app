@@ -14,7 +14,7 @@ var app = require('./app');
 var HtmlComponent = React.createFactory(require('./Html.js'));
 var Router = require('react-router');
 var FluxibleComponent = require('fluxible-addons-react/FluxibleComponent');
-var jwt = require('jsonwebtoken');
+
 
 // Needed to parse posts
 var bodyParser = require('body-parser');
@@ -43,6 +43,7 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.use(csrf({cookie: true}));
 
+var jwt = require('jsonwebtoken');
 var AuthenticationService = require('isomorphic-react-authentication').AuthenticationService;
 var authFunc = function(params,callback){
     var key = 'private';
@@ -62,7 +63,6 @@ var authFunc = function(params,callback){
         callback(err, null)
     }
 };
-
 AuthenticationService.setAuthenticateMethod(authFunc);
 
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
