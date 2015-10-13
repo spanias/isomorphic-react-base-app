@@ -30,6 +30,8 @@ class Home extends React.Component {
 				<h3>react-select widget example <a href="https://github.com/JedWatson/react-select">(github)</a></h3> 
 				<ReactSelectExample/>
 
+
+                <h1>Authentication</h1>
 				<AuthenticationComponent />
 			</div>
 		);
