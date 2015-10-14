@@ -49,8 +49,8 @@ var AWSDynamoDBConnector = require ('./app/modules/authenticationModuleServer/in
 
 var readonly_dynamocredentials = require('./dynamodbuserreadonly.json');
 var full_dynamocredentials = require('./dynamodbuser.json');
-var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials);
-var full_connector = new AWSDynamoDBConnector(full_dynamocredentials);
+var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials, true);
+var full_connector = new AWSDynamoDBConnector(full_dynamocredentials, false);
 AuthenticationService.setDataConnectors(full_connector, readonly_connector);
 
 //Custom authentication procedure

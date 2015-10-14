@@ -3,7 +3,7 @@
  * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  **/
     var DynDB = null;
-    var UserModel = require("./userModel");
+    //var UserModel = require("./userModel");
 
 class AWSDynamoDB {
     // always initialize all instance properties
@@ -22,35 +22,33 @@ class AWSDynamoDB {
         this.readUser = this.readUser.bind(this);
     }
 
-    createTable (prefix, callback)
-    {
-        if (this.accesstokenset && !this.dbreadonly){
+    createTable (prefix, callback) {
+        if (this.accesstokenset && !this.dbreadonly) {
             var params = {
-                TableName : prefix + "_users",
+                TableName: prefix + "_users",
                 KeySchema: [
-                    { AttributeName: "userid", KeyType: "HASH"},
-                    { AttributeName: "username", KeyType: "HASH"},
-                    { AttributeName: "email", KeyType: "HASH" }
+                    {AttributeName: "userid", KeyType: "HASH"},
+                    {AttributeName: "username", KeyType: "HASH"},
+                    {AttributeName: "email", KeyType: "HASH"}
                 ],
                 AttributeDefinitions: [
-                    { AttributeName: "userid", AttributeType: "N"},
-                    { AttributeName: "username", AttributeType: "S" },
-                    { AttributeName: "email", AttributeType: "S" },
-                    { AttributeName: "hash", AttributeType: "S" },
-                    { AttributeName: "accesstokens", AttributeType: "S" },
-                    { AttributeName: "imageurl", AttributeType: "S" },
-                    { AttributeName: "firstname", AttributeType: "S" },
-                    { AttributeName: "lastname", AttributeType: "S" },
-                    { AttributeName: "verified", AttributeType: "S" },
-                    { AttributeName: "active", AttributeType: "S" }
+                    {AttributeName: "userid", AttributeType: "N"},
+                    {AttributeName: "username", AttributeType: "S"},
+                    {AttributeName: "email", AttributeType: "S"},
+                    {AttributeName: "hash", AttributeType: "S"},
+                    {AttributeName: "imageurl", AttributeType: "S"},
+                    {AttributeName: "firstname", AttributeType: "S"},
+                    {AttributeName: "lastname", AttributeType: "S"},
+                    {AttributeName: "verified", AttributeType: "S"},
+                    {AttributeName: "active", AttributeType: "S"},
+                    {AttributeName: "activetoken", AttributeType: "S"}
                 ],
                 ProvisionedThroughput: {
                     ReadCapacityUnits: 3,
                     WriteCapacityUnits: 3
                 }
             };
-
-            this.DynDB.client.createTable(params, function(err, data) {
+            this.DynDB.client.createTable(params, function (err, data) {
                 if (err) {
                     console.error("awsdynamodb: Unable to create table. Error JSON:", JSON.stringify(err, null, 2));
                     callback(err, false);
@@ -62,26 +60,49 @@ class AWSDynamoDB {
         }
     };
 
-    readUser(prefix, user, callback)
-    {
-
+    readUser(prefix, user, callback) {
         DynDB.table(prefix + '_users')
             .where('username').eq(user.username)
             .order_by('username-index').descending()
-            .query(function( err, data ) {
+            .query(function (err, data) {
                 if (err) {
                     console.log(err, err.stack);
                     callback(err, null);
                 } // an error occurred
-                else{
-                    console.log(data);           // successful response
+                else {
+                    //console.log(data);           // successful response
                     callback(null, data);
                 }
             });
     };
-
-    createUser(user, callback)
+    updateAccessToken(prefix, token, userid, callback)
     {
+        if (this.dbreadonly)
+        {
+            var err = {errorID: 2, message: "Cannot write with readonly credentials!"};
+            callback(err, null);
+        }
+        else
+        {
+            console.log("Updating token for user with id:" + userid + " with token: " + token + " in table: " + prefix + "_users");
+            DynDB.table(prefix + '_users')
+                .where('userid').eq(userid)
+                .return(DynDB.All_OLD)
+                .update(
+                {activetoken: token},
+                function (err, data) {
+                    if (err) {
+                        console.log(err, err.stack);
+                        callback(err, null);
+                    } // an error occurred
+                    else {
+                        //console.log(data);           // successful response
+                        callback(null, data);
+                    }
+                });
+        }
+    }
+    createUser(user, callback) {
 
     };
 }

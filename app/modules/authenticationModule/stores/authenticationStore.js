@@ -24,10 +24,8 @@ class AuthenticationStore extends BaseStore {
         };
     }
     loginAction(payload) {
-        var key = 'private';
-        try {
-            var decoded = jwt.verify(payload, key);
-            this.propStore = {
+        var decoded=payload;
+        this.propStore = {
                 loggedIn: true,
                 attempts: 0,
                 user: decoded.user,
@@ -39,21 +37,6 @@ class AuthenticationStore extends BaseStore {
                 imageurl: decoded.imageurl,
                 verified: decoded.verified
             };
-        } catch(err) {
-            // err
-            this.propStore = {
-                loggedIn: false,
-                attempts: 0,
-                user: null,
-                jwt: null,
-                email: null,
-                group: null,
-                firstname: null,
-                lastname: null,
-                imageurl: null,
-                verified: false
-            };
-        }
         this.emitChange();
     }
     loginFailedAction(payload) {

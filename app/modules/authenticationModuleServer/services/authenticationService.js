@@ -8,24 +8,29 @@ var jwt = require('jsonwebtoken');
 var password = require('password-hash-and-salt');
 var UserModel = require('./dataconnectors/userModel');
 
+var key = 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj';
+var tokenexpirydays = 7;
+
 module.exports = {
     name: 'AuthenticationService',
     dataconnection : null,
-    readonly_dataconnection : null,
+    readonly_dataconnection: null,
+    key : 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj',
+    tokenexpirydays : 7,
 
     authenticate: function(params, callback) {
-        var key = 'private';
         var myuser = new UserModel();
-
         myuser.username = params.username;
-        console.log("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
+
+        var currentdataconnection = this.dataconnection;
+        //console.log("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
         if (this.readonly_dataconnection) {
             this.readonly_dataconnection.readUser("test", myuser, function (err, data) {
                 if (!err) {
-                    console.log("Data Retrieved from Dynamo: " + JSON.stringify(data));
+                    console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null,4));
 
                     if(data.length === 1) {
-                        console.log("Hash: " + data[0].hash);
+                        //console.log("Hash: " + data[0].hash);
                         password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
                             if (error)
                                 throw new Error('AuthenticationService: Hash verification failed by unknown error!');
@@ -35,17 +40,43 @@ module.exports = {
                                 callback(err, null)
                             } else {
                                 console.log("AuthenticationService: Password hash verified!");
+                                var expirydate= new Date();
+                                expirydate.setDate(expirydate.getDate() + tokenexpirydays);
                                 var token = jwt.sign({
+                                    user: data[0].username,
+                                    email: data[0].email,
+                                    expiry: expirydate
+                                }, key);
+                                var result = {
                                     user: data[0].username,
                                     group: data[0].group,
                                     email: data[0].email,
-                                    imageurl: data[0].imageurl,//"https://scontent-frt3-1.xx.fbcdn.net/hprofile-xtp1/v/t1.0-1/p160x160/11836815_10153529476323501_7420840948075719399_n.jpg?oh=194d9ba316763547aef705da984b08fc&oe=5697E8A6",
+                                    imageurl: data[0].imageurl,
                                     firstname: data[0].firstname,
                                     lastname: data[0].lastname,
                                     verified: data[0].verified,
-                                    active: data[0].active
-                                }, key);
-                                callback(null, token);
+                                    active: data[0].active,
+                                    token: token
+                                };
+                                if (params.rememberme) {
+                                    console.log("AuthenticationService: Saving token to database...");
+                                    password(token).hash(function (error, hashedtoken) {
+                                        if (error)
+                                            throw new Error('AuthenticationService: Hash generation failed!');
+                                        // pbkdf2  10000 iterations
+                                        // Store hash (incl. algorithm, iterations, and salt)
+                                        currentdataconnection.updateAccessToken("test", hashedtoken, data[0].userid, function (err, data) {
+                                            if (err) {
+                                                console.log("AuthenticationService: Token not saved.", err)
+                                            }
+                                            else {
+                                                console.log("AuthenticationService: Token saved.", data)
+                                            }
+                                        });
+                                    });
+                                }
+
+                                callback(null, result);
                             }
                         });
                     }
@@ -57,26 +88,10 @@ module.exports = {
                     }
                 }
                 else {
-                    console.log("Data Retrieval failed from Dynamo: " + JSON.stringify(err));
+                    console.log("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
                 }
             });
         }
-/*
-        // Creating hash and salt
-        myuser.username = "spanias";
-        //this will read the user's data (we generate it here instead
-
-        password('password').hash(function(error, hash) {
-            if(error)
-                throw new Error('AuthenticationService: Hash generation failed!');
-
-            // pbkdf2  10000 iterations
-            // Store hash (incl. algorithm, iterations, and salt)
-            console.log("AuthenticationService: Verifying against user: "+ myuser.username +  " hash: " + hash);
-
-            //Verifying the hash
-
-        });*/
     },
 
     setDataConnectors(_dataconnector,_readonly_dataconnector){
@@ -84,13 +99,15 @@ module.exports = {
         this.readonly_dataconnection = _readonly_dataconnector;
     },
 
+    /*
     setAuthenticateMethod: function(authenticateMethod){
         this.authenticate = authenticateMethod;
-    },
+    },*/
 
+    /*
     setCreateMethod: function(createMethod){
         this.createmethod = createMethod;
-    },
+    },*/
 
     read: function (req, resource, params, config, callback) {
         //params contains username, password
@@ -103,7 +120,17 @@ module.exports = {
             }
         });
     },
+        /*
+        // Creating hash and salt
+        //this will read the user's data (we generate it here instead
 
+        password('password').hash(function(error, hash) {
+            if(error)
+                throw new Error('AuthenticationService: Hash generation failed!');
+            // pbkdf2  10000 iterations
+            // Store hash (incl. algorithm, iterations, and salt)
+            console.log("AuthenticationService: Verifying against user: "+ myuser.username +  " hash: " + hash);
+        });*/
     create: function(req, resource, params, body, config, callback) {
 
     }

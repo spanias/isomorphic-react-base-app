@@ -101,7 +101,8 @@ class AuthenticationComponent extends React.Component {
                 //Authentication Service called here.
                 context.executeAction(AuthenticationActions, ["Login", {
                     username: this.refs.userInput.getValue(),
-                    password: this.refs.passInput.getValue()
+                    password: this.refs.passInput.getValue(),
+                    rememberme: this.refs.remembermeInput.getValue()
                 }]);
 
             }
@@ -155,6 +156,7 @@ class AuthenticationComponent extends React.Component {
                         </Col>
                         <Col xs={6}>
                             <Input type="password" ref="passInput" placeholder="Password" onKeyPress={this._handleKeyPress}/>
+                            <Input type="checkbox" label="Remember me" ref="remembermeInput" />
                         </Col>
                     </Row>
                 </div>;
