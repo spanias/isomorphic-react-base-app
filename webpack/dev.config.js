@@ -38,6 +38,9 @@ export default {
       { test: /\.less$/, loader: "style!css!autoprefixer?browsers=last 2 version!less" }, // use instead postcss([autoprefixer]).process()
       { test: /\.css$/, loader: 'style!css' },
       { test: /\.scss$/, loader: 'style!sass' },
+
+        //demetris added json loader to webpack to support aws sdk
+      { test: /\.json$/, loader: 'json' },
       //{ test: /\.css$/, loader: "css-loader" },
       { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,   loader: "url?limit=10000&minetype=application/font-woff" },
       { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,   loader: "url?limit=10000&minetype=application/font-woff" },

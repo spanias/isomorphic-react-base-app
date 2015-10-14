@@ -9,7 +9,7 @@ import SaveState from '../elements/SaveState';
 import ModalExample from '../elements/ModalExample';
 import ReactSelectExample from '../elements/ReactSelectExample';
 
-var AuthenticationComponent = require('isomorphic-react-authentication').AuthenticationComponent;
+var AuthenticationComponent = require('../../modules/authenticationModule/index').AuthenticationComponent;
 
 class Home extends React.Component {
 

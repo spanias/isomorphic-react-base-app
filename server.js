@@ -44,8 +44,11 @@ server.use(bodyParser.json());
 server.use(csrf({cookie: true}));
 
 var jwt = require('jsonwebtoken');
-var AuthenticationService = require('isomorphic-react-authentication').AuthenticationService;
-var authFunc = function(params,callback){
+var AuthenticationService = require('./app/modules/authenticationModule/index').AuthenticationService;
+
+//Custom authentication procedure
+//If you use this always use salted-hashed-passwords
+/*var authFunc = function(params,callback){
     var key = 'private';
     if (params.username === "spanias" && params.password === "itworks") {
         console.log("AuthenticationService: Authentication Successful!");
@@ -66,7 +69,7 @@ var authFunc = function(params,callback){
         callback(err, null)
     }
 };
-AuthenticationService.setAuthenticateMethod(authFunc);
+AuthenticationService.setAuthenticateMethod(authFunc);*/
 
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
 fetchrPlugin.registerService(require('./app/services/exampleService'));

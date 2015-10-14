@@ -24,10 +24,9 @@ class AuthenticationUserView extends React.Component {
             verified: "",
             group: ""
         };
+
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
-
         this._refreshStateWithProps(props);
-
         this._handleEmailInput = this._handleEmailInput.bind(this);
         this._validateEmail = this._validateEmail.bind(this);
     }
