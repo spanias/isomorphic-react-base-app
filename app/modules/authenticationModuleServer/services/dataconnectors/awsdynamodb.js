@@ -64,17 +64,11 @@ class AWSDynamoDB {
 
     readUser(prefix, user, callback)
     {
-        console.log("The DynDB client:" + JSON.stringify(DynDB.client));
-        DynDB.client.listTables(function(err, data) {
-            console.log("The DynDB table list: " + JSON.stringify(data.TableNames));
-        });
-
-
-        //console.log("Querying table: " + prefix + '_users WHERE username = ' + user.username  );
 
         DynDB.table(prefix + '_users')
-            .where('username-index: username').eq(user.username)
-            .get(function( err, data ) {
+            .where('username').eq(user.username)
+            .order_by('username-index').descending()
+            .query(function( err, data ) {
                 if (err) {
                     console.log(err, err.stack);
                     callback(err, null);

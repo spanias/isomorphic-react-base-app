@@ -23,28 +23,38 @@ module.exports = {
             this.readonly_dataconnection.readUser("test", myuser, function (err, data) {
                 if (!err) {
                     console.log("Data Retrieved from Dynamo: " + JSON.stringify(data));
-                    password(params.password).verifyAgainst(data.hash, function(error, verified) {
-                        if(error)
-                            throw new Error('AuthenticationService: Hash verification failed by unknown error!');
-                        if(!verified || !data.active) {
-                            console.log("AuthenticationService: Password hash failed to verify!");
-                            var err = {errorID: 1, message: 'Authentication Failed'};
-                            callback(err, null)
-                        } else {
-                            console.log("AuthenticationService: Password hash verified!");
-                            var token = jwt.sign({
-                                user: data.username,
-                                group: data.group,
-                                email: data.email,
-                                imageurl: "https://scontent-frt3-1.xx.fbcdn.net/hprofile-xtp1/v/t1.0-1/p160x160/11836815_10153529476323501_7420840948075719399_n.jpg?oh=194d9ba316763547aef705da984b08fc&oe=5697E8A6",
-                                firstname: data.firstname,
-                                lastname: data.lastname,
-                                verified: data.verified,
-                                active: data.active
-                            }, key);
-                            callback(null, token);
-                        }
-                    });
+
+                    if(data.length === 1) {
+                        console.log("Hash: " + data[0].hash);
+                        password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
+                            if (error)
+                                throw new Error('AuthenticationService: Hash verification failed by unknown error!');
+                            if (!verified || !data[0].active) {
+                                console.log("AuthenticationService: Password hash failed to verify!");
+                                var err = {errorID: 1, message: 'Authentication Failed'};
+                                callback(err, null)
+                            } else {
+                                console.log("AuthenticationService: Password hash verified!");
+                                var token = jwt.sign({
+                                    user: data[0].username,
+                                    group: data[0].group,
+                                    email: data[0].email,
+                                    imageurl: data[0].imageurl,//"https://scontent-frt3-1.xx.fbcdn.net/hprofile-xtp1/v/t1.0-1/p160x160/11836815_10153529476323501_7420840948075719399_n.jpg?oh=194d9ba316763547aef705da984b08fc&oe=5697E8A6",
+                                    firstname: data[0].firstname,
+                                    lastname: data[0].lastname,
+                                    verified: data[0].verified,
+                                    active: data[0].active
+                                }, key);
+                                callback(null, token);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        console.log("AuthenticationService: Username not found!");
+                        var err = {errorID: 1, message: 'Authentication Failed'};
+                        callback(err, null)
+                    }
                 }
                 else {
                     console.log("Data Retrieval failed from Dynamo: " + JSON.stringify(err));
