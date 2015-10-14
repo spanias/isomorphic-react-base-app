@@ -87,7 +87,7 @@ class AWSDynamoDB {
             console.log("Updating token for user with id:" + userid + " with token: " + token + " in table: " + prefix + "_users");
             DynDB.table(prefix + '_users')
                 .where('userid').eq(userid)
-                .return(DynDB.All_OLD)
+                .return(DynDB.ALL_OLD)
                 .update(
                 {activetoken: token},
                 function (err, data) {
