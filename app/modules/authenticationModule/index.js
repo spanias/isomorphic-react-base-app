@@ -1,15 +1,19 @@
-var AuthenticationModule = module.exports;
+//AuthenticationModule = module.exports;
 
-import Actions from './actions/constant'
-AuthenticationModule.Actions = Actions;
 
-import AuthenticationComponent from './components/authenticationComponent';
-AuthenticationModule.AuthenticationComponent = AuthenticationComponent;
+import _Actions from './actions/constant';
+//AuthenticationModule.Actions = _Actions;
+export {_Actions as Actions};
 
-import AuthenticationActions from './actions/authenticationActions';
-AuthenticationModule.AuthenticationActions = AuthenticationActions;
+import _AuthenticationComponent from './components/authenticationComponent';
+//AuthenticationModule.AuthenticationComponent = _AuthenticationComponent;
+export  {_AuthenticationComponent as AuthenticationComponent};
 
-import AuthenticationStore from  "./stores/authenticationStore";
-AuthenticationModule.AuthenticationStore = AuthenticationStore;
+import _AuthenticationActions from './actions/authenticationActions';
+//AuthenticationModule.AuthenticationActions = _AuthenticationActions;
+export {_AuthenticationActions as AuthenticationActions};
 
-var AuthenticationService  = AuthenticationModule.AuthenticationService = require("./services/authenticationService");
+import _AuthenticationStore from  "./stores/authenticationStore";
+//AuthenticationModule.AuthenticationStore = _AuthenticationStore;
+export {_AuthenticationStore as AuthenticationStore};
+

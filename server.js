@@ -43,11 +43,19 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.use(csrf({cookie: true}));
 
-var jwt = require('jsonwebtoken');
-var AuthenticationService = require('./app/modules/authenticationModule/index').AuthenticationService;
+
+var AuthenticationService = require('./app/modules/authenticationModuleServer/index').AuthenticationService;
+var AWSDynamoDBConnector = require ('./app/modules/authenticationModuleServer/index').AWSDynamoDBConnector;
+
+var readonly_dynamocredentials = require('./dynamodbuserreadonly.json');
+var full_dynamocredentials = require('./dynamodbuser.json');
+var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials);
+var full_connector = new AWSDynamoDBConnector(full_dynamocredentials);
+AuthenticationService.setDataConnectors(full_connector, readonly_connector);
 
 //Custom authentication procedure
 //If you use this always use salted-hashed-passwords
+//var jwt = require('jsonwebtoken');
 /*var authFunc = function(params,callback){
     var key = 'private';
     if (params.username === "spanias" && params.password === "itworks") {

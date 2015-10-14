@@ -8,7 +8,7 @@ import Routes from './app/components/Routes';
 import ApplicationStore from './app/stores/ApplicationStore';
 import ExampleStore from './app/stores/exampleStore';
 import fetchrPlugin from 'fluxible-plugin-fetchr';
-var AuthenticationStore = require('./app/modules/authenticationModule/index').AuthenticationStore;
+import { AuthenticationStore} from './app/modules/authenticationModule/index';
 let app = new Fluxible({
     component: Routes,
     stores: [

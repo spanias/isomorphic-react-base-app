@@ -69,6 +69,7 @@ export default {
         NODE_ENV: JSON.stringify("development")
       }
     }),
+      //new webpack.IgnorePlugin(new RegExp("^(aws-sdk|aws-dynamodb)$")),
     // stats
     function() { this.plugin("done", notifyStats); },
     function() { this.plugin("done", writeStats); }
