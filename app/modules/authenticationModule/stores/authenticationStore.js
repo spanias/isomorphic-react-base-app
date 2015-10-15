@@ -2,7 +2,8 @@
  * Copyright 2015, Digital Optimization Group, LLC.
  * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  */
-
+var debug = require('debug');
+var debugauth = debug('AuthenticationStore');
 import {BaseStore} from 'fluxible/addons';
 import Actions from "../actions/constant";
 import cookie from 'react-cookie';
@@ -45,10 +46,19 @@ class AuthenticationStore extends BaseStore {
         if (decoded.token) {
             var expirydate = new Date();
             expirydate.setDate(expirydate.getDate() + cookieexpirydays);
-            cookie.httpOnly = true;
-            cookie.secure = false;
-            cookie.expires = expirydate;
-            cookie.save('accesstoken', decoded.token);
+            debugauth("loginAction: Saving cookie cookie accesstoken.");
+            try {
+                cookie.save('accesstoken',
+                    decoded.token,
+                    {
+                        httpOnly: true,
+                        maxAge: 604800
+                    });
+            }
+            catch(err)
+            {
+                debugauth("loginAction: Cannot save cookie: ", err);
+            }
         }
         this.emitChange();
     }
@@ -60,7 +70,7 @@ class AuthenticationStore extends BaseStore {
         if (payload != undefined){
             if (payload.message === "XMLHttpRequest timeout")
             {
-                console.log("loginFailedAction: Timeout detected!");
+                debugauth("loginFailedAction: Timeout detected!");
                 attemptincrement = 0;
                 errormessage = "Login request timed out!"
             }

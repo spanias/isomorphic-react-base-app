@@ -9,7 +9,7 @@ import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootst
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationStore from '../stores/authenticationStore';
-
+var debugauth = require('debug')('AuthenticationUserView');
 class AuthenticationUserView extends React.Component {
 
     constructor(props, context) {
@@ -32,11 +32,11 @@ class AuthenticationUserView extends React.Component {
     }
     componentDidMount()
     {
-        console.log("authenticationUserView: didMount ->", this.props);
+        debugauth("didMount ->", this.props);
         this._refreshStateWithProps(this.props);
     }
     componentWillReceiveProps(nextProps) {
-        console.log("authenticationUserView: willReceiveProps ->", nextProps);
+        debugauth("willReceiveProps ->", nextProps);
         this._refreshStateWithProps(nextProps);
     }
 
@@ -87,9 +87,9 @@ class AuthenticationUserView extends React.Component {
     /*
     _handleKeyPress(event)
     {
-        //console.log("Keypress event ->", event);
+        //debugauth("Keypress event ->", event);
         var charCode = event.which || event.charCode || event.keyCode || 0;
-        //console.log("charCode ->", charCode);
+        //debugauth("charCode ->", charCode);
         if (charCode === 13) {
 
         }
@@ -99,7 +99,7 @@ class AuthenticationUserView extends React.Component {
 
     render() {
 
-        console.log("authenticationUserView: rendering");
+        debugauth("Rendering");
         //Contains the main component (empty if not logged in)
         var userview =
             <div className="authentication-userview-group">

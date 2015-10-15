@@ -9,7 +9,9 @@ import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationStore from '../stores/authenticationStore';
 import AuthenticationUserView from './authenticationUserView';
-import cookie from 'react-cookie';
+var cookie = require('react-cookie')
+var debug = require('debug');
+var debugauth = debug('AuthenticationComponent');
 
 class AuthenticationComponent extends React.Component {
 
@@ -38,7 +40,7 @@ class AuthenticationComponent extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log("loginElement: Receiving new props ->", nextProps);
+        debugauth("AuthenticationComponent: Receiving new props ->", nextProps);
         this._refreshStateWithProps(nextProps);
     }
 
@@ -90,9 +92,9 @@ class AuthenticationComponent extends React.Component {
 
     _handleKeyPress(event)
     {
-        //console.log("Keypress event ->", event);
+        //debugauth("Keypress event ->", event);
         var charCode = event.which || event.charCode || event.keyCode || 0;
-        //console.log("charCode ->", charCode);
+        //debugauth("charCode ->", charCode);
         if (charCode === 13) {
             this._login(event);
         }

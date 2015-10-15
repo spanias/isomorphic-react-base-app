@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 //using https://www.npmjs.com/package/password-hash-and-salt
 var password = require('password-hash-and-salt');
 var UserModel = require('./dataconnectors/userModel');
-
+var debugauth = require('debug')('AuthenticationService');
 var key = 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj';
 var tokenexpirydays = 7;
 
@@ -28,7 +28,7 @@ module.exports = {
         var prefix = this.prefix;
 
         var successfullogin = function(params, callback) {
-            console.log("AuthenticationService: Successful login procedure: ", params);
+            debugauth("Successful login procedure: ", params);
             var token = null;
             if (params.rememberme || params.refreshtoken) {
                 //refresh token
@@ -54,17 +54,17 @@ module.exports = {
             callback(null, result);
 
             if (params.rememberme || params.refreshtoken) {
-                console.log("AuthenticationService: Saving new token to database...");
+                debugauth("Saving new token to database...");
                 password(token).hash(function (error, hashedtoken) {
                     if (!error) {
                         // pbkdf2  10000 iterations
                         // Store hash (incl. algorithm, iterations, and salt)
                         params.currentdataconnection.updateAccessToken(params.prefix, hashedtoken, params.data[0].userid, function (err, retrieveddata) {
                             if (err) {
-                                console.log("AuthenticationService: Token not saved.", err)
+                                debugauth("Token not saved.", err)
                             }
                             else {
-                                console.log("AuthenticationService: Token saved.", retrieveddata)
+                                debugauth("Token saved.", retrieveddata)
                             }
                         });
                     }
@@ -73,23 +73,23 @@ module.exports = {
         };
         if (params.accesstoken && !params.username){
             //Token authentication
-            console.log("AuthenticationService: Attempting to login with token!");
+            debugauth("Attempting to login with token!");
             jwt.verify(params.accesstoken, key, function(err,decoded){
                if (!err) {
                    myuser.username = decoded.user;
-                    console.log("Decrypted token: ", decoded);
+                   debugauth("Decrypted token: ", decoded);
                    if (new Date(decoded.expiry) >= new Date() ) {
                        if (currectreadonlydataconnection) {
                            currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
-                               console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                               debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
                                if (data.length === 1) {
                                    password(params.accesstoken).verifyAgainst(data[0].activetoken, function (error, verified) {
                                        if (!verified || !data[0].active) {
-                                           console.log("AuthenticationService: Token hash failed to verify! " , verified, data[0].active);
+                                           debugauth("Token hash failed to verify! " , verified, data[0].active);
                                            callback(new Error('Token Authentication Failed'), null)
                                        }
                                        else {
-                                           console.log("AuthenticationService: Token hash verified!");
+                                           debugauth("Token hash verified!");
                                            var forwardparameters = {
                                                data: data,
                                                rememberme: params.rememberme,
@@ -107,12 +107,12 @@ module.exports = {
                        }
                    }
                    else {
-                       console.log("AuthenticationService: Token expired!");
+                       debugauth("Token expired!");
                        callback(new Error("Token is expired!"), null);
                    }
                }
                else {
-                   console.log("AuthenticationService: Token cannot be verified!");
+                   debugauth("Token cannot be verified!");
                    callback(new Error("Token cannot be verified!"), null);
                }
             });
@@ -120,22 +120,22 @@ module.exports = {
         else {
             //Username and password authentication
             myuser.username = params.username;
-            //console.log("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
+            //debugauth("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
             if (currectreadonlydataconnection) {
                 currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
                     if (!err) {
-                        console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                        debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
 
                         if (data.length === 1) {
-                            //console.log("Hash: " + data[0].hash);
+
                             password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
                                 if (error)
                                     throw new Error('AuthenticationService: Hash verification failed by unknown error!');
                                 if (!verified || !data[0].active) {
-                                    console.log("AuthenticationService: Password hash failed to verify!");
+                                    debugauth("Password hash failed to verify!");
                                     callback(new Error( 'Authentication Failed'), null)
                                 } else {
-                                    console.log("AuthenticationService: Password hash verified!");
+                                    debugauth("Password hash verified!");
                                     var forwardparameters = {
                                         data: data,
                                         rememberme: params.rememberme,
@@ -150,12 +150,12 @@ module.exports = {
                             });
                         }
                         else {
-                            console.log("AuthenticationService: Username not found!");
+                            debugauth("Username not found!");
                             callback(new Error('Authentication Failed'), null)
                         }
                     }
                     else {
-                        console.log("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                        debugauth("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
                     }
                 });
             }
@@ -179,7 +179,7 @@ module.exports = {
 
     read: function (req, resource, params, config, callback) {
         //params contains username, password
-        console.log("AuthenticationService: reading -> ", params, "==", params.username, ":", params.password);
+        debugauth("Reading -> ", params, "==", params.username, ":", params.password);
         this.authenticate(params, function(err, token) {
             if (err) {
                 callback(err, null)
@@ -197,7 +197,7 @@ module.exports = {
                 throw new Error('AuthenticationService: Hash generation failed!');
             // pbkdf2  10000 iterations
             // Store hash (incl. algorithm, iterations, and salt)
-            console.log("AuthenticationService: Verifying against user: "+ myuser.username +  " hash: " + hash);
+         debugauth("Verifying against user: "+ myuser.username +  " hash: " + hash);
         });*/
     create: function(req, resource, params, body, config, callback) {
 
