@@ -18,9 +18,9 @@ export default function (context, payload, done) {
         case "Login":
             console.log("Reading AuthenticationService ->", payload[1]);
 
-            context.service.read('AuthenticationService', payload[1], {timeout: 5000}, function (err, data) {
+            context.service.read('AuthenticationService', payload[1], {timeout: 10000}, function (err, data) {
                  if (err || !data) {
-                     console.log("authenticationActions: Calling LOGINFAILED_ACTION, Err: ", err, " data:",data  );
+                     //console.log("authenticationActions: Calling LOGINFAILED_ACTION, Err: ", err, " data:",data  );
                      context.dispatch(Actions.LOGINFAILED_ACTION, err);
                  }
                  else {

@@ -26,6 +26,51 @@ module.exports = {
         var currectreadonlydataconnection = this.readonly_dataconnection;
         var myuser = new UserModel();
         var prefix = this.prefix;
+
+        var successfullogin = function(params, callback) {
+            console.log("AuthenticationService: Successful login procedure: ", params);
+            var token = null;
+            if (params.rememberme || params.refreshtoken) {
+                //refresh token
+                var expirydate = new Date();
+                expirydate.setDate(expirydate.getDate() + tokenexpirydays);
+                token = jwt.sign({
+                    user: params.data[0].username,
+                    email: params.data[0].email,
+                    expiry: expirydate
+                }, key);
+            }
+            var result = {
+                user: params.data[0].username,
+                group: params.data[0].group,
+                email: params.data[0].email,
+                imageurl: params.data[0].imageurl,
+                firstname: params.data[0].firstname,
+                lastname: params.data[0].lastname,
+                verified: params.data[0].verified,
+                active: params.data[0].active,
+                token: token
+            };
+            callback(null, result);
+
+            if (params.rememberme || params.refreshtoken) {
+                console.log("AuthenticationService: Saving new token to database...");
+                password(token).hash(function (error, hashedtoken) {
+                    if (!error) {
+                        // pbkdf2  10000 iterations
+                        // Store hash (incl. algorithm, iterations, and salt)
+                        params.currentdataconnection.updateAccessToken(params.prefix, hashedtoken, params.data[0].userid, function (err, retrieveddata) {
+                            if (err) {
+                                console.log("AuthenticationService: Token not saved.", err)
+                            }
+                            else {
+                                console.log("AuthenticationService: Token saved.", retrieveddata)
+                            }
+                        });
+                    }
+                });
+            }
+        };
         if (params.accesstoken && !params.username){
             //Token authentication
             console.log("AuthenticationService: Attempting to login with token!");
@@ -38,55 +83,23 @@ module.exports = {
                            currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
                                console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
                                if (data.length === 1) {
-                                   password(decoded.accesstoken).verifyAgainst(data[0].activetoken, function (error, verified) {
+                                   password(params.accesstoken).verifyAgainst(data[0].activetoken, function (error, verified) {
                                        if (!verified || !data[0].active) {
-                                           console.log("AuthenticationService: Token hash failed to verify!");
+                                           console.log("AuthenticationService: Token hash failed to verify! " , verified, data[0].active);
                                            callback(new Error('Token Authentication Failed'), null)
                                        }
                                        else {
                                            console.log("AuthenticationService: Token hash verified!");
-                                           var token = null;
-
-                                           //refresh token
-                                           var expirydate = new Date();
-                                           expirydate.setDate(expirydate.getDate() + tokenexpirydays);
-
-                                           token = jwt.sign({
-                                               user: data[0].username,
-                                               email: data[0].email,
-                                               expiry: expirydate
-                                           }, key);
-
-                                           var result = {
-                                               user: data[0].username,
-                                               group: data[0].group,
-                                               email: data[0].email,
-                                               imageurl: data[0].imageurl,
-                                               firstname: data[0].firstname,
-                                               lastname: data[0].lastname,
-                                               verified: data[0].verified,
-                                               active: data[0].active,
-                                               token: token
+                                           var forwardparameters = {
+                                               data: data,
+                                               rememberme: params.rememberme,
+                                               refreshtoken: true,
+                                               currentdataconnection: currentdataconnection,
+                                               prefix: prefix
                                            };
-                                           callback(null, result);
-
-                                           if (params.rememberme) {
-                                               console.log("AuthenticationService: Saving new token to database...");
-                                               password(token).hash(function (error, hashedtoken) {
-                                                   if (!error) {
-                                                       // pbkdf2  10000 iterations
-                                                       // Store hash (incl. algorithm, iterations, and salt)
-                                                       currentdataconnection.updateAccessToken(prefix, hashedtoken, data[0].userid, function (err, data) {
-                                                           if (err) {
-                                                               console.log("AuthenticationService: Token not saved.", err)
-                                                           }
-                                                           else {
-                                                               console.log("AuthenticationService: Token saved.", data)
-                                                           }
-                                                       });
-                                                   }
-                                               });
-                                           }
+                                           successfullogin(forwardparameters,function(err,result){
+                                               callback(err,result);
+                                           });
                                        }
                                    });
                                }
@@ -123,48 +136,16 @@ module.exports = {
                                     callback(new Error( 'Authentication Failed'), null)
                                 } else {
                                     console.log("AuthenticationService: Password hash verified!");
-                                    var token = null;
-                                    if(params.rememberme) {
-                                        var expirydate = new Date();
-                                        expirydate.setDate(expirydate.getDate() + tokenexpirydays);
-                                         token = jwt.sign({
-                                            user: data[0].username,
-                                            email: data[0].email,
-                                            expiry: expirydate
-                                        }, key);
-                                    }
-                                    var result = {
-                                        user: data[0].username,
-                                        group: data[0].group,
-                                        email: data[0].email,
-                                        imageurl: data[0].imageurl,
-                                        firstname: data[0].firstname,
-                                        lastname: data[0].lastname,
-                                        verified: data[0].verified,
-                                        active: data[0].active,
-                                        token: token
+                                    var forwardparameters = {
+                                        data: data,
+                                        rememberme: params.rememberme,
+                                        refreshtoken: false,
+                                        currentdataconnection: currentdataconnection,
+                                        prefix: prefix
                                     };
-
-                                    callback(null, result);
-
-                                    // Store token to dataconnection
-                                    if (params.rememberme) {
-                                        console.log("AuthenticationService: Saving token to database...");
-                                        password(token).hash(function (error, hashedtoken) {
-                                            if (!error) {
-                                                // pbkdf2  10000 iterations
-                                                // Store hash (incl. algorithm, iterations, and salt)
-                                                currentdataconnection.updateAccessToken(prefix, hashedtoken, data[0].userid, function (err, data) {
-                                                    if (err) {
-                                                        console.log("AuthenticationService: Token not saved.", err)
-                                                    }
-                                                    else {
-                                                        console.log("AuthenticationService: Token saved.", data)
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
+                                    successfullogin(forwardparameters,function(err,result){
+                                        callback(err,result);
+                                    });
                                 }
                             });
                         }
