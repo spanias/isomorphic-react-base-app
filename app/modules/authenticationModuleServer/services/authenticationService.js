@@ -16,81 +16,168 @@ module.exports = {
     dataconnection : null,
     readonly_dataconnection: null,
     key : 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj',
+    prefix: "test",
     tokenexpirydays : 7,
 
+
+
     authenticate: function(params, callback) {
-        var myuser = new UserModel();
-        myuser.username = params.username;
-
         var currentdataconnection = this.dataconnection;
-        //console.log("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
-        if (this.readonly_dataconnection) {
-            this.readonly_dataconnection.readUser("test", myuser, function (err, data) {
-                if (!err) {
-                    console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null,4));
+        var currectreadonlydataconnection = this.readonly_dataconnection;
+        var myuser = new UserModel();
+        var prefix = this.prefix;
+        if (params.accesstoken && !params.username){
+            //Token authentication
+            console.log("AuthenticationService: Attempting to login with token!");
+            jwt.verify(params.accesstoken, key, function(err,decoded){
+               if (!err) {
+                   myuser.username = decoded.user;
+                    console.log("Decrypted token: ", decoded);
+                   if (new Date(decoded.expiry) >= new Date() ) {
+                       if (currectreadonlydataconnection) {
+                           currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
+                               console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                               if (data.length === 1) {
+                                   password(decoded.accesstoken).verifyAgainst(data[0].activetoken, function (error, verified) {
+                                       if (!verified || !data[0].active) {
+                                           console.log("AuthenticationService: Token hash failed to verify!");
+                                           callback(new Error('Token Authentication Failed'), null)
+                                       }
+                                       else {
+                                           console.log("AuthenticationService: Token hash verified!");
+                                           var token = null;
 
-                    if(data.length === 1) {
-                        //console.log("Hash: " + data[0].hash);
-                        password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
-                            if (error)
-                                throw new Error('AuthenticationService: Hash verification failed by unknown error!');
-                            if (!verified || !data[0].active) {
-                                console.log("AuthenticationService: Password hash failed to verify!");
-                                var err = {errorID: 1, message: 'Authentication Failed'};
-                                callback(err, null)
-                            } else {
-                                console.log("AuthenticationService: Password hash verified!");
-                                var expirydate= new Date();
-                                expirydate.setDate(expirydate.getDate() + tokenexpirydays);
-                                var token = jwt.sign({
-                                    user: data[0].username,
-                                    email: data[0].email,
-                                    expiry: expirydate
-                                }, key);
-                                var result = {
-                                    user: data[0].username,
-                                    group: data[0].group,
-                                    email: data[0].email,
-                                    imageurl: data[0].imageurl,
-                                    firstname: data[0].firstname,
-                                    lastname: data[0].lastname,
-                                    verified: data[0].verified,
-                                    active: data[0].active,
-                                    token: token
-                                };
-                                if (params.rememberme) {
-                                    console.log("AuthenticationService: Saving token to database...");
-                                    password(token).hash(function (error, hashedtoken) {
-                                        if (error)
-                                            throw new Error('AuthenticationService: Hash generation failed!');
-                                        // pbkdf2  10000 iterations
-                                        // Store hash (incl. algorithm, iterations, and salt)
-                                        currentdataconnection.updateAccessToken("test", hashedtoken, data[0].userid, function (err, data) {
-                                            if (err) {
-                                                console.log("AuthenticationService: Token not saved.", err)
-                                            }
-                                            else {
-                                                console.log("AuthenticationService: Token saved.", data)
+                                           //refresh token
+                                           var expirydate = new Date();
+                                           expirydate.setDate(expirydate.getDate() + tokenexpirydays);
+
+                                           token = jwt.sign({
+                                               user: data[0].username,
+                                               email: data[0].email,
+                                               expiry: expirydate
+                                           }, key);
+
+                                           var result = {
+                                               user: data[0].username,
+                                               group: data[0].group,
+                                               email: data[0].email,
+                                               imageurl: data[0].imageurl,
+                                               firstname: data[0].firstname,
+                                               lastname: data[0].lastname,
+                                               verified: data[0].verified,
+                                               active: data[0].active,
+                                               token: token
+                                           };
+                                           callback(null, result);
+
+                                           if (params.rememberme) {
+                                               console.log("AuthenticationService: Saving new token to database...");
+                                               password(token).hash(function (error, hashedtoken) {
+                                                   if (!error) {
+                                                       // pbkdf2  10000 iterations
+                                                       // Store hash (incl. algorithm, iterations, and salt)
+                                                       currentdataconnection.updateAccessToken(prefix, hashedtoken, data[0].userid, function (err, data) {
+                                                           if (err) {
+                                                               console.log("AuthenticationService: Token not saved.", err)
+                                                           }
+                                                           else {
+                                                               console.log("AuthenticationService: Token saved.", data)
+                                                           }
+                                                       });
+                                                   }
+                                               });
+                                           }
+                                       }
+                                   });
+                               }
+                           });
+                       }
+                   }
+                   else {
+                       console.log("AuthenticationService: Token expired!");
+                       callback(new Error("Token is expired!"), null);
+                   }
+               }
+               else {
+                   console.log("AuthenticationService: Token cannot be verified!");
+                   callback(new Error("Token cannot be verified!"), null);
+               }
+            });
+        }
+        else {
+            //Username and password authentication
+            myuser.username = params.username;
+            //console.log("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
+            if (currectreadonlydataconnection) {
+                currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
+                    if (!err) {
+                        console.log("AuthenticationService: Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+
+                        if (data.length === 1) {
+                            //console.log("Hash: " + data[0].hash);
+                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
+                                if (error)
+                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
+                                if (!verified || !data[0].active) {
+                                    console.log("AuthenticationService: Password hash failed to verify!");
+                                    callback(new Error( 'Authentication Failed'), null)
+                                } else {
+                                    console.log("AuthenticationService: Password hash verified!");
+                                    var token = null;
+                                    if(params.rememberme) {
+                                        var expirydate = new Date();
+                                        expirydate.setDate(expirydate.getDate() + tokenexpirydays);
+                                         token = jwt.sign({
+                                            user: data[0].username,
+                                            email: data[0].email,
+                                            expiry: expirydate
+                                        }, key);
+                                    }
+                                    var result = {
+                                        user: data[0].username,
+                                        group: data[0].group,
+                                        email: data[0].email,
+                                        imageurl: data[0].imageurl,
+                                        firstname: data[0].firstname,
+                                        lastname: data[0].lastname,
+                                        verified: data[0].verified,
+                                        active: data[0].active,
+                                        token: token
+                                    };
+
+                                    callback(null, result);
+
+                                    // Store token to dataconnection
+                                    if (params.rememberme) {
+                                        console.log("AuthenticationService: Saving token to database...");
+                                        password(token).hash(function (error, hashedtoken) {
+                                            if (!error) {
+                                                // pbkdf2  10000 iterations
+                                                // Store hash (incl. algorithm, iterations, and salt)
+                                                currentdataconnection.updateAccessToken(prefix, hashedtoken, data[0].userid, function (err, data) {
+                                                    if (err) {
+                                                        console.log("AuthenticationService: Token not saved.", err)
+                                                    }
+                                                    else {
+                                                        console.log("AuthenticationService: Token saved.", data)
+                                                    }
+                                                });
                                             }
                                         });
-                                    });
+                                    }
                                 }
-
-                                callback(null, result);
-                            }
-                        });
+                            });
+                        }
+                        else {
+                            console.log("AuthenticationService: Username not found!");
+                            callback(new Error('Authentication Failed'), null)
+                        }
                     }
-                    else
-                    {
-                        console.log("AuthenticationService: Username not found!");
-                        var err = {errorID: 1, message: 'Authentication Failed'};
-                        callback(err, null)
+                    else {
+                        console.log("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
                     }
-                }
-                else {
-                    console.log("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
-                }
-            });
+                });
+            }
         }
     },
 

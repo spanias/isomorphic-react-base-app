@@ -9,6 +9,7 @@ import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationStore from '../stores/authenticationStore';
 import AuthenticationUserView from './authenticationUserView';
+import cookie from 'react-cookie';
 
 class AuthenticationComponent extends React.Component {
 
@@ -28,6 +29,12 @@ class AuthenticationComponent extends React.Component {
         this._hideModal = this._hideModal.bind(this);
         this._login = this._login.bind(this);
         this._handleKeyPress = this._handleKeyPress.bind(this);
+        this.loginwithtoken = this.loginwithtoken.bind(this);
+        var accesstoken = cookie.load('accesstoken');
+        if (accesstoken)
+        {
+            this.loginwithtoken(accesstoken);
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -55,9 +62,14 @@ class AuthenticationComponent extends React.Component {
                 message: "",
                 messageclass: "danger"
             });
-            if (typeof nextProps !== "undefined" && nextProps.attempts > 0) {
+            if (typeof nextProps !== "undefined" && nextProps.attempts > 0 ) {
                 this.setState({
                     message: "Username and password combination invalid!"
+                });
+            }
+            if (typeof nextProps !== "undefined" && nextProps.errormessage) {
+                this.setState({
+                    message: nextProps.errormessage
                 });
             }
         }
@@ -87,6 +99,15 @@ class AuthenticationComponent extends React.Component {
     }
 
 
+    loginwithtoken(token) {
+        if (!this.state.loggedIn) {
+                //Authentication Service called here.
+                context.executeAction(AuthenticationActions, ["Login", {
+                    accesstoken: token
+                }]);
+        }
+    }
+
     _login(event) {
         event.preventDefault();
         if (!this.props.loggedIn) {
@@ -102,9 +123,8 @@ class AuthenticationComponent extends React.Component {
                 context.executeAction(AuthenticationActions, ["Login", {
                     username: this.refs.userInput.getValue(),
                     password: this.refs.passInput.getValue(),
-                    rememberme: this.refs.remembermeInput.getValue()
+                    rememberme: this.refs.remembermeInput.getChecked()
                 }]);
-
             }
             else {
                 this.setState({

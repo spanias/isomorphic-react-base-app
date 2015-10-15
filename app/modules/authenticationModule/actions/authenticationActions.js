@@ -17,11 +17,15 @@ export default function (context, payload, done) {
     switch(payload[0]){
         case "Login":
             console.log("Reading AuthenticationService ->", payload[1]);
-            context.service.read('AuthenticationService', payload[1], {}, function (err, token) {
-                 if (err || !token) {
-                 context.dispatch(Actions.LOGINFAILED_ACTION, err);
-                 } else {
-                 context.dispatch(Actions.LOGINSUCCESS_ACTION, token);
+
+            context.service.read('AuthenticationService', payload[1], {timeout: 5000}, function (err, data) {
+                 if (err || !data) {
+                     console.log("authenticationActions: Calling LOGINFAILED_ACTION, Err: ", err, " data:",data  );
+                     context.dispatch(Actions.LOGINFAILED_ACTION, err);
+                 }
+                 else {
+                     //https://www.npmjs.com/package/react-cookie
+                     context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
                  }
                  done();
             });
@@ -31,7 +35,7 @@ export default function (context, payload, done) {
         case "Logout":
             var store = context.getStore(AuthenticationStore).getState();
             if (store.loggedIn){
-                context.dispatch(Actions.LOGOUT_ACTION, null)
+                context.dispatch(Actions.LOGOUT_ACTION, null);
             }
             break;
     }
