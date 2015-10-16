@@ -13,29 +13,44 @@ var debugauth = require('debug')('AuthenticationAction');
  */
 export default function (context, payload, done) {
     debugauth("The payload in the Action login action  ->", payload);
-
-    switch(payload[0]){
+    var loginTimemout = 10000;
+    switch(payload[0]) {
         case "Login":
             debugauth("Reading AuthenticationService ->", payload[1]);
-
-            context.service.read('AuthenticationService', payload[1], {timeout: 10000}, function (err, data) {
-                 if (err || !data) {
-                     debugauth("Calling LOGINFAILED_ACTION, Err: ", err, " data:",data  );
-                     context.dispatch(Actions.LOGINFAILED_ACTION, err);
-                 }
-                 else {
-                     //https://www.npmjs.com/package/react-cookie
-                     context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
-                 }
-                 done();
+            context.service.read('AuthenticationService', payload[1], {timeout: loginTimemout}, function (err, data) {
+                if (err || !data) {
+                    debugauth("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
+                    context.dispatch(Actions.LOGINFAILED_ACTION, err);
+                }
+                else {
+                    //https://www.npmjs.com/package/react-cookie
+                    context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
+                }
+                done();
             });
 
+            break;
+
+        case "LoginWithToken":
+                var parameters = {accesstoken: true };
+                debugauth("Reading AuthenticationService ->", parameters);
+                context.service.read('AuthenticationService', parameters, {timeout: loginTimemout}, function (err, data) {
+                    if (err || !data) {
+                        debugauth("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
+                        context.dispatch(Actions.LOGINFAILED_ACTION, err);
+                    }
+                    else {
+                        context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
+                    }
+                    done();
+                });
             break;
 
         case "Logout":
             var store = context.getStore(AuthenticationStore).getState();
             if (store.loggedIn){
                 context.dispatch(Actions.LOGOUT_ACTION, null);
+                done();
             }
             break;
     }

@@ -8,7 +8,9 @@ import Routes from './app/components/Routes';
 import ApplicationStore from './app/stores/ApplicationStore';
 import ExampleStore from './app/stores/exampleStore';
 import fetchrPlugin from 'fluxible-plugin-fetchr';
+
 import { AuthenticationStore} from './app/modules/authenticationModule/index';
+
 let app = new Fluxible({
     component: Routes,
     stores: [
@@ -21,5 +23,4 @@ let app = new Fluxible({
 app.plug(fetchrPlugin({
     xhrPath: '/api'
 }));
-
 export default app;

@@ -43,7 +43,7 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.use(csrf({cookie: true}));
 
-
+//Authentication Service initialization
 var AuthenticationService = require('./app/modules/authenticationModuleServer/index').AuthenticationService;
 var AWSDynamoDBConnector = require ('./app/modules/authenticationModuleServer/index').AWSDynamoDBConnector;
 
@@ -53,31 +53,6 @@ var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials, tr
 var full_connector = new AWSDynamoDBConnector(full_dynamocredentials, false);
 AuthenticationService.setDataConnectors(full_connector, readonly_connector);
 
-//Custom authentication procedure
-//If you use this always use salted-hashed-passwords
-//var jwt = require('jsonwebtoken');
-/*var authFunc = function(params,callback){
-    var key = 'private';
-    if (params.username === "spanias" && params.password === "itworks") {
-        console.log("AuthenticationService: Authentication Successful!");
-        var token = jwt.sign({
-            user: 'spanias',
-            group: 'administrator',
-            email: 'demetris@spanias.com',
-            imageurl: "https://scontent-frt3-1.xx.fbcdn.net/hprofile-xtp1/v/t1.0-1/p160x160/11836815_10153529476323501_7420840948075719399_n.jpg?oh=194d9ba316763547aef705da984b08fc&oe=5697E8A6",
-            firstname: "Demetris",
-            lastname: "Spanias",
-            verified: false
-        }, key);
-        callback(null, token);
-    }
-    else {
-        console.log("AuthenticationService: Authentication Failed!");
-        var err = {errorID: 1, message: 'Authentication Failed'};
-        callback(err, null)
-    }
-};
-AuthenticationService.setAuthenticateMethod(authFunc);*/
 
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
 fetchrPlugin.registerService(require('./app/services/exampleService'));

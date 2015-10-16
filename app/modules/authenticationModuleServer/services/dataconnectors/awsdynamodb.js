@@ -3,6 +3,7 @@
  * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  **/
     var DynDB = null;
+var debug = require('debug')('AWSDynamoDBConnector')
     //var UserModel = require("./userModel");
 
 class AWSDynamoDB {
@@ -50,10 +51,10 @@ class AWSDynamoDB {
             };
             this.DynDB.client.createTable(params, function (err, data) {
                 if (err) {
-                    console.error("awsdynamodb: Unable to create table. Error JSON:", JSON.stringify(err, null, 2));
+                    debug("Unable to create table. Error JSON:", JSON.stringify(err, null, 2));
                     callback(err, false);
                 } else {
-                    console.log("awsdynamodb: Created table. Table description JSON:", JSON.stringify(data, null, 2));
+                    debug("Created table. Table description JSON:", JSON.stringify(data, null, 2));
                     callback(null, data);
                 }
             });
@@ -66,11 +67,11 @@ class AWSDynamoDB {
             .order_by('username-index').descending()
             .query(function (err, data) {
                 if (err) {
-                    console.log(err, err.stack);
+                    debug(err, err.stack);
                     callback(err, null);
                 } // an error occurred
                 else {
-                    //console.log(data);           // successful response
+                    //debug(data);           // successful response
                     callback(null, data);
                 }
             });
@@ -84,7 +85,7 @@ class AWSDynamoDB {
         }
         else
         {
-            console.log("Updating token for user with id:" + userid + " with token: " + token + " in table: " + prefix + "_users");
+            debug("Updating token for user with id:" + userid + " with token: " + token + " in table: " + prefix + "_users");
             DynDB.table(prefix + '_users')
                 .where('userid').eq(userid)
                 .return(DynDB.ALL_OLD)
@@ -92,11 +93,11 @@ class AWSDynamoDB {
                 {activetoken: token},
                 function (err, data) {
                     if (err) {
-                        console.log(err, err.stack);
+                        debug(err, err.stack);
                         callback(err, null);
                     } // an error occurred
                     else {
-                        //console.log(data);           // successful response
+                        //debug(data);           // successful response
                         callback(null, data);
                     }
                 });

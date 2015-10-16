@@ -19,47 +19,47 @@ module.exports = {
     prefix: "test",
     tokenexpirydays : 7,
 
-
-
-    authenticate: function(params, callback) {
+    authenticate: function(req, params, callback) {
         var currentdataconnection = this.dataconnection;
         var currectreadonlydataconnection = this.readonly_dataconnection;
         var myuser = new UserModel();
         var prefix = this.prefix;
 
-        var successfullogin = function(params, callback) {
-            debugauth("Successful login procedure: ", params);
+        var successfullogin = function(request, parameters, callback) {
+
+            debugauth("Successful login procedure: ", parameters);
             var token = null;
-            if (params.rememberme || params.refreshtoken) {
+            if (parameters.rememberme || parameters.refreshtoken) {
                 //refresh token
                 var expirydate = new Date();
                 expirydate.setDate(expirydate.getDate() + tokenexpirydays);
                 token = jwt.sign({
-                    user: params.data[0].username,
-                    email: params.data[0].email,
+                    user: parameters.data[0].username,
+                    email: parameters.data[0].email,
                     expiry: expirydate
                 }, key);
+                request.res.cookie('authentoken', token, { expires: expirydate, httpOnly: true /*, secure: true */ });
             }
             var result = {
-                user: params.data[0].username,
-                group: params.data[0].group,
-                email: params.data[0].email,
-                imageurl: params.data[0].imageurl,
-                firstname: params.data[0].firstname,
-                lastname: params.data[0].lastname,
-                verified: params.data[0].verified,
-                active: params.data[0].active,
+                user: parameters.data[0].username,
+                group: parameters.data[0].group,
+                email: parameters.data[0].email,
+                imageurl: parameters.data[0].imageurl,
+                firstname: parameters.data[0].firstname,
+                lastname: parameters.data[0].lastname,
+                verified: parameters.data[0].verified,
+                active: parameters.data[0].active,
                 token: token
             };
             callback(null, result);
 
-            if (params.rememberme || params.refreshtoken) {
+            if (parameters.rememberme || parameters.refreshtoken) {
                 debugauth("Saving new token to database...");
                 password(token).hash(function (error, hashedtoken) {
                     if (!error) {
                         // pbkdf2  10000 iterations
                         // Store hash (incl. algorithm, iterations, and salt)
-                        params.currentdataconnection.updateAccessToken(params.prefix, hashedtoken, params.data[0].userid, function (err, retrieveddata) {
+                        parameters.currentdataconnection.updateAccessToken(parameters.prefix, hashedtoken, parameters.data[0].userid, function (err, retrieveddata) {
                             if (err) {
                                 debugauth("Token not saved.", err)
                             }
@@ -71,54 +71,67 @@ module.exports = {
                 });
             }
         };
-        if (params.accesstoken && !params.username){
+
+        if (params.accesstoken && params.username == undefined ){
             //Token authentication
             debugauth("Attempting to login with token!");
-            jwt.verify(params.accesstoken, key, function(err,decoded){
-               if (!err) {
-                   myuser.username = decoded.user;
-                   debugauth("Decrypted token: ", decoded);
-                   if (new Date(decoded.expiry) >= new Date() ) {
-                       if (currectreadonlydataconnection) {
-                           currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
-                               debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-                               if (data.length === 1) {
-                                   password(params.accesstoken).verifyAgainst(data[0].activetoken, function (error, verified) {
-                                       if (!verified || !data[0].active) {
-                                           debugauth("Token hash failed to verify! " , verified, data[0].active);
-                                           callback(new Error('Token Authentication Failed'), null)
-                                       }
-                                       else {
-                                           debugauth("Token hash verified!");
-                                           var forwardparameters = {
-                                               data: data,
-                                               rememberme: params.rememberme,
-                                               refreshtoken: true,
-                                               currentdataconnection: currentdataconnection,
-                                               prefix: prefix
-                                           };
-                                           successfullogin(forwardparameters,function(err,result){
-                                               callback(err,result);
-                                           });
-                                       }
-                                   });
-                               }
-                           });
-                       }
-                   }
-                   else {
-                       debugauth("Token expired!");
-                       callback(new Error("Token is expired!"), null);
-                   }
-               }
-               else {
-                   debugauth("Token cannot be verified!");
-                   callback(new Error("Token cannot be verified!"), null);
-               }
-            });
+            if (req.cookies['authentoken']) {
+                jwt.verify(req.cookies['authentoken'], key, function (err, decoded) {
+                    if (!err) {
+                        myuser.username = decoded.user;
+                        debugauth("Decrypted token: ", decoded);
+                        if (new Date(decoded.expiry) >= new Date()) {
+                            if (currectreadonlydataconnection) {
+                                currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
+                                    debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                    if (data.length === 1) {
+                                        password(req.cookies['authentoken']).verifyAgainst(data[0].activetoken, function (error, verified) {
+                                            if (!verified || !data[0].active) {
+                                                debugauth("Token hash failed to verify! ", verified, data[0].active);
+                                                request.res.cookie('authentoken', "", { expires: new Date(0)});
+                                                callback(new Error('Token Authentication Failed'), null)
+
+                                            }
+                                            else {
+                                                debugauth("Token hash verified!");
+                                                var forwardparameters = {
+                                                    data: data,
+                                                    rememberme: params.rememberme,
+                                                    refreshtoken: true,
+                                                    currentdataconnection: currentdataconnection,
+                                                    prefix: prefix
+                                                };
+                                                successfullogin(req, forwardparameters, function (err, result) {
+                                                    callback(err, result);
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            debugauth("Token expired!");
+                            request.res.cookie('authentoken', "", { expires: new Date(0)});
+                            callback(new Error("Token is expired!"), null);
+                        }
+                    }
+                    else {
+                        debugauth("Token cannot be verified!");
+                        request.res.cookie('authentoken', "", { expires: new Date(0)});
+                        callback(new Error("Token cannot be verified!"), null);
+                    }
+                });
+            }
+            else
+            {
+                debugauth("Token cannot be found!");
+                callback(new Error("Token cannot be found!"), null);
+            }
         }
         else {
             //Username and password authentication
+            debugauth("Attempting to login with username and password!");
             myuser.username = params.username;
             //debugauth("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
             if (currectreadonlydataconnection) {
@@ -127,7 +140,6 @@ module.exports = {
                         debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
 
                         if (data.length === 1) {
-
                             password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
                                 if (error)
                                     throw new Error('AuthenticationService: Hash verification failed by unknown error!');
@@ -143,7 +155,7 @@ module.exports = {
                                         currentdataconnection: currentdataconnection,
                                         prefix: prefix
                                     };
-                                    successfullogin(forwardparameters,function(err,result){
+                                    successfullogin(req, forwardparameters,function(err,result){
                                         callback(err,result);
                                     });
                                 }
@@ -178,9 +190,11 @@ module.exports = {
     },*/
 
     read: function (req, resource, params, config, callback) {
+
+
         //params contains username, password
         debugauth("Reading -> ", params, "==", params.username, ":", params.password);
-        this.authenticate(params, function(err, token) {
+        this.authenticate(req, params, function(err, token) {
             if (err) {
                 callback(err, null)
             } else {

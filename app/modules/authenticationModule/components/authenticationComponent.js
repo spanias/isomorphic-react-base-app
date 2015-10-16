@@ -9,9 +9,8 @@ import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationStore from '../stores/authenticationStore';
 import AuthenticationUserView from './authenticationUserView';
-var cookie = require('react-cookie')
-var debug = require('debug');
-var debugauth = debug('AuthenticationComponent');
+
+var debugauth = require('debug')('AuthenticationComponent');
 
 class AuthenticationComponent extends React.Component {
 
@@ -32,18 +31,17 @@ class AuthenticationComponent extends React.Component {
         this._login = this._login.bind(this);
         this._handleKeyPress = this._handleKeyPress.bind(this);
         this.loginwithtoken = this.loginwithtoken.bind(this);
-        var accesstoken = cookie.load('accesstoken');
-        if (accesstoken)
-        {
-            this.loginwithtoken(accesstoken);
-        }
     }
 
+    componentDidMount(){
+        if (!this.state.loggedIn) {
+            this.loginwithtoken();
+        }
+    }
     componentWillReceiveProps(nextProps) {
         debugauth("AuthenticationComponent: Receiving new props ->", nextProps);
         this._refreshStateWithProps(nextProps);
     }
-
 
     _refreshStateWithProps(nextProps) {
         if (typeof nextProps !== "undefined" && nextProps.loggedIn) {
@@ -101,12 +99,10 @@ class AuthenticationComponent extends React.Component {
     }
 
 
-    loginwithtoken(token) {
+    loginwithtoken() {
         if (!this.state.loggedIn) {
-                //Authentication Service called here.
-                context.executeAction(AuthenticationActions, ["Login", {
-                    accesstoken: token
-                }]);
+            //Authentication Service called here.
+            context.executeAction(AuthenticationActions, ["LoginWithToken", {}]);
         }
     }
 
@@ -118,7 +114,6 @@ class AuthenticationComponent extends React.Component {
                 message: "Attempting login with Username " + this.refs.userInput.getValue(),
                 messageclass: "info"
             });
-
 
             if (this.refs.userInput.getValue() !== "" && this.refs.passInput.getValue() !== "") {
                 //Authentication Service called here.

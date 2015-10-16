@@ -35,7 +35,6 @@
     "password-hash-and-salt": "^0.1.2",
     "react": "0.13.x",
     "react-bootstrap": "0.25.2",
-    "react-cookie": "^0.3.4",
     "react-dnd": "1.1.1",
     "react-hot-loader": "^1.2.7",
     "react-router": "0.13.3",

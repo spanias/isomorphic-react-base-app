@@ -13,7 +13,7 @@ var debugauth = require('debug')('AuthenticationUserView');
 class AuthenticationUserView extends React.Component {
 
     constructor(props, context) {
-        super();
+        super(props,context);
         this.state = {
             visible: false,
             imageurl:"",

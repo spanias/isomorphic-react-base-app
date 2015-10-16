@@ -6,8 +6,6 @@ var debug = require('debug');
 var debugauth = debug('AuthenticationStore');
 import {BaseStore} from 'fluxible/addons';
 import Actions from "../actions/constant";
-import cookie from 'react-cookie';
-var cookieexpirydays = 7;
 
 class AuthenticationStore extends BaseStore {
     constructor(dispatcher) {
@@ -42,24 +40,6 @@ class AuthenticationStore extends BaseStore {
             verified: decoded.verified,
             errormessage: null
         };
-
-        if (decoded.token) {
-            var expirydate = new Date();
-            expirydate.setDate(expirydate.getDate() + cookieexpirydays);
-            debugauth("loginAction: Saving cookie cookie accesstoken.");
-            try {
-                cookie.save('accesstoken',
-                    decoded.token,
-                    {
-                        httpOnly: true,
-                        maxAge: 604800
-                    });
-            }
-            catch(err)
-            {
-                debugauth("loginAction: Cannot save cookie: ", err);
-            }
-        }
         this.emitChange();
     }
 
@@ -70,7 +50,7 @@ class AuthenticationStore extends BaseStore {
         if (payload != undefined){
             if (payload.message === "XMLHttpRequest timeout")
             {
-                debugauth("loginFailedAction: Timeout detected!");
+                debugauth("loginFailedAction -  Timeout detected!");
                 attemptincrement = 0;
                 errormessage = "Login request timed out!"
             }
@@ -88,7 +68,6 @@ class AuthenticationStore extends BaseStore {
             verified: false,
             errormessage: errormessage
         };
-        cookie.remove('accesstoken');
 
         this.emitChange();
     }
@@ -107,7 +86,6 @@ class AuthenticationStore extends BaseStore {
             errormessage: null
         };
         this.emitChange();
-        cookie.remove('accesstoken');
     }
     getState() {
         return this.propStore;
