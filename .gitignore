@@ -24,3 +24,7 @@ webpack/utils/webpack-stats.json
 .idea/watcherTasks.xml
 
 .idea/codeStyleSettings.xml
+
+dynamodbuser.json
+
+dynamodbuserreadonly.json

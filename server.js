@@ -43,30 +43,17 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.use(csrf({cookie: true}));
 
-var jwt = require('jsonwebtoken');
-var AuthenticationService = require('isomorphic-react-authentication').AuthenticationService;
-var authFunc = function(params,callback){
-    var key = 'private';
-    if (params.username === "spanias" && params.password === "itworks") {
-        console.log("AuthenticationService: Authentication Successful!");
-        var token = jwt.sign({
-            user: 'spanias',
-            group: 'administrator',
-            email: 'demetris@spanias.com',
-            imageurl: "https://scontent-frt3-1.xx.fbcdn.net/hprofile-xtp1/v/t1.0-1/p160x160/11836815_10153529476323501_7420840948075719399_n.jpg?oh=194d9ba316763547aef705da984b08fc&oe=5697E8A6",
-            firstname: "Demetris",
-            lastname: "Spanias",
-            verified: false
-        }, key);
-        callback(null, token);
-    }
-    else {
-        console.log("AuthenticationService: Authentication Failed!");
-        var err = {errorID: 1, message: 'Authentication Failed'};
-        callback(err, null)
-    }
-};
-AuthenticationService.setAuthenticateMethod(authFunc);
+//Authentication Service initialization
+var AuthenticationService = require('isomorphic-react-authentication-server').AuthenticationService;
+var AWSDynamoDBConnector = require ('isomorphic-react-authentication-server').AWSDynamoDBConnector;
+
+var readonly_dynamocredentials = require('./dynamodbuserreadonly.json');
+var full_dynamocredentials = require('./dynamodbuser.json');
+var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials, true);
+var full_connector = new AWSDynamoDBConnector(full_dynamocredentials, false);
+AuthenticationService.setDataConnectors(full_connector, readonly_connector);
+AuthenticationService.setTokenPrivateKey("hiuhasidIUAHIUHiuhEIURHIiubiBFIBIaisuIUAS89219£@!!");
+AuthenticationService.setTokenExpiryPeriod(30);
 
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
 fetchrPlugin.registerService(require('./app/services/exampleService'));

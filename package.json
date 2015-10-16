@@ -29,6 +29,7 @@
     "fluxible-plugin-fetchr": "^0.3.6",
     "fs": "",
     "isomorphic-react-authentication": "git+https://github.com/spanias/isomorphic-react-authentication.git",
+    "isomorphic-react-authentication-server": "git+https://github.com/spanias/isomorphic-react-authentication-server.git",
     "less-loader": "^2.2.0",
     "react": "0.13.x",
     "react-bootstrap": "0.25.2",
