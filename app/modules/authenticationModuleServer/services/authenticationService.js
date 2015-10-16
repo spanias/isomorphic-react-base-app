@@ -8,8 +8,12 @@ var jwt = require('jsonwebtoken');
 var password = require('password-hash-and-salt');
 var UserModel = require('./dataconnectors/userModel');
 var debugauth = require('debug')('AuthenticationService');
-var key = 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj';
-var tokenexpirydays = 7;
+
+//change this key to something random
+//var key = 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj';
+
+//the amount of days to keep the session token
+//var tokenexpirydays = 7;
 
 module.exports = {
     name: 'AuthenticationService',
@@ -24,7 +28,8 @@ module.exports = {
         var currectreadonlydataconnection = this.readonly_dataconnection;
         var myuser = new UserModel();
         var prefix = this.prefix;
-
+        var key = this.key;
+        var tokenexpirydays = this.tokenexpirydays;
         //This function gets executed when credentials are validated.
         var successfullogin = function(request, parameters, callback) {
 
@@ -130,7 +135,7 @@ module.exports = {
             }
             else
             {
-                debugauth("Token cannot be found!");
+                debugauth("Token not set in cookies! Aborting login procedure.");
                 callback(new Error("Token cannot be found!"), null);
             }
         }
@@ -184,6 +189,7 @@ module.exports = {
                     }
                     else {
                         debugauth("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                        callback(new Error('Data Retrieval failed from dataconnection!'), null)
                     }
                 });
             }
@@ -193,6 +199,14 @@ module.exports = {
     setDataConnectors(_dataconnector,_readonly_dataconnector){
         this.dataconnection = _dataconnector;
         this.readonly_dataconnection = _readonly_dataconnector;
+    },
+
+    setTokenPrivateKey(privatekey){
+        this.key = privatekey;
+    },
+
+    setTokenExpiryPeriod(days){
+        this.tokenexpirydays = days;
     },
 
     /*
@@ -218,24 +232,34 @@ module.exports = {
             }
         });
     },
+
+    create: function(req, resource, params, body, config, callback) {
+        /*
+         // Creating hash and salt
+         password('password').hash(function(error, hash) {
+         if(error)
+         throw new Error('AuthenticationService: Hash generation failed!');
+         // pbkdf2  10000 iterations
+         // Store hash (incl. algorithm, iterations, and salt)
+         debugauth("Verifying against user: "+ myuser.username +  " hash: " + hash);
+         });*/
+
+    },
+    update: function(req, resource, params, body, config, callback) {
         /*
         // Creating hash and salt
-        //this will read the user's data (we generate it here instead
-
         password('password').hash(function(error, hash) {
             if(error)
                 throw new Error('AuthenticationService: Hash generation failed!');
             // pbkdf2  10000 iterations
             // Store hash (incl. algorithm, iterations, and salt)
-         debugauth("Verifying against user: "+ myuser.username +  " hash: " + hash);
+            debugauth("Verifying against user: "+ myuser.username +  " hash: " + hash);
         });*/
-    create: function(req, resource, params, body, config, callback) {
-
     }
 };
     /*
      // create: function(req, resource, params, body, config, callback) {},
-     // update: function(req, resource, params, body, config, callback) {},
+     //
      // delete: function(req, resource, params, config, callback) {}
     */
 
