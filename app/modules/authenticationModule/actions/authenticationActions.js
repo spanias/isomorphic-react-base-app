@@ -49,6 +49,16 @@ export default function (context, payload, done) {
         case "Logout":
             var store = context.getStore(AuthenticationStore).getState();
             if (store.loggedIn){
+
+                var parameters = {logout: true };
+                context.service.read('AuthenticationService', parameters, {timeout: loginTimemout}, function (err, data) {
+                    if (err) {
+                        debugauth("Logout failed! ", err);
+                    }
+                    else {
+                        debugauth("Logout succeded!");
+                    }
+                });
                 context.dispatch(Actions.LOGOUT_ACTION, null);
                 done();
             }

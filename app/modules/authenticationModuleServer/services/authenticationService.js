@@ -25,6 +25,7 @@ module.exports = {
         var myuser = new UserModel();
         var prefix = this.prefix;
 
+        //This function gets executed when credentials are validated.
         var successfullogin = function(request, parameters, callback) {
 
             debugauth("Successful login procedure: ", parameters);
@@ -59,6 +60,7 @@ module.exports = {
                     if (!error) {
                         // pbkdf2  10000 iterations
                         // Store hash (incl. algorithm, iterations, and salt)
+
                         parameters.currentdataconnection.updateAccessToken(parameters.prefix, hashedtoken, parameters.data[0].userid, function (err, retrieveddata) {
                             if (err) {
                                 debugauth("Token not saved.", err)
@@ -88,7 +90,8 @@ module.exports = {
                                         password(req.cookies['authentoken']).verifyAgainst(data[0].activetoken, function (error, verified) {
                                             if (!verified || !data[0].active) {
                                                 debugauth("Token hash failed to verify! ", verified, data[0].active);
-                                                request.res.cookie('authentoken', "", { expires: new Date(0)});
+                                                //request.res.cookie('authentoken', "", { expires: new Date(0)});
+                                                req.res.clearCookie('authentoken');
                                                 callback(new Error('Token Authentication Failed'), null)
 
                                             }
@@ -112,13 +115,15 @@ module.exports = {
                         }
                         else {
                             debugauth("Token expired!");
-                            request.res.cookie('authentoken', "", { expires: new Date(0)});
+                            //request.res.cookie('authentoken', "", { expires: new Date(0)});
+                            req.res.clearCookie('authentoken');
                             callback(new Error("Token is expired!"), null);
                         }
                     }
                     else {
                         debugauth("Token cannot be verified!");
-                        request.res.cookie('authentoken', "", { expires: new Date(0)});
+                        //request.res.cookie('authentoken', "", { expires: new Date(0)});
+                        req.res.clearCookie('authentoken');
                         callback(new Error("Token cannot be verified!"), null);
                     }
                 });
@@ -128,6 +133,17 @@ module.exports = {
                 debugauth("Token cannot be found!");
                 callback(new Error("Token cannot be found!"), null);
             }
+        }
+        else if (params.logout)
+        {
+            debugauth("Invoking logout procedure!");
+
+            debugauth("Removing cookie token!");
+            req.res.clearCookie('authentoken');
+
+            debugauth("Removing token from dataconnection!");
+            //TODO: Remove tokens from dataconnection
+            callback(null,true);
         }
         else {
             //Username and password authentication

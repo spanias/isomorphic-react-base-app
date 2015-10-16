@@ -78,6 +78,7 @@ class AWSDynamoDB {
     };
     updateAccessToken(prefix, token, userid, callback)
     {
+        //TODO: Add multiple tokens to dataconnection for multiple browsers
         if (this.dbreadonly)
         {
             var err = {errorID: 2, message: "Cannot write with readonly credentials!"};
