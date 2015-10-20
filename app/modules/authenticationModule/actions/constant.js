@@ -8,7 +8,8 @@ const Actions = keyMirror({
     //Authentication Store Uses These
     LOGINSUCCESS_ACTION: null,
     LOGINFAILED_ACTION: null,
-    LOGOUT_ACTION: null
+    LOGOUT_ACTION: null,
+    CHANGE_PASSWORD_ACTION: null
 });
 
 export default Actions;

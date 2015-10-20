@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 //using https://www.npmjs.com/package/password-hash-and-salt
 var password = require('password-hash-and-salt');
 var UserModel = require('./dataconnectors/userModel');
-var debugauth = require('debug')('AuthenticationService');
+var debug = require('debug')('AuthenticationService');
 
 //change this key to something random
 //var key = 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj';
@@ -17,61 +17,62 @@ var debugauth = require('debug')('AuthenticationService');
 
 module.exports = {
     name: 'AuthenticationService',
-    dataconnection : null,
-    readonly_dataconnection: null,
+    dataConnection : null,
+    readOnlyDataConnection: null,
     key : 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj',
     prefix: "test",
-    tokenexpirydays : 7,
+    tokenExpiryDays : 7,
+    checkedForInitialization: false,
 
     authenticate: function(req, params, callback) {
-        var currentdataconnection = this.dataconnection;
-        var currectreadonlydataconnection = this.readonly_dataconnection;
-        var myuser = new UserModel();
-        var prefix = this.prefix;
+        var myUser = new UserModel();
+        var currentDataConnection = this.dataConnection;
+        var currentReadOnlyDataConnection = this.readOnlyDataConnection;
         var key = this.key;
-        var tokenexpirydays = this.tokenexpirydays;
+        var prefix = this.prefix;
+        var tokenExpiryDays = this.tokenExpiryDays;
         //This function gets executed when credentials are validated.
-        var successfullogin = function(request, parameters, callback) {
+        var successfulLogin = function(request, parameters, callback) {
 
-            debugauth("Successful login procedure: ", parameters);
+            debug("Successful login procedure: ", parameters);
             var token = null;
-            if (parameters.rememberme || parameters.refreshtoken) {
+            if (parameters.rememberMe || parameters.refreshToken) {
                 //refresh token
-                var expirydate = new Date();
-                expirydate.setDate(expirydate.getDate() + tokenexpirydays);
+                var expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + tokenExpiryDays);
                 token = jwt.sign({
                     user: parameters.data[0].username,
                     email: parameters.data[0].email,
-                    expiry: expirydate
+                    expiry: expiryDate
                 }, key);
-                request.res.cookie('authentoken', token, { expires: expirydate, httpOnly: true /*, secure: true */ });
+                request.res.cookie('authentoken', token, { expires: expiryDate, httpOnly: true /*, secure: true */ });
             }
             var result = {
                 user: parameters.data[0].username,
                 group: parameters.data[0].group,
                 email: parameters.data[0].email,
-                imageurl: parameters.data[0].imageurl,
-                firstname: parameters.data[0].firstname,
-                lastname: parameters.data[0].lastname,
+                imageURL: parameters.data[0].imageURL,
+                firstName: parameters.data[0].firstName,
+                lastName: parameters.data[0].lastName,
                 verified: parameters.data[0].verified,
                 active: parameters.data[0].active,
                 token: token
             };
             callback(null, result);
 
-            if (parameters.rememberme || parameters.refreshtoken) {
-                debugauth("Saving new token to database...");
-                password(token).hash(function (error, hashedtoken) {
+            if (parameters.rememberMe || parameters.refreshToken) {
+                debug("Saving new token to database...");
+                password(token).hash(function (error, hashedToken) {
                     if (!error) {
                         // pbkdf2  10000 iterations
                         // Store hash (incl. algorithm, iterations, and salt)
 
-                        parameters.currentdataconnection.updateAccessToken(parameters.prefix, hashedtoken, parameters.data[0].userid, function (err, retrieveddata) {
+                        parameters.currentDataConnection.updateAccessToken(parameters.prefix, hashedToken, parameters.data[0].userID, function (err, retrievedData) {
                             if (err) {
-                                debugauth("Token not saved.", err)
+                                debug("Token not saved.", err)
                             }
                             else {
-                                debugauth("Token saved.", retrieveddata)
+                                debug("Token saved.", retrievedData)
                             }
                         });
                     }
@@ -79,37 +80,36 @@ module.exports = {
             }
         };
 
-        if (params.accesstoken && params.username == undefined ){
+        if (params.accessToken && params.username == undefined ){
             //Token authentication
-            debugauth("Attempting to login with token!");
+            debug("Attempting to login with token!");
             if (req.cookies['authentoken']) {
                 jwt.verify(req.cookies['authentoken'], key, function (err, decoded) {
                     if (!err) {
-                        myuser.username = decoded.user;
-                        debugauth("Decrypted token: ", decoded);
+                        myUser.username = decoded.user;
+                        debug("Decrypted token: ", decoded);
                         if (new Date(decoded.expiry) >= new Date()) {
-                            if (currectreadonlydataconnection) {
-                                currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
-                                    debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                            if (currentReadOnlyDataConnection) {
+                                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                                    debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
                                     if (data.length === 1) {
-                                        password(req.cookies['authentoken']).verifyAgainst(data[0].activetoken, function (error, verified) {
+                                        password(req.cookies['authentoken']).verifyAgainst(data[0].activeToken, function (error, verified) {
                                             if (!verified || !data[0].active) {
-                                                debugauth("Token hash failed to verify! ", verified, data[0].active);
-                                                //request.res.cookie('authentoken', "", { expires: new Date(0)});
+                                                debug("Token hash failed to verify! ", verified, data[0].active);
                                                 req.res.clearCookie('authentoken');
                                                 callback(new Error('Token Authentication Failed'), null)
 
                                             }
                                             else {
-                                                debugauth("Token hash verified!");
-                                                var forwardparameters = {
+                                                debug("Token hash verified!");
+                                                var forwardParameters = {
                                                     data: data,
-                                                    rememberme: params.rememberme,
-                                                    refreshtoken: true,
-                                                    currentdataconnection: currentdataconnection,
+                                                    rememberMe: params.rememberMe,
+                                                    refreshToken: true,
+                                                    currentDataConnection: currentDataConnection,
                                                     prefix: prefix
                                                 };
-                                                successfullogin(req, forwardparameters, function (err, result) {
+                                                successfulLogin(req, forwardParameters, function (err, result) {
                                                     callback(err, result);
                                                 });
                                             }
@@ -119,15 +119,13 @@ module.exports = {
                             }
                         }
                         else {
-                            debugauth("Token expired!");
-                            //request.res.cookie('authentoken', "", { expires: new Date(0)});
+                            debug("Token expired!");
                             req.res.clearCookie('authentoken');
                             callback(new Error("Token is expired!"), null);
                         }
                     }
                     else {
-                        debugauth("Token cannot be verified!");
-                        //request.res.cookie('authentoken', "", { expires: new Date(0)});
+                        debug("Token cannot be verified!");
                         req.res.clearCookie('authentoken');
                         callback(new Error("Token cannot be verified!"), null);
                     }
@@ -135,104 +133,139 @@ module.exports = {
             }
             else
             {
-                debugauth("Token not set in cookies! Aborting login procedure.");
+                debug("Token not set in cookies! Aborting login procedure.");
                 callback(new Error("Token cannot be found!"), null);
             }
         }
         else if (params.logout)
         {
-            debugauth("Invoking logout procedure!");
+            debug("Invoking logout procedure!");
 
-            debugauth("Removing cookie token!");
+            debug("Removing cookie token!");
             req.res.clearCookie('authentoken');
 
-            debugauth("Removing token from dataconnection!");
+            debug("Removing token from dataconnection!");
             //TODO: Remove tokens from dataconnection
             callback(null,true);
         }
         else {
             //Username and password authentication
-            debugauth("Attempting to login with username and password!");
-            myuser.username = params.username;
-            //debugauth("dataconnection: " + JSON.stringify(this.readonly_dataconnection, null, 4));
-            if (currectreadonlydataconnection) {
-                currectreadonlydataconnection.readUser(prefix, myuser, function (err, data) {
+            debug("Attempting to login with username and password!");
+            myUser.username = params.username;
+
+            if (currentReadOnlyDataConnection) {
+                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
                     if (!err) {
-                        debugauth("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
 
                         if (data.length === 1) {
                             password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
                                 if (error)
                                     throw new Error('AuthenticationService: Hash verification failed by unknown error!');
                                 if (!verified || !data[0].active) {
-                                    debugauth("Password hash failed to verify!");
+                                    debug("Password hash failed to verify!");
                                     callback(new Error( 'Authentication Failed'), null)
                                 } else {
-                                    debugauth("Password hash verified!");
-                                    var forwardparameters = {
+                                    debug("Password hash verified!");
+                                    var forwardParameters = {
                                         data: data,
-                                        rememberme: params.rememberme,
-                                        refreshtoken: false,
-                                        currentdataconnection: currentdataconnection,
+                                        rememberMe: params.rememberMe,
+                                        refreshToken: false,
+                                        currentDataConnection: currentDataConnection,
                                         prefix: prefix
                                     };
-                                    successfullogin(req, forwardparameters,function(err,result){
+                                    successfulLogin(req, forwardParameters,function(err,result){
                                         callback(err,result);
                                     });
                                 }
                             });
                         }
                         else {
-                            debugauth("Username not found!");
+                            debug("Username not found!");
                             callback(new Error('Authentication Failed'), null)
                         }
                     }
                     else {
-                        debugauth("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
                         callback(new Error('Data Retrieval failed from dataconnection!'), null)
                     }
                 });
+            }
+            else
+            {
+                debug("Readonly data connection not set!")
             }
         }
     },
 
     setDataConnectors(_dataconnector,_readonly_dataconnector){
-        this.dataconnection = _dataconnector;
-        this.readonly_dataconnection = _readonly_dataconnector;
+        this.dataConnection = _dataconnector;
+        this.readOnlyDataConnection = _readonly_dataconnector;
     },
     setDataPrefix(prefix){
         this.prefix = prefix;
     },
-    setTokenPrivateKey(privatekey){
-        this.key = privatekey;
+    setTokenPrivateKey(privateKey){
+        this.key = privateKey;
     },
-
     setTokenExpiryPeriod(days){
-        this.tokenexpirydays = days;
+        this.tokenExpiryDays = days;
+    },
+    _setInitializationCheck(initialized){
+        this.checkedForInitialization = initialized;
     },
 
-    /*
-    setAuthenticateMethod: function(authenticateMethod){
-        this.authenticate = authenticateMethod;
-    },*/
-
-    /*
-    setCreateMethod: function(createMethod){
-        this.createmethod = createMethod;
-    },*/
-
-    read: function (req, resource, params, config, callback) {
-
-
-        //params contains username, password
-        debugauth("Reading -> ", params, "==", params.username, ":", params.password);
-        this.authenticate(req, params, function(err, token) {
-            if (err) {
-                callback(err, null)
-            } else {
-                callback(null, token)
+    checkAndInitialize(){
+        var currentDataConnection = this.dataConnection;
+        var prefix = this.prefix;
+        var initFunction = this._setInitializationCheck.bind(this);
+        this.readOnlyDataConnection.isInitialised(prefix, function(err, data) {
+            if (!err && data){
+                //everything is fine!
+                initFunction(true);
+            }
+            else
+            {
+                debug("DataConnection not initialized: ", err);
+                if (data){
+                    //missing tables is the data
+                    currentDataConnection.createTable(prefix,function (err,data){
+                        if (!err){
+                            debug("Tables created! ", data);
+                            initFunction(true);
+                        }
+                        else{
+                            debug("Initialization failed!", err);
+                            initFunction(false);
+                        }
+                    });
+                }
+                else {
+                    initFunction(false);
+                }
             }
         });
+    },
+
+    read: function (req, resource, params, config, callback) {
+        //params contains username, password
+        var authenticationFunction = this.authenticate.bind(this);
+        debug("Reading -> ", params);
+           if (this.checkedForInitialization){
+               authenticationFunction(req, params, function(err, token) {
+                   if (err) {
+                       callback(err, null)
+                   } else {
+                       callback(null, token)
+                   }
+               });
+           }
+           else
+           {
+               debug("DataConnection not initialized: ", err);
+               callback(new Error('Data connection is not initialized!'))
+           }
+
     },
 
     create: function(req, resource, params, body, config, callback) {
@@ -243,7 +276,7 @@ module.exports = {
          throw new Error('AuthenticationService: Hash generation failed!');
          // pbkdf2  10000 iterations
          // Store hash (incl. algorithm, iterations, and salt)
-         debugauth("Verifying against user: "+ myuser.username +  " hash: " + hash);
+         debug("Verifying against user: "+ myUser.username +  " hash: " + hash);
          });*/
 
     },
@@ -255,7 +288,7 @@ module.exports = {
                 throw new Error('AuthenticationService: Hash generation failed!');
             // pbkdf2  10000 iterations
             // Store hash (incl. algorithm, iterations, and salt)
-            debugauth("Verifying against user: "+ myuser.username +  " hash: " + hash);
+            debug("Verifying against user: "+ myuser.username +  " hash: " + hash);
         });*/
     }
 };

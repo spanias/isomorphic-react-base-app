@@ -6,12 +6,12 @@ module.exports = function()
 {
     this.username = "";
     this.hash = "";
-    this.accesstoken = "";
+    this.accessToken = "";
     this.group = "";
     this.email = "";
-    this.imageurl = "";
-    this.firstname = "";
-    this.lastname = "";
+    this.imageURL = "";
+    this.firstName = "";
+    this.lastName = "";
     this.verified = false;
     this.active = false;
 };

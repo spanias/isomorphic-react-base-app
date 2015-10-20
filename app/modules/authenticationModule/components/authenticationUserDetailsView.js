@@ -17,9 +17,9 @@ class AuthenticationUserDetailsView extends React.Component {
         this.state = {
             visible: false,
             user: "",
-            imageurl: "",
-            firstname: "",
-            lastname: "",
+            imageURL: "",
+            firstName: "",
+            lastName: "",
             email: "",
             verified: false
         };
@@ -30,6 +30,7 @@ class AuthenticationUserDetailsView extends React.Component {
         this._handleFirstNameInput = this._handleFirstNameInput.bind(this);
         this._handleLastNameInput = this._handleLastNameInput.bind(this);
         this._validateEmail = this._validateEmail.bind(this);
+        this._hasChanges = this._hasChanges.bind(this);
     }
     componentDidMount() {
         if (this.props != null) {
@@ -47,9 +48,9 @@ class AuthenticationUserDetailsView extends React.Component {
             this.setState({
                 visible: true,
                 user: nextProps.user,
-                imageurl: nextProps.imageurl,
-                firstname: nextProps.firstname,
-                lastname: nextProps.lastname,
+                imageURL: nextProps.imageURL,
+                firstName: nextProps.firstName,
+                lastName: nextProps.lastName,
                 email: nextProps.email,
                 verified: nextProps.verified
             });
@@ -58,9 +59,9 @@ class AuthenticationUserDetailsView extends React.Component {
             this.setState({
                 visible: false,
                 user: "",
-                imageurl:"",
-                firstname: "",
-                lastname: "",
+                imageURL:"",
+                firstName: "",
+                lastName: "",
                 email:"",
                 verified: false
             });
@@ -79,6 +80,13 @@ class AuthenticationUserDetailsView extends React.Component {
             return 'error';
         }
     }
+    _hasChanges()
+    {
+        return (this.state.email != this.props.email ||
+            this.state.firstName != this.props.firstName ||
+            this.state.lastName != this.props.lastName );
+
+    }
     _handleEmailInput(){
         this.setState({
             email: this.refs.email.getValue()
@@ -86,37 +94,33 @@ class AuthenticationUserDetailsView extends React.Component {
     }
     _handleFirstNameInput() {
         this.setState({
-            firstname: this.refs.firstname.getValue()
+            firstName: this.refs.firstName.getValue()
         });
     }
 
     _handleLastNameInput() {
         this.setState({
-            lastname: this.refs.lastname.getValue()
+            lastName: this.refs.lastName.getValue()
         });
     }
 
-
     render() {
-
         debug("Rendering");
-        //Contains the main component (empty if not logged in)
         var userDetailsView =
-            <div className="authentication-userdetailsview-group">
+            <div className="authentication-userDetailsView-group">
             </div>;
 
-
+        var saveButton = <Button disabled>Save changes</Button>;
+        if (this._validateEmail() == 'success' && this._hasChanges()){
+            saveButton = <Button>Save changes</Button>;
+        }
         var verifiedLabel = <span><Label bsSize="xs" bsStyle="danger">Unverified</Label></span>;
         if (this.state.verified)
         {
             verifiedLabel = <span><Label bsSize="xs" bsStyle="success">Verified</Label></span>;
         }
-        //if there is a user logged in show the user view
-        /*
-         <Col xs={6}><Image src={this.state.imageurl} circle /></Col>
 
-         */
-        var avatarstyle = {
+        var avatarStyle = {
             "borderRadius": '50px',
             "width": '125px',
             "height": '140px',
@@ -125,26 +129,33 @@ class AuthenticationUserDetailsView extends React.Component {
             "marginTop": "10px"
         };
 
-        var usernamediv = {
+        var usernameDIV = {
             "paddingBottom": "20px",
             "marginTop": "40px"
         };
-        var usernamelabelspan = {
+        var usernameLabelSpan = {
             "fontSize": "24px",
             "fontWeight": "bold"
         };
-        var usernamespan = {
+        var usernameSpan = {
             "fontSize": "24px",
             "paddingLeft": "5px"
         };
 
         if (this.props.loggedIn){
             userDetailsView =
-                <div className="authentication-userview-group">
+                <div className="authentication-userView-group">
                     <Panel header="User Information" bsStyle="primary">
                         <Row>
-                            <Col xs={6}><img src={this.state.imageurl} style={avatarstyle} className="authenticationUserView-avatar"/></Col>
-                            <Col xs={6}><div style={usernamediv}><span style={usernamelabelspan}>Username:</span> <span style={usernamespan}>{this.state.user}</span> </div></Col>
+                            <Col xs={6}>
+                                <img src={this.state.imageURL} style={avatarStyle} className="authenticationUserView-avatar"/>
+                            </Col>
+                            <Col xs={6}>
+                                <div style={usernameDIV}>
+                                    <span style={usernameLabelSpan}>Username:</span>
+                                    <span style={usernameSpan}>{this.state.user}</span>
+                                </div>
+                            </Col>
                         </Row>
                         <Row>
                             <Col xs={6}>
@@ -153,8 +164,8 @@ class AuthenticationUserDetailsView extends React.Component {
                                     placeholder="Enter text"
                                     label="First Name"
                                     ref="firstname"
-                                    value={this.state.firstname}
-                                    defaultValue={this.state.firstname}
+                                    value={this.state.firstName}
+                                    defaultValue={this.props.firstName}
                                     onChange={this._handleFirstNameInput}/>
                             </Col>
                             <Col xs={6}>
@@ -163,8 +174,8 @@ class AuthenticationUserDetailsView extends React.Component {
                                     placeholder="Enter text"
                                     label="Last Name"
                                     ref="lastname"
-                                    value = {this.state.lastname}
-                                    defaultValue={this.state.lastname}
+                                    value = {this.state.lastName}
+                                    defaultValue={this.props.lastName}
                                     onChange={this._handleLastNameInput}/>
                             </Col>
                         </Row>
@@ -178,12 +189,12 @@ class AuthenticationUserDetailsView extends React.Component {
                                     ref="email"
                                     bsStyle={this._validateEmail()}
                                     value = {this.state.email}
-                                    defaultValue={this.state.email}
+                                    defaultValue={this.props.email}
                                     onChange={this._handleEmailInput}
                                     />
                             </Col>
                         </Row>
-                        <Button >Save</Button>
+                        {saveButton}
                     </Panel>
                 </div>;
         }

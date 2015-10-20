@@ -19,7 +19,7 @@ class AuthenticationComponent extends React.Component {
         this.state = {
             show: false,
             message: "",
-            messageclass: "info"
+            messageClass: "info"
         };
 
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
@@ -27,12 +27,12 @@ class AuthenticationComponent extends React.Component {
         this._hideModal = this._hideModal.bind(this);
         this._login = this._login.bind(this);
         this._handleKeyPress = this._handleKeyPress.bind(this);
-        this.loginwithtoken = this.loginwithtoken.bind(this);
+        this.loginWithToken = this.loginWithToken.bind(this);
     }
 
     componentDidMount(){
         if (!this.state.loggedIn) {
-            this.loginwithtoken();
+            this.loginWithToken();
         }
     }
     componentWillReceiveProps(nextProps) {
@@ -48,16 +48,16 @@ class AuthenticationComponent extends React.Component {
             });
         }
         else {
-            if (nextProps.attempts > 0 && nextProps.errormessage == null ) {
+            if (nextProps.attempts > 0 && nextProps.errorMessage == null ) {
                 this.setState({
                     message:"Username and password combination invalid!",
                     messageClass : "danger"
                 });
 
             }
-            if (nextProps.errormessage != null) {
+            if (nextProps.errorMessage != null) {
                 this.setState({
-                    message:nextProps.errormessage,
+                    message:nextProps.errorMessage,
                     messageClass : "danger"
                 });
             }
@@ -90,7 +90,7 @@ class AuthenticationComponent extends React.Component {
     }
 
 
-    loginwithtoken() {
+    loginWithToken() {
         if (!this.state.loggedIn) {
             //Authentication Service called here.
             context.executeAction(AuthenticationActions, ["LoginWithToken", {}]);
@@ -111,7 +111,7 @@ class AuthenticationComponent extends React.Component {
                 context.executeAction(AuthenticationActions, ["Login", {
                     username: this.refs.userInput.getValue(),
                     password: this.refs.passInput.getValue(),
-                    rememberme: this.refs.remembermeInput.getChecked()
+                    rememberMe: this.refs.rememberMeInput.getChecked()
                 }]);
             }
             else {
@@ -151,7 +151,7 @@ class AuthenticationComponent extends React.Component {
         //Main page buttons which serve as the entrypoint of the modal
         // TODO: have style props which change how main buttons look
         var mainbuttons =
-            <div className="login-mainbuttons">
+            <div className="login-mainButtons">
                 <Button bsStyle="info" onClick={this._showModal}>
                     User Profile
                 </Button>
@@ -179,7 +179,7 @@ class AuthenticationComponent extends React.Component {
                         </Col>
                         <Col xs={6}>
                             <Input type="password" ref="passInput" placeholder="Password" onKeyPress={this._handleKeyPress}/>
-                            <Input type="checkbox" label="Remember me" ref="remembermeInput" />
+                            <Input type="checkbox" label="Remember me" ref="rememberMeInput" />
                         </Col>
                     </Row>
                 </div>;

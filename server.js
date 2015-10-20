@@ -47,14 +47,16 @@ server.use(csrf({cookie: true}));
 var AuthenticationService = require('./app/modules/authenticationModuleServer/index').AuthenticationService;
 var AWSDynamoDBConnector = require ('./app/modules/authenticationModuleServer/index').AWSDynamoDBConnector;
 
-var readonly_dynamocredentials = require('./dynamodbuserreadonly.json');
-var full_dynamocredentials = require('./dynamodbuser.json');
-var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials, true);
-var full_connector = new AWSDynamoDBConnector(full_dynamocredentials, false);
-AuthenticationService.setDataConnectors(full_connector, readonly_connector);
-AuthenticationService.setDataPrefix("test");
+var readonly_dynamoCredentials = require('./dynamodbuserreadonly.json');
+var full_dynamoCredentials = require('./dynamodbuser.json');
+var readOnlyConnector = new AWSDynamoDBConnector(readonly_dynamoCredentials, true);
+var fullConnector = new AWSDynamoDBConnector(full_dynamoCredentials, false);
+AuthenticationService.setDataConnectors(fullConnector, readOnlyConnector);
+AuthenticationService.setDataPrefix("test2");
 AuthenticationService.setTokenPrivateKey("hiuhasidIUAHIUHiuhEIURHIiubiBFIBIaisuIUAS89219£@!!");
 AuthenticationService.setTokenExpiryPeriod(30);
+AuthenticationService.checkAndInitialize();
+
 
 var fetchrPlugin = app.getPlugin('FetchrPlugin');
 fetchrPlugin.registerService(require('./app/services/exampleService'));

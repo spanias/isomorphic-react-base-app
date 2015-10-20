@@ -95,14 +95,20 @@ class AuthenticationUserSecurityView extends React.Component {
     render() {
 
         debug("Rendering");
-        //Contains the main component (empty if not logged in)
+
+
         var changePasswordButton = <Button disabled>Change Password</Button>;
         if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
         {
             changePasswordButton = <Button>Change Password</Button>;
         }
 
-        var errorLabel = '';
+        var errorLabel =  '';
+        if (this.props.errorMessage != null)
+        {
+            errorLabel =  <Alert bsStyle="error">{this.props.errorMessage}</Alert>;
+        }
+
         var userSecurityView =
             <div className="authentication-userSecurityView-group">
             </div>;
@@ -123,7 +129,7 @@ class AuthenticationUserSecurityView extends React.Component {
                                     value={this.state.currentPassword} />
                             </Col>
                             <Col xs={6}>
-
+                                {errorLabel}
                             </Col>
                         </Row>
                         <Row>

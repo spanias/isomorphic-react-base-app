@@ -3,53 +3,116 @@
  * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  **/
     var DynDB = null;
-var debug = require('debug')('AWSDynamoDBConnector')
+    var debug = require('debug')('AWSDynamoDBConnector');
     //var UserModel = require("./userModel");
 
 class AWSDynamoDB {
     // always initialize all instance properties
-    constructor(dynamodbconfig, readonly) {
-        this.dbreadonly = readonly;
-        if (dynamodbconfig && dynamodbconfig.hasOwnProperty('accessKeyId')) {
-            DynDB = require('aws-dynamodb')(dynamodbconfig);
-            this.accesstokenset = true;
+    constructor(dynamoDBConfig, readOnly) {
+        this.dbReadOnly = readOnly;
+        if (dynamoDBConfig && dynamoDBConfig.hasOwnProperty('accessKeyId')) {
+            DynDB = require('aws-dynamodb')(dynamoDBConfig);
+            this.accessTokenSet = true;
         }
         else
         {
-            this.accesstokenset = false;
+            this.accessTokenSet = false;
         }
 
         this.createTable = this.createTable.bind(this);
         this.readUser = this.readUser.bind(this);
     }
 
+    isInitialised(prefix, callback){
+        if (DynDB && this.accessTokenSet) {
+            DynDB.client.listTables(function(err,data){
+                if(!err) {
+                    var missingTables = [];
+                    debug("Initialization data: " , data);
+                    if(data.TableNames.indexOf(prefix + '_users')<0) {
+                        missingTables.push(prefix + '_users')
+                    }
+                    if (missingTables.length >0) {
+                        callback(new Error('Missing tables: '+ missingTables.toString()), missingTables);
+                    }
+                    else {
+                        callback(null, true);
+                    }
+                }
+                else
+                {
+                    debug("Initialization error: " , err);
+                    callback(err,false);
+                }
+            });
+        }
+        else
+        {
+            //Access token not set or token readonly
+            callback(new Error('Access token not set!'),false);
+        }
+
+    }
+
     createTable (prefix, callback) {
-        if (this.accesstokenset && !this.dbreadonly) {
+        if (this.accessTokenSet && !this.dbReadOnly) {
             var params = {
-                TableName: prefix + "_users",
-                KeySchema: [
-                    {AttributeName: "userid", KeyType: "HASH"},
-                    {AttributeName: "username", KeyType: "HASH"},
-                    {AttributeName: "email", KeyType: "HASH"}
-                ],
                 AttributeDefinitions: [
-                    {AttributeName: "userid", AttributeType: "N"},
+                    {AttributeName: "userID", AttributeType: "N"},
                     {AttributeName: "username", AttributeType: "S"},
-                    {AttributeName: "email", AttributeType: "S"},
+                    {AttributeName: "email", AttributeType: "S"}
+                    /*
                     {AttributeName: "hash", AttributeType: "S"},
-                    {AttributeName: "imageurl", AttributeType: "S"},
-                    {AttributeName: "firstname", AttributeType: "S"},
-                    {AttributeName: "lastname", AttributeType: "S"},
+                    {AttributeName: "imageURL", AttributeType: "S"},
+                    {AttributeName: "firstName", AttributeType: "S"},
+                    {AttributeName: "lastName", AttributeType: "S"},
                     {AttributeName: "verified", AttributeType: "S"},
                     {AttributeName: "active", AttributeType: "S"},
-                    {AttributeName: "activetoken", AttributeType: "S"}
+                    {AttributeName: "activeToken", AttributeType: "S"}*/
+                ],
+                KeySchema: [
+                    {AttributeName: "userID", KeyType: "HASH"}
                 ],
                 ProvisionedThroughput: {
-                    ReadCapacityUnits: 3,
-                    WriteCapacityUnits: 3
+                    ReadCapacityUnits: 1,
+                    WriteCapacityUnits: 1
+                },
+                TableName: prefix + "_users",
+                GlobalSecondaryIndexes: [
+                    {
+                        IndexName: 'username-index',
+                        KeySchema: [
+                            {AttributeName: "username", KeyType: "HASH"},
+                        ],
+                        ProvisionedThroughput: {
+                            ReadCapacityUnits: 1,
+                            WriteCapacityUnits: 1
+                        },
+                        Projection: {
+                            ProjectionType: 'ALL'
+                        }
+                    },
+                    {
+                        IndexName: 'email-index',
+                        KeySchema: [
+                            {AttributeName: "email", KeyType: "HASH"}
+                        ],
+                        ProvisionedThroughput: {
+                            ReadCapacityUnits: 1,
+                            WriteCapacityUnits: 1
+                        },
+                        Projection: {
+                            ProjectionType: 'ALL'
+                        }
+                    }
+                ],
+                StreamSpecification: {
+                    StreamEnabled: true,
+                    StreamViewType: 'NEW_AND_OLD_IMAGES'
                 }
+
             };
-            this.DynDB.client.createTable(params, function (err, data) {
+            DynDB.client.createTable(params, function (err, data) {
                 if (err) {
                     debug("Unable to create table. Error JSON:", JSON.stringify(err, null, 2));
                     callback(err, false);
@@ -76,22 +139,22 @@ class AWSDynamoDB {
                 }
             });
     };
-    updateAccessToken(prefix, token, userid, callback)
+    updateAccessToken(prefix, token, userID, callback)
     {
         //TODO: Add multiple tokens to dataconnection for multiple browsers
-        if (this.dbreadonly)
+        if (this.dbReadOnly)
         {
             var err = {errorID: 2, message: "Cannot write with readonly credentials!"};
             callback(err, null);
         }
         else
         {
-            debug("Updating token for user with id:" + userid + " with token: " + token + " in table: " + prefix + "_users");
+            debug("Updating token for user with id:" + userID + " with token: " + token + " in table: " + prefix + "_users");
             DynDB.table(prefix + '_users')
-                .where('userid').eq(userid)
+                .where('userID').eq(userID)
                 .return(DynDB.ALL_OLD)
                 .update(
-                {activetoken: token},
+                {activeToken: token},
                 function (err, data) {
                     if (err) {
                         debug(err, err.stack);
@@ -104,6 +167,8 @@ class AWSDynamoDB {
                 });
         }
     }
+
+
     createUser(user, callback) {
 
     };

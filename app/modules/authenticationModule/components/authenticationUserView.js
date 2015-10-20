@@ -11,7 +11,7 @@ import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserDetailsView from './authenticationUserDetailsView';
 import AuthenticationUserSecurityView from './authenticationUserSecurityView';
 
-var debugauth = require('debug')('AuthenticationUserView');
+var debug = require('debug')('AuthenticationUserView');
 class AuthenticationUserView extends React.Component {
 
     constructor(props, context) {
@@ -22,12 +22,12 @@ class AuthenticationUserView extends React.Component {
     }
     componentDidMount() {
         if (this.props != null) {
-            debugauth("didMount ->", this.props);
+            debug("didMount ->", this.props);
             this._refreshStateWithProps(this.props);
         }
     }
     componentWillReceiveProps(nextProps) {
-        debugauth("willReceiveProps ->", nextProps);
+        debug("willReceiveProps ->", nextProps);
         this._refreshStateWithProps(nextProps);
     }
 
@@ -36,9 +36,9 @@ class AuthenticationUserView extends React.Component {
             this.setState({
                 visible: true,
                 user: nextProps.user,
-                imageurl: nextProps.imageurl,
-                firstname: nextProps.firstname,
-                lastname: nextProps.lastname,
+                imageURL: nextProps.imageURL,
+                firstName: nextProps.firstName,
+                lastName: nextProps.lastName,
                 email: nextProps.email,
                 verified: nextProps.verified
             });
@@ -47,28 +47,25 @@ class AuthenticationUserView extends React.Component {
             this.setState({
                 visible: false,
                 user: "",
-                imageurl:"",
-                firstname: "",
-                lastname: "",
+                imageURL:"",
+                firstName: "",
+                lastName: "",
                 email:"",
                 verified: false
             });
         }
     }
-
-
-
+    
     render() {
-
-        debugauth("Rendering");
+        debug("Rendering");
         //Contains the main component (empty if not logged in)
-        var userview =
-            <div className="authentication-userview-group">
+        var userView =
+            <div className="authentication-userView-group">
             </div>;
 
         if (this.props.loggedIn){
-            userview =
-                <div className="authentication-userview-group">
+            userView =
+                <div className="authentication-userView-group">
                     <Tabs defaultActiveKey={1}>
                         <Tab eventKey={1} title= "Contact">
                             <AuthenticationUserDetailsView {...this.props} />
@@ -81,7 +78,7 @@ class AuthenticationUserView extends React.Component {
         }
         return (
             <div>
-                {userview}
+                {userView}
             </div>
         );
     }

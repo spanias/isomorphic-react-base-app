@@ -17,11 +17,11 @@ class AuthenticationStore extends BaseStore {
             jwt: null,
             email: null,
             group: null,
-            firstname: null,
-            lastname: null,
-            imageurl: null,
+            firstName: null,
+            lastName: null,
+            imageURL: null,
             verified: false,
-            errormessage: null
+            errorMessage: null
         };
     }
     loginAction(payload) {
@@ -34,11 +34,11 @@ class AuthenticationStore extends BaseStore {
             jwt: decoded.token,
             group: decoded.group,
             email: decoded.email,
-            firstname: decoded.firstname,
-            lastname: decoded.lastname,
-            imageurl: decoded.imageurl,
+            firstName: decoded.firstName,
+            lastName: decoded.lastName,
+            imageURL: decoded.imageURL,
             verified: decoded.verified,
-            errormessage: null
+            errorMessage: null
         };
         this.emitChange();
     }
@@ -62,11 +62,11 @@ class AuthenticationStore extends BaseStore {
             jwt: null,
             email: null,
             group: null,
-            firstname: null,
-            lastname: null,
-            imageurl: null,
+            firstName: null,
+            lastName: null,
+            imageURL: null,
             verified: false,
-            errormessage: errormessage
+            errorMessage: errormessage
         };
 
         this.emitChange();
@@ -79,11 +79,28 @@ class AuthenticationStore extends BaseStore {
             jwt: null,
             email: null,
             group: null,
-            firstname: null,
-            lastname: null,
-            imageurl: null,
+            firstName: null,
+            lastName: null,
+            imageURL: null,
             verified: false,
-            errormessage: null
+            errorMessage: null
+        };
+        this.emitChange();
+    }
+
+    changePasswordAction(payload) {
+        this.propStore = {
+            loggedIn: false,
+            attempts: 0,
+            user: null,
+            jwt: null,
+            email: null,
+            group: null,
+            firstName: null,
+            lastName: null,
+            imageURL: null,
+            verified: false,
+            errorMessage: null
         };
         this.emitChange();
     }
@@ -102,7 +119,9 @@ AuthenticationStore.storeName = 'authenticationStore';
 AuthenticationStore.handlers = {
     [Actions.LOGINSUCCESS_ACTION]: 'loginAction',
     [Actions.LOGINFAILED_ACTION]: 'loginFailedAction',
-    [Actions.LOGOUT_ACTION]: 'logoutAction'
+    [Actions.LOGOUT_ACTION]: 'logoutAction',
+    [Actions.CHANGEPASSWORD_ACTION]: 'changePasswordAction'
+
 };
 
 export default AuthenticationStore;
