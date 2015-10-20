@@ -200,7 +200,9 @@ module.exports = {
         this.dataconnection = _dataconnector;
         this.readonly_dataconnection = _readonly_dataconnector;
     },
-
+    setDataPrefix(prefix){
+        this.prefix = prefix;
+    },
     setTokenPrivateKey(privatekey){
         this.key = privatekey;
     },

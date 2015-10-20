@@ -10,7 +10,7 @@ import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationStore from '../stores/authenticationStore';
 import AuthenticationUserView from './authenticationUserView';
 
-var debugauth = require('debug')('AuthenticationComponent');
+var debug = require('debug')('AuthenticationComponent');
 
 class AuthenticationComponent extends React.Component {
 
@@ -18,11 +18,8 @@ class AuthenticationComponent extends React.Component {
         super();
         this.state = {
             show: false,
-            mainbuttontext: "Login",
-            headertext: "Please sign in...",
-            actionbuttontext: "Sign In",
             message: "",
-            messageclass: "danger"
+            messageclass: "info"
         };
 
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
@@ -39,60 +36,54 @@ class AuthenticationComponent extends React.Component {
         }
     }
     componentWillReceiveProps(nextProps) {
-        debugauth("AuthenticationComponent: Receiving new props ->", nextProps);
+        debug("Receiving new props ->", nextProps);
         this._refreshStateWithProps(nextProps);
     }
 
     _refreshStateWithProps(nextProps) {
-        if (typeof nextProps !== "undefined" && nextProps.loggedIn) {
+        if (nextProps.loggedIn) {
             this.setState({
-
-                mainbuttontext: "Logout",
-                headertext: "User Profile",
-                actionbuttontext: "Sign Out",
-                message: "",//"You are already signed in as " + nextProps.user + " who is a user in group: " + nextProps.group,
-                messageclass: "info"
+                message : "",
+                messageClass : "info"
             });
         }
         else {
-            this.setState({
-                mainbuttontext: "Login",
-                headertext: "Please sign in...",
-                actionbuttontext: "Sign In",
-                message: "",
-                messageclass: "danger"
-            });
-            if (typeof nextProps !== "undefined" && nextProps.attempts > 0 ) {
+            if (nextProps.attempts > 0 && nextProps.errormessage == null ) {
                 this.setState({
-                    message: "Username and password combination invalid!"
+                    message:"Username and password combination invalid!",
+                    messageClass : "danger"
                 });
+
             }
-            if (typeof nextProps !== "undefined" && nextProps.errormessage) {
+            if (nextProps.errormessage != null) {
                 this.setState({
-                    message: nextProps.errormessage
+                    message:nextProps.errormessage,
+                    messageClass : "danger"
                 });
             }
         }
     }
     _showModal() {
-        this._refreshStateWithProps(this.props);
         this.setState({
-            show: true
+            show: true,
+            message: "",
+            messageClass: "info"
         });
     }
 
     _hideModal() {
         this.setState({
             show: false,
-            message: ""
+            message: "",
+            messageClass: "info"
         });
     }
 
     _handleKeyPress(event)
     {
-        //debugauth("Keypress event ->", event);
+        //debug("Keypress event ->", event);
         var charCode = event.which || event.charCode || event.keyCode || 0;
-        //debugauth("charCode ->", charCode);
+        //debug("charCode ->", charCode);
         if (charCode === 13) {
             this._login(event);
         }
@@ -112,7 +103,7 @@ class AuthenticationComponent extends React.Component {
 
             this.setState({
                 message: "Attempting login with Username " + this.refs.userInput.getValue(),
-                messageclass: "info"
+                messageClass: "info"
             });
 
             if (this.refs.userInput.getValue() !== "" && this.refs.passInput.getValue() !== "") {
@@ -126,7 +117,7 @@ class AuthenticationComponent extends React.Component {
             else {
                 this.setState({
                     message: "Username or password cannot be empty!",
-                    messageclass: "danger"
+                    messageClass: "danger"
                 });
             }
         }
@@ -137,7 +128,22 @@ class AuthenticationComponent extends React.Component {
     }
 
     render() {
-        //Contains the username and password inputs
+        //Calculate displays
+        var headerText = "";
+        var mainButtonText = "";
+        var actionButtonText = "";
+
+        if (this.props.loggedIn) {
+            headerText = "User Profile";
+            mainButtonText = "Logout";
+            actionButtonText = "Sign Out";
+        }
+        else {
+            headerText = "Please sign in...";
+            mainButtonText = "Login";
+            actionButtonText = "Sign In";
+        }
+
         var form =
             <div className="login-form-group">
             </div>;
@@ -150,7 +156,7 @@ class AuthenticationComponent extends React.Component {
                     User Profile
                 </Button>
                 <Button bsStyle="primary" onClick={this._login}>
-                    {this.state.mainbuttontext}
+                    {mainButtonText}
                 </Button>
             </div>;
 
@@ -160,7 +166,7 @@ class AuthenticationComponent extends React.Component {
 
         if (this.state.message !== "")
         {
-            alert= <Alert bsSize="medium" bsStyle={this.state.messageclass}>{this.state.message}</Alert>
+            alert= <Alert bsSize="medium" bsStyle={this.state.messageClass}>{this.state.message}</Alert>
         }
 
         //if there is no user logged in show the input form and change the main page buttons
@@ -180,7 +186,7 @@ class AuthenticationComponent extends React.Component {
 
             mainbuttons =
                 <Button bsStyle="primary" onClick={this._showModal}>
-                    {this.state.mainbuttontext}
+                    {mainButtonText}
                 </Button>;
         }
 
@@ -195,17 +201,17 @@ class AuthenticationComponent extends React.Component {
                     dialogClassName="login-modal"
                     >
                     <Modal.Header closeButton modalClassName="login-modal-header">
-                        <Modal.Title id="contained-modal-title-lg" modalClassName="login-modal-title">{this.state.headertext}</Modal.Title>
+                        <Modal.Title id="contained-modal-title-lg" modalClassName="login-modal-title">{headerText}</Modal.Title>
                     </Modal.Header>
 
                     <Modal.Body>
                         {form}
                         {alert}
-                        <AuthenticationUserView />
+                        <AuthenticationUserView {...this.props}/>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button onClick={this._hideModal}>Close</Button>
-                        <Button onClick={this._login} bsStyle="primary">{this.state.actionbuttontext}</Button>
+                        <Button onClick={this._login} bsStyle="primary">{actionButtonText}</Button>
                     </Modal.Footer>
                 </Modal>
 

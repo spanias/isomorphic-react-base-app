@@ -52,6 +52,7 @@ var full_dynamocredentials = require('./dynamodbuser.json');
 var readonly_connector = new AWSDynamoDBConnector(readonly_dynamocredentials, true);
 var full_connector = new AWSDynamoDBConnector(full_dynamocredentials, false);
 AuthenticationService.setDataConnectors(full_connector, readonly_connector);
+AuthenticationService.setDataPrefix("test");
 AuthenticationService.setTokenPrivateKey("hiuhasidIUAHIUHiuhEIURHIiubiBFIBIaisuIUAS89219£@!!");
 AuthenticationService.setTokenExpiryPeriod(30);
 
