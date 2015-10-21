@@ -2,8 +2,7 @@
  * Copyright 2015, Digital Optimization Group, LLC.
  * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  */
-var debug = require('debug');
-var debugauth = debug('AuthenticationStore');
+var debugauth = require('debug')('AuthenticationStore');
 import {BaseStore} from 'fluxible/addons';
 import Actions from "../actions/constant";
 
@@ -21,7 +20,9 @@ class AuthenticationStore extends BaseStore {
             lastName: null,
             imageURL: null,
             verified: false,
-            errorMessage: null
+            errorMessage: null,
+            changePasswordFailed: false,
+            changePasswordErrorMessage: null
         };
     }
     loginAction(payload) {
@@ -38,7 +39,9 @@ class AuthenticationStore extends BaseStore {
             lastName: decoded.lastName,
             imageURL: decoded.imageURL,
             verified: decoded.verified,
-            errorMessage: null
+            errorMessage: null,
+            changePasswordFailed: false,
+            changePasswordErrorMessage: null
         };
         this.emitChange();
     }
@@ -54,7 +57,18 @@ class AuthenticationStore extends BaseStore {
                 attemptincrement = 0;
                 errormessage = "Login request timed out!"
             }
+            if (payload.message === "Token cannot be found!"){
+                debugauth("loginFailedAction -  Token login failure!");
+                attemptincrement = 0;
+                errormessage = null;
+            }
+            if (payload.message === "Authentication Failed"){
+                debugauth("loginFailedAction -  Authentication failed!");
+                attemptincrement = 0;
+                errormessage = "Invalid username and password combination!";
+            }
         }
+
         this.propStore = {
             loggedIn: false,
             attempts: this.propStore.attempts +attemptincrement,
@@ -66,7 +80,9 @@ class AuthenticationStore extends BaseStore {
             lastName: null,
             imageURL: null,
             verified: false,
-            errorMessage: errormessage
+            errorMessage: errormessage,
+            changePasswordFailed: false,
+            changePasswordErrorMessage: null
         };
 
         this.emitChange();
@@ -83,25 +99,43 @@ class AuthenticationStore extends BaseStore {
             lastName: null,
             imageURL: null,
             verified: false,
-            errorMessage: null
+            errorMessage: null,
+            changePasswordFailed: false,
+            changePasswordErrorMessage: null
         };
         this.emitChange();
     }
 
+    resetMessagesAction(payload) {
+        this.propStore.changePasswordFailed= false;
+        this.propStore.changePasswordErrorMessage=  null;
+        this.propStore.errorMessage = null;
+
+        this.emitChange();
+    }
+
     changePasswordAction(payload) {
-        this.propStore = {
-            loggedIn: false,
-            attempts: 0,
-            user: null,
-            jwt: null,
-            email: null,
-            group: null,
-            firstName: null,
-            lastName: null,
-            imageURL: null,
-            verified: false,
-            errorMessage: null
-        };
+        this.propStore.changePasswordFailed= false;
+        this.propStore.changePasswordErrorMessage=  "Password changed successfully!";
+        this.emitChange();
+    }
+    changePasswordFailedAction(payload) {
+        var message = null;
+        debugauth("changePasswordFailedAction -  payload: ", payload);
+        if (payload != undefined){
+            if (payload.message === "XMLHttpRequest timeout")
+            {
+                debugauth("changePasswordFailedAction -  Timeout detected!");
+                message = "Change password request timed out!"
+            }
+            if (payload.message === "Current password cannot be verified!")
+            {
+                debugauth("Current password cannot be verified!");
+                message = "Current password cannot be verified! Password not changed!"
+            }
+        }
+        this.propStore.changePasswordFailed= true;
+        this.propStore.changePasswordErrorMessage =  message;
         this.emitChange();
     }
     getState() {
@@ -120,7 +154,9 @@ AuthenticationStore.handlers = {
     [Actions.LOGINSUCCESS_ACTION]: 'loginAction',
     [Actions.LOGINFAILED_ACTION]: 'loginFailedAction',
     [Actions.LOGOUT_ACTION]: 'logoutAction',
-    [Actions.CHANGEPASSWORD_ACTION]: 'changePasswordAction'
+    [Actions.CHANGE_PASSWORD_ACTION]: 'changePasswordAction',
+    [Actions.CHANGE_PASSWORD_FAILED_ACTION]: 'changePasswordFailedAction',
+    [Actions.RESET_MESSAGES_ACTION]: 'resetMessagesAction'
 
 };
 

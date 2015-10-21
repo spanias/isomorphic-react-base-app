@@ -26,7 +26,7 @@ class AuthenticationUserSecurityView extends React.Component {
         this._handleCurrentPasswordInput = this._handleCurrentPasswordInput.bind(this);
         this._handleNewPasswordInput = this._handleNewPasswordInput.bind(this);
         this._handleConfirmPasswordInput = this._handleConfirmPasswordInput.bind(this);
-
+        this._changePassword = this._changePassword.bind(this);
     }
     componentDidMount() {
         if (this.props != null) {
@@ -77,6 +77,16 @@ class AuthenticationUserSecurityView extends React.Component {
             return 'error';
         }
     }
+    _changePassword() {
+        if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
+        {
+            context.executeAction(AuthenticationActions, ["ChangePassword", {
+                username: this.props.user,
+                password: this.state.currentPassword,
+                newPassword: this.state.newPassword
+            }]);
+        }
+    }
     _handleCurrentPasswordInput() {
         this.setState({
             currentPassword: this.refs.currentPassword.getValue()
@@ -95,20 +105,21 @@ class AuthenticationUserSecurityView extends React.Component {
     render() {
 
         debug("Rendering");
-
-
         var changePasswordButton = <Button disabled>Change Password</Button>;
         if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
         {
-            changePasswordButton = <Button>Change Password</Button>;
+            changePasswordButton = <Button onClick={this._changePassword}>Change Password</Button>;
         }
 
         var errorLabel =  '';
-        if (this.props.errorMessage != null)
+        if (this.props.changePasswordErrorMessage != null && this.props.changePasswordFailed)
         {
-            errorLabel =  <Alert bsStyle="error">{this.props.errorMessage}</Alert>;
+            errorLabel =  <Alert bsStyle="danger">{this.props.changePasswordErrorMessage}</Alert>;
         }
-
+        else if (this.props.changePasswordErrorMessage != null && !this.props.changePasswordFailed)
+        {
+            errorLabel =  <Alert bsStyle="success">{this.props.changePasswordErrorMessage}</Alert>;
+        }
         var userSecurityView =
             <div className="authentication-userSecurityView-group">
             </div>;
@@ -118,7 +129,7 @@ class AuthenticationUserSecurityView extends React.Component {
                 <div className="authentication-userSecurityView-group">
                     <Panel header="Security" bsStyle="primary">
                         <Row>
-                            <Col xs={6}>
+                            <Col xs={12}>
                                 <Input
                                     type="password"
                                     placeholder="Current password"
@@ -127,9 +138,6 @@ class AuthenticationUserSecurityView extends React.Component {
                                     bsStyle={this._validateCurrentPassword()}
                                     onChange={this._handleCurrentPasswordInput}
                                     value={this.state.currentPassword} />
-                            </Col>
-                            <Col xs={6}>
-                                {errorLabel}
                             </Col>
                         </Row>
                         <Row>
@@ -154,6 +162,7 @@ class AuthenticationUserSecurityView extends React.Component {
                                     value={this.state.confirmPassword} />
                             </Col>
                         </Row>
+                        {errorLabel}
                         {changePasswordButton}
                     </Panel>
                 </div>

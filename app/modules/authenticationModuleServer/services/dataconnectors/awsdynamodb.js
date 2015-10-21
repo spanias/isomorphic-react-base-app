@@ -168,7 +168,32 @@ class AWSDynamoDB {
         }
     }
 
-
+    updatePassword(prefix, newPassword, userID, callback)
+    {
+        //TODO: Add multiple tokens to dataconnection for multiple browsers
+        if (this.dbReadOnly)
+        {
+            var err = {errorID: 2, message: "Cannot write with readonly credentials!"};
+            callback(err, null);
+        }
+        else {
+            debug("Updating password hash for user with id:" + userID + " with hash: " + newPassword + " in table: " + prefix + "_users");
+            DynDB.table(prefix + '_users')
+                .where('userID').eq(userID)
+                .return(DynDB.ALL_OLD)
+                .update(
+                {hash: newPassword},
+                function (err, data) {
+                    if (err) {
+                        debug(err, err.stack);
+                        callback(err, null);
+                    }
+                    else {
+                        callback(null, data);
+                    }
+                });
+        }
+    }
     createUser(user, callback) {
 
     };

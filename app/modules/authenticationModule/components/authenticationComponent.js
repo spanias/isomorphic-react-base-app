@@ -69,6 +69,7 @@ class AuthenticationComponent extends React.Component {
             message: "",
             messageClass: "info"
         });
+        context.executeAction(AuthenticationActions, ["ResetMessages", {}]);
     }
 
     _hideModal() {
@@ -77,6 +78,7 @@ class AuthenticationComponent extends React.Component {
             message: "",
             messageClass: "info"
         });
+        context.executeAction(AuthenticationActions, ["ResetMessages", {}]);
     }
 
     _handleKeyPress(event)

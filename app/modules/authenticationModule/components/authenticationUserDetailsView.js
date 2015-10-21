@@ -163,7 +163,7 @@ class AuthenticationUserDetailsView extends React.Component {
                                     type="text"
                                     placeholder="Enter text"
                                     label="First Name"
-                                    ref="firstname"
+                                    ref="firstName"
                                     value={this.state.firstName}
                                     defaultValue={this.props.firstName}
                                     onChange={this._handleFirstNameInput}/>
@@ -173,7 +173,7 @@ class AuthenticationUserDetailsView extends React.Component {
                                     type="text"
                                     placeholder="Enter text"
                                     label="Last Name"
-                                    ref="lastname"
+                                    ref="lastName"
                                     value = {this.state.lastName}
                                     defaultValue={this.props.lastName}
                                     onChange={this._handleLastNameInput}/>

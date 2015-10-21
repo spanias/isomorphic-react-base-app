@@ -146,6 +146,7 @@ module.exports = {
 
             debug("Removing token from dataconnection!");
             //TODO: Remove tokens from dataconnection
+
             callback(null,true);
         }
         else {
@@ -290,6 +291,73 @@ module.exports = {
             // Store hash (incl. algorithm, iterations, and salt)
             debug("Verifying against user: "+ myuser.username +  " hash: " + hash);
         });*/
+        var myUser = new UserModel();
+        var currentDataConnection = this.dataConnection;
+        var currentReadOnlyDataConnection = this.readOnlyDataConnection;
+        var key = this.key;
+        var prefix = this.prefix;
+        var tokenExpiryDays = this.tokenExpiryDays;
+        myUser.username = params.username;
+
+        if (params.changePassword) {
+            //first confirm current password
+            debug("Changing password: " + JSON.stringify(params, null, 4));
+            if (currentReadOnlyDataConnection) {
+                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                    if (!err) {
+                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+
+                        if (data.length === 1) {
+                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
+                                if (error)
+                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
+                                if (!verified || !data[0].active) {
+                                    debug("Password hash failed to verify!");
+                                    callback(new Error( 'Current password cannot be verified!'), null)
+                                } else {
+                                    debug("Current password hash verified! Proceeding with password change.");
+                                    password(params.newPassword).hash(function(error, newHash) {
+                                        if(error)
+                                            throw new Error('AuthenticationService: Hash generation failed!');
+
+                                        debug("Generated new hash for password: " + newHash);
+                                        currentDataConnection.updatePassword(prefix, newHash, data[0].userID, function (error, data){
+                                            if(error){
+                                                debug('Could not update hash: ' + JSON.stringify(error));
+                                                callback(error,null);
+                                            }
+                                            else {
+                                                debug('Password hash updated: ' + JSON.stringify(data));
+                                                callback(null,data);
+                                            }
+                                        });
+                                    });
+
+                                }
+                            });
+                        }
+                        else {
+                            debug("Username not found!");
+                            callback(new Error('Current password cannot be verified!'), null);
+                        }
+                    }
+                    else {
+                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                        callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                    }
+                });
+            }
+            else
+            {
+                debug("Readonly data connection not set!");
+                callback(new Error('Data Retrieval failed from dataconnection!'), null);
+            }
+
+        }
+        else{
+            debug("Update action not defined!");
+            callback(new Error('Update action not defined!'), null);
+        }
     }
 };
     /*

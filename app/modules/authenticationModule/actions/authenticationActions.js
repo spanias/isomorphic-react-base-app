@@ -12,12 +12,12 @@ var debug = require('debug')('AuthenticationAction');
  var store = context.getStore(exampleStore).getState()
  */
 export default function (context, payload, done) {
-    debug("The payload in the Action login action  ->", payload);
-    var loginTimemout = 10000;
+    debug("The payload in the Action function  ->", payload);
+    var loginTimeOut = 20000;
     switch(payload[0]) {
         case "Login":
             debug("Reading AuthenticationService ->", payload[1]);
-            context.service.read('AuthenticationService', payload[1], {timeout: loginTimemout}, function (err, data) {
+            context.service.read('AuthenticationService', payload[1], {timeout: loginTimeOut}, function (err, data) {
                 if (err || !data) {
                     debug("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
                     context.dispatch(Actions.LOGINFAILED_ACTION, err);
@@ -31,10 +31,16 @@ export default function (context, payload, done) {
 
             break;
 
+        case "ResetMessages":
+            var store = context.getStore(AuthenticationStore).getState();
+                context.dispatch(Actions.RESET_MESSAGES_ACTION, null);
+                done();
+            break;
+
         case "LoginWithToken":
                 var parameters = {accessToken: true };
                 debug("Reading AuthenticationService ->", parameters);
-                context.service.read('AuthenticationService', parameters, {timeout: loginTimemout}, function (err, data) {
+                context.service.read('AuthenticationService', parameters, {timeout: loginTimeOut}, function (err, data) {
                     if (err || !data) {
                         debug("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
                         context.dispatch(Actions.LOGINFAILED_ACTION, err);
@@ -47,15 +53,15 @@ export default function (context, payload, done) {
             break;
 
         case "ChangePassword":
-            var parameters = {changePassword: true , username: payload[1], password: payload[2], newPassword: payload[3]};
+            var parameters = {changePassword: true , username: payload[1].username, password: payload[1].password, newPassword: payload[1].newPassword};
             debug("Reading AuthenticationService ->", parameters);
-            context.service.read('AuthenticationService', parameters, {timeout: loginTimemout}, function (err, data) {
+            context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
                 if (err || !data) {
                     debug("Calling CHANGE_PASSWORD action, Err: ", err, " data:", data);
-                    context.dispatch(Actions.CHANGE_PASSWORD, err);
+                    context.dispatch(Actions.CHANGE_PASSWORD_FAILED_ACTION, err);
                 }
                 else {
-                    context.dispatch(Actions.CHANGE_PASSWORD, data);
+                    context.dispatch(Actions.CHANGE_PASSWORD_ACTION, data);
                 }
                 done();
             });
@@ -66,7 +72,7 @@ export default function (context, payload, done) {
             if (store.loggedIn){
 
                 var parameters = {logout: true };
-                context.service.read('AuthenticationService', parameters, {timeout: loginTimemout}, function (err, data) {
+                context.service.read('AuthenticationService', parameters, {timeout: loginTimeOut}, function (err, data) {
                     if (err) {
                         debug("Logout failed! ", err);
                     }
