@@ -22,7 +22,9 @@ class AuthenticationStore extends BaseStore {
             verified: false,
             errorMessage: null,
             changePasswordFailed: false,
-            changePasswordErrorMessage: null
+            changePasswordErrorMessage: null,
+            changeUserDetailsFailed: false,
+            changeUserDetailsMessage: null
         };
     }
     loginAction(payload) {
@@ -41,7 +43,9 @@ class AuthenticationStore extends BaseStore {
             verified: decoded.verified,
             errorMessage: null,
             changePasswordFailed: false,
-            changePasswordErrorMessage: null
+            changePasswordErrorMessage: null,
+            changeUserDetailsFailed: false,
+            changeUserDetailsMessage: null
         };
         this.emitChange();
     }
@@ -82,7 +86,9 @@ class AuthenticationStore extends BaseStore {
             verified: false,
             errorMessage: errormessage,
             changePasswordFailed: false,
-            changePasswordErrorMessage: null
+            changePasswordErrorMessage: null,
+            changeUserDetailsFailed: false,
+            changeUserDetailsMessage: null
         };
 
         this.emitChange();
@@ -101,12 +107,16 @@ class AuthenticationStore extends BaseStore {
             verified: false,
             errorMessage: null,
             changePasswordFailed: false,
-            changePasswordErrorMessage: null
+            changePasswordErrorMessage: null,
+            changeUserDetailsFailed: false,
+            changeUserDetailsMessage: null
         };
         this.emitChange();
     }
 
     resetMessagesAction(payload) {
+        this.propStore.changeUserDetailsFailed = false;
+        this.propStore.changeUserDetailsMessage = null;
         this.propStore.changePasswordFailed= false;
         this.propStore.changePasswordErrorMessage=  null;
         this.propStore.errorMessage = null;
@@ -136,8 +146,39 @@ class AuthenticationStore extends BaseStore {
         }
         this.propStore.changePasswordFailed= true;
         this.propStore.changePasswordErrorMessage =  message;
+
+
         this.emitChange();
     }
+
+    changeUserDetailsAction(payload) {
+        if (payload)
+        {
+            this.propStore.verified = payload.verified;
+            this.propStore.imageURL = payload.imageURL;
+            this.propStore.email = payload.email;
+            this.propStore.firstName = payload.firstName;
+            this.propStore.lastName = payload.lastName;
+        }
+        this.propStore.changeUserDetailsFailed = false;
+        this.propStore.changeUserDetailsMessage =  "Details changed successfully!";
+        this.emitChange();
+    }
+
+    changeUserDetailsFailedAction(payload) {
+        var message = null;
+        if (payload != undefined){
+            if (payload.message === "XMLHttpRequest timeout")
+            {
+                debugauth("changeUserDetailsFailed -  Timeout detected!");
+                message = "Change user details request timed out!"
+            }
+        }
+        this.propStore.changeUserDetailsFailed = true;
+        this.propStore.changeUserDetailsMessage = message;
+        this.emitChange();
+    }
+
     getState() {
         return this.propStore;
     }
@@ -156,7 +197,9 @@ AuthenticationStore.handlers = {
     [Actions.LOGOUT_ACTION]: 'logoutAction',
     [Actions.CHANGE_PASSWORD_ACTION]: 'changePasswordAction',
     [Actions.CHANGE_PASSWORD_FAILED_ACTION]: 'changePasswordFailedAction',
-    [Actions.RESET_MESSAGES_ACTION]: 'resetMessagesAction'
+    [Actions.RESET_MESSAGES_ACTION]: 'resetMessagesAction',
+    [Actions.CHANGE_USER_DETAILS_ACTION]: 'changeUserDetailsAction',
+    [Actions.CHANGE_USER_DETAILS_FAILED_ACTION]: 'changeUserDetailsFailedAction'
 
 };
 

@@ -30,6 +30,8 @@ class AuthenticationUserDetailsView extends React.Component {
         this._handleFirstNameInput = this._handleFirstNameInput.bind(this);
         this._handleLastNameInput = this._handleLastNameInput.bind(this);
         this._validateEmail = this._validateEmail.bind(this);
+        this._updateUserDetails =this._updateUserDetails.bind(this);
+
         this._hasChanges = this._hasChanges.bind(this);
     }
     componentDidMount() {
@@ -87,6 +89,31 @@ class AuthenticationUserDetailsView extends React.Component {
             this.state.lastName != this.props.lastName );
 
     }
+
+    _updateUserDetails() {
+        if(this._hasChanges())
+        {
+            var myUser = {};
+            //individually check parameters to avoid injection
+            //parameters checked one by one server side as well
+            myUser.username = this.props.user;
+
+            if (this.state.firstName != this.props.firstName)
+            {
+                myUser.firstName = this.state.firstName;
+            }
+            if (this.state.lastName != this.props.lastName)
+            {
+                myUser.lastName = this.state.lastName;
+            }
+            if (this.state.email != this.props.email)
+            {
+                myUser.email = this.state.email;
+            }
+            context.executeAction(AuthenticationActions, ["ChangeUserDetails", {jwt: this.props.jwt, myUser: myUser}]);
+        }
+    }
+
     _handleEmailInput(){
         this.setState({
             email: this.refs.email.getValue()
@@ -112,7 +139,7 @@ class AuthenticationUserDetailsView extends React.Component {
 
         var saveButton = <Button disabled>Save changes</Button>;
         if (this._validateEmail() == 'success' && this._hasChanges()){
-            saveButton = <Button>Save changes</Button>;
+            saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
         }
         var verifiedLabel = <span><Label bsSize="xs" bsStyle="danger">Unverified</Label></span>;
         if (this.state.verified)
@@ -120,6 +147,15 @@ class AuthenticationUserDetailsView extends React.Component {
             verifiedLabel = <span><Label bsSize="xs" bsStyle="success">Verified</Label></span>;
         }
 
+        var errorAlert =  '';
+        if (this.props.changeUserDetailsMessage != null && this.props.changeUserDetailsFailed)
+        {
+            errorAlert =  <Alert bsStyle="danger">{this.props.changeUserDetailsMessage}</Alert>;
+        }
+        else if (this.props.changeUserDetailsMessage != null && !this.props.changeUserDetailsFailed)
+        {
+            errorAlert =  <Alert bsStyle="success">{this.props.changeUserDetailsMessage}</Alert>;
+        }
         var avatarStyle = {
             "borderRadius": '50px',
             "width": '125px',
@@ -194,6 +230,7 @@ class AuthenticationUserDetailsView extends React.Component {
                                     />
                             </Col>
                         </Row>
+                        {errorAlert}
                         {saveButton}
                     </Panel>
                 </div>;

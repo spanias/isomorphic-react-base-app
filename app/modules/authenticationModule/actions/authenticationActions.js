@@ -53,8 +53,8 @@ export default function (context, payload, done) {
             break;
 
         case "ChangePassword":
-            var parameters = {changePassword: true , username: payload[1].username, password: payload[1].password, newPassword: payload[1].newPassword};
-            debug("Reading AuthenticationService ->", parameters);
+            var parameters = {changePassword: true , jwt: payload[1].jwt, username: payload[1].username, password: payload[1].password, newPassword: payload[1].newPassword};
+            debug("Updating AuthenticationService ->", parameters);
             context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
                 if (err || !data) {
                     debug("Calling CHANGE_PASSWORD action, Err: ", err, " data:", data);
@@ -62,6 +62,21 @@ export default function (context, payload, done) {
                 }
                 else {
                     context.dispatch(Actions.CHANGE_PASSWORD_ACTION, data);
+                }
+                done();
+            });
+            break;
+
+        case "ChangeUserDetails":
+            var parameters = {updateUserDetails: true , jwt: payload[1].jwt, myUser: payload[1].myUser};
+            debug("Updating AuthenticationService ->", parameters);
+            context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+                if (err || !data) {
+                    debug("Calling CHANGE_PASSWORD action, Err: ", err, " data:", data);
+                    context.dispatch(Actions.CHANGE_USER_DETAILS_FAILED_ACTION, err);
+                }
+                else {
+                    context.dispatch(Actions.CHANGE_USER_DETAILS_ACTION, data);
                 }
                 done();
             });

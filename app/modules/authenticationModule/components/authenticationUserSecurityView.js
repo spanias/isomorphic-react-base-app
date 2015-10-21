@@ -81,6 +81,7 @@ class AuthenticationUserSecurityView extends React.Component {
         if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
         {
             context.executeAction(AuthenticationActions, ["ChangePassword", {
+                jwt: this.props.jwt,
                 username: this.props.user,
                 password: this.state.currentPassword,
                 newPassword: this.state.newPassword

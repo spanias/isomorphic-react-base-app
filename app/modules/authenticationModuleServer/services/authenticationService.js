@@ -282,82 +282,138 @@ module.exports = {
 
     },
     update: function(req, resource, params, body, config, callback) {
-        /*
-        // Creating hash and salt
-        password('password').hash(function(error, hash) {
-            if(error)
-                throw new Error('AuthenticationService: Hash generation failed!');
-            // pbkdf2  10000 iterations
-            // Store hash (incl. algorithm, iterations, and salt)
-            debug("Verifying against user: "+ myuser.username +  " hash: " + hash);
-        });*/
-        var myUser = new UserModel();
+        var myUser = {};
         var currentDataConnection = this.dataConnection;
         var currentReadOnlyDataConnection = this.readOnlyDataConnection;
         var key = this.key;
         var prefix = this.prefix;
-        var tokenExpiryDays = this.tokenExpiryDays;
-        myUser.username = params.username;
+        //var tokenExpiryDays = this.tokenExpiryDays;
+        if (params.jwt) {
+            jwt.verify(params.jwt, key, function (err, decoded) {
+                if (!err) {
+                    myUser.username = decoded.user;
+                    debug("Decrypted token: ", decoded);
+                    if (new Date(decoded.expiry) >= new Date()) {
+                        if (params.changePassword) {
+                            //first confirm current password
+                            debug("Changing password: " + JSON.stringify(params, null, 4));
+                            if (currentReadOnlyDataConnection) {
+                                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                                    if (!err) {
+                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
 
-        if (params.changePassword) {
-            //first confirm current password
-            debug("Changing password: " + JSON.stringify(params, null, 4));
-            if (currentReadOnlyDataConnection) {
-                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
-                    if (!err) {
-                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                        if (data.length === 1) {
+                                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
+                                                if (error)
+                                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
+                                                if (!verified || !data[0].active) {
+                                                    debug("Password hash failed to verify!");
+                                                    callback(new Error('Current password cannot be verified!'), null)
+                                                }
+                                                else {
+                                                    debug("Current password hash verified! Proceeding with password change.");
+                                                    password(params.newPassword).hash(function (error, newHash) {
+                                                        if (error)
+                                                            throw new Error('AuthenticationService: Hash generation failed!');
 
-                        if (data.length === 1) {
-                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
-                                if (error)
-                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
-                                if (!verified || !data[0].active) {
-                                    debug("Password hash failed to verify!");
-                                    callback(new Error( 'Current password cannot be verified!'), null)
-                                } else {
-                                    debug("Current password hash verified! Proceeding with password change.");
-                                    password(params.newPassword).hash(function(error, newHash) {
-                                        if(error)
-                                            throw new Error('AuthenticationService: Hash generation failed!');
+                                                        debug("Generated new hash for password: " + newHash);
+                                                        currentDataConnection.updatePassword(prefix, newHash, data[0].userID, function (error, data) {
+                                                            if (error) {
+                                                                debug('Could not update hash: ' + JSON.stringify(error));
+                                                                callback(error, null);
+                                                            }
+                                                            else {
+                                                                debug('Password hash updated: ' + JSON.stringify(data));
+                                                                callback(null, data);
+                                                            }
+                                                        });
+                                                    });
 
-                                        debug("Generated new hash for password: " + newHash);
-                                        currentDataConnection.updatePassword(prefix, newHash, data[0].userID, function (error, data){
-                                            if(error){
-                                                debug('Could not update hash: ' + JSON.stringify(error));
-                                                callback(error,null);
-                                            }
-                                            else {
-                                                debug('Password hash updated: ' + JSON.stringify(data));
-                                                callback(null,data);
-                                            }
-                                        });
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            debug("Username not found!");
+                                            callback(new Error('Current password cannot be verified!'), null);
+                                        }
+                                    }
+                                    else {
+                                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                                        callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                                    }
+                                });
+                            }
+                            else {
+                                debug("Readonly data connection not set!");
+                                callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                            }
+
+                        }
+                        else if (params.updateUserDetails) {
+                            debug("Updating user details: " + JSON.stringify(params, null, 4));
+
+                            if (params.myUser.firstName) {
+                                myUser.firstName = params.myUser.firstName;
+                            }
+                            if (params.myUser.lastName) {
+                                myUser.lastName = params.myUser.lastName;
+                            }
+                            if (params.myUser.email) {
+                                myUser.email = params.myUser.email;
+                                myUser.verified = false;
+                            }
+
+                            if (params.myUser.imageURL) {
+                                myUser.imageURL = params.myUser.imageURL;
+                            }
+
+                            if (Object.keys(myUser).length > 1) {
+                                if (currentDataConnection) {
+                                    currentDataConnection.updateUser(prefix, myUser, function (err, data) {
+                                        if (!err) {
+                                            debug("Updated user successfully! ", data);
+                                            callback(null, data);
+                                        }
+                                        else {
+                                            debug("Couldn't update user! ", err);
+                                            callback(err, null);
+                                        }
                                     });
-
                                 }
-                            });
+                                else {
+                                    debug("Data connection not set!");
+                                    callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                                }
+                            }
+                            else {
+                                debug("No data to change!");
+                                callback(new Error('No changes requested!'), null);
+                            }
                         }
                         else {
-                            debug("Username not found!");
-                            callback(new Error('Current password cannot be verified!'), null);
+                            debug("Update action not defined!");
+                            callback(new Error('Update action not defined!'), null);
                         }
                     }
                     else {
-                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
-                        callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                        //Session token expired
+                        debug("JWT Token expired!");
+                        callback(new Error('Session token has expired!'), null);
                     }
-                });
-            }
-            else
-            {
-                debug("Readonly data connection not set!");
-                callback(new Error('Data Retrieval failed from dataconnection!'), null);
-            }
-
+                }
+                else {
+                    //Error decrypting session token
+                    debug("Unable to decrypt JWT!");
+                    callback(new Error('Session token could not be decrypted!'), null);
+                }
+            });
         }
         else{
-            debug("Update action not defined!");
-            callback(new Error('Update action not defined!'), null);
+            //Not jwt token provided
+            debug("JWT Token not provided!");
+            callback(new Error('No session token provided!'), null);
         }
+
     }
 };
     /*
