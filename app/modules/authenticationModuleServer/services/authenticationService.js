@@ -33,19 +33,18 @@ module.exports = {
         var tokenExpiryDays = this.tokenExpiryDays;
         //This function gets executed when credentials are validated.
         var successfulLogin = function(request, parameters, callback) {
-
             debug("Successful login procedure: ", parameters);
             var token = null;
+            //refresh session token
+            var expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + tokenExpiryDays);
+            token = jwt.sign({
+                user: parameters.data[0].username,
+                email: parameters.data[0].email,
+                expiry: expiryDate
+            }, key);
             if (parameters.rememberMe || parameters.refreshToken) {
-                //refresh token
-                var expiryDate = new Date();
-                expiryDate.setDate(expiryDate.getDate() + tokenExpiryDays);
-                token = jwt.sign({
-                    user: parameters.data[0].username,
-                    email: parameters.data[0].email,
-                    expiry: expiryDate
-                }, key);
-                request.res.cookie('authentoken', token, { expires: expiryDate, httpOnly: true /*, secure: true */ });
+                request.res.cookie('authentoken', token, {expires: expiryDate, httpOnly: true /*, secure: true */});
             }
             var result = {
                 user: parameters.data[0].username,
@@ -98,7 +97,6 @@ module.exports = {
                                                 debug("Token hash failed to verify! ", verified, data[0].active);
                                                 req.res.clearCookie('authentoken');
                                                 callback(new Error('Token Authentication Failed'), null)
-
                                             }
                                             else {
                                                 debug("Token hash verified!");
@@ -137,8 +135,7 @@ module.exports = {
                 callback(new Error("Token cannot be found!"), null);
             }
         }
-        else if (params.logout)
-        {
+        else if (params.logout) {
             debug("Invoking logout procedure!");
 
             debug("Removing cookie token!");
@@ -266,9 +263,7 @@ module.exports = {
                debug("DataConnection not initialized: ", err);
                callback(new Error('Data connection is not initialized!'))
            }
-
     },
-
     create: function(req, resource, params, body, config, callback) {
         /*
          // Creating hash and salt
@@ -328,7 +323,6 @@ module.exports = {
                                                             }
                                                         });
                                                     });
-
                                                 }
                                             });
                                         }

@@ -2,11 +2,11 @@
  * Copyright 2015, Digital Optimization Group, LLC.
  * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  */
-var debugauth = require('debug')('AuthenticationStore');
+var debug = require('debug')('AuthenticationMainStore');
 import {BaseStore} from 'fluxible/addons';
 import Actions from "../actions/constant";
 
-class AuthenticationStore extends BaseStore {
+class AuthenticationMainStore extends BaseStore {
     constructor(dispatcher) {
         super(dispatcher);
         this.propStore = {
@@ -28,19 +28,17 @@ class AuthenticationStore extends BaseStore {
         };
     }
     loginAction(payload) {
-        var decoded = payload;
-
         this.propStore = {
             loggedIn: true,
             attempts: 0,
-            user: decoded.user,
-            jwt: decoded.token,
-            group: decoded.group,
-            email: decoded.email,
-            firstName: decoded.firstName,
-            lastName: decoded.lastName,
-            imageURL: decoded.imageURL,
-            verified: decoded.verified,
+            user: payload.user,
+            jwt: payload.token,
+            group: payload.group,
+            email: payload.email,
+            firstName: payload.firstName,
+            lastName: payload.lastName,
+            imageURL: payload.imageURL,
+            verified: payload.verified,
             errorMessage: null,
             changePasswordFailed: false,
             changePasswordErrorMessage: null,
@@ -57,17 +55,17 @@ class AuthenticationStore extends BaseStore {
         if (payload != undefined){
             if (payload.message === "XMLHttpRequest timeout")
             {
-                debugauth("loginFailedAction -  Timeout detected!");
+                debug("loginFailedAction -  Timeout detected!");
                 attemptincrement = 0;
                 errormessage = "Login request timed out!"
             }
             if (payload.message === "Token cannot be found!"){
-                debugauth("loginFailedAction -  Token login failure!");
+                debug("loginFailedAction -  Token login failure!");
                 attemptincrement = 0;
                 errormessage = null;
             }
             if (payload.message === "Authentication Failed"){
-                debugauth("loginFailedAction -  Authentication failed!");
+                debug("loginFailedAction -  Authentication failed!");
                 attemptincrement = 0;
                 errormessage = "Invalid username and password combination!";
             }
@@ -131,16 +129,16 @@ class AuthenticationStore extends BaseStore {
     }
     changePasswordFailedAction(payload) {
         var message = null;
-        debugauth("changePasswordFailedAction -  payload: ", payload);
+        debug("changePasswordFailedAction -  payload: ", payload);
         if (payload != undefined){
             if (payload.message === "XMLHttpRequest timeout")
             {
-                debugauth("changePasswordFailedAction -  Timeout detected!");
+                debug("changePasswordFailedAction -  Timeout detected!");
                 message = "Change password request timed out!"
             }
             if (payload.message === "Current password cannot be verified!")
             {
-                debugauth("Current password cannot be verified!");
+                debug("Current password cannot be verified!");
                 message = "Current password cannot be verified! Password not changed!"
             }
         }
@@ -170,7 +168,7 @@ class AuthenticationStore extends BaseStore {
         if (payload != undefined){
             if (payload.message === "XMLHttpRequest timeout")
             {
-                debugauth("changeUserDetailsFailed -  Timeout detected!");
+                debug("changeUserDetailsFailed -  Timeout detected!");
                 message = "Change user details request timed out!"
             }
         }
@@ -190,8 +188,8 @@ class AuthenticationStore extends BaseStore {
     }
 }
 
-AuthenticationStore.storeName = 'authenticationStore';
-AuthenticationStore.handlers = {
+AuthenticationMainStore.storeName = 'authenticationMainStore';
+AuthenticationMainStore.handlers = {
     [Actions.LOGINSUCCESS_ACTION]: 'loginAction',
     [Actions.LOGINFAILED_ACTION]: 'loginFailedAction',
     [Actions.LOGOUT_ACTION]: 'logoutAction',
@@ -203,4 +201,4 @@ AuthenticationStore.handlers = {
 
 };
 
-export default AuthenticationStore;
+export default AuthenticationMainStore;

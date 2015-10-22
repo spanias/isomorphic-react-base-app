@@ -4,7 +4,7 @@
  */
 import keyMirror from "react/lib/keyMirror";
 import Actions from "./constant";
-import AuthenticationStore from '../stores/authenticationStore';
+import AuthenticationMainStore from '../stores/authenticationMainStore';
 var debug = require('debug')('AuthenticationAction');
 /*
  This function is used to save and load the login state store.
@@ -32,7 +32,7 @@ export default function (context, payload, done) {
             break;
 
         case "ResetMessages":
-            var store = context.getStore(AuthenticationStore).getState();
+            var store = context.getStore(AuthenticationMainStore).getState();
                 context.dispatch(Actions.RESET_MESSAGES_ACTION, null);
                 done();
             break;
@@ -83,7 +83,7 @@ export default function (context, payload, done) {
             break;
         
         case "Logout":
-            var store = context.getStore(AuthenticationStore).getState();
+            var store = context.getStore(AuthenticationMainStore).getState();
             if (store.loggedIn){
 
                 var parameters = {logout: true };

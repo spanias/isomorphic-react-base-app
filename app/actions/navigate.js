@@ -20,9 +20,16 @@ export default function (context, payload, done) {
 	var path = payload.path;
 	var titles = {
 		"/": {pageTitle: "Home Page"},
-		"/about": {pageTitle: "About Us"}
+		"/about": {pageTitle: "About Us"},
+        "default": {pageTitle: "Default Page Title"}
+
 	}
-	context.dispatch('UPDATE_PAGE_TITLE', titles[path]);
+    if(titles[path]) {
+        context.dispatch('UPDATE_PAGE_TITLE', titles[path]);
+    }
+    else{
+        context.dispatch('UPDATE_PAGE_TITLE', titles["default"]);
+    }
 	
 	done();
 };

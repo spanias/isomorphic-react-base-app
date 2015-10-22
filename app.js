@@ -9,14 +9,14 @@ import ApplicationStore from './app/stores/ApplicationStore';
 import ExampleStore from './app/stores/exampleStore';
 import fetchrPlugin from 'fluxible-plugin-fetchr';
 
-import { AuthenticationStore} from './app/modules/authenticationModule/index';
+import { AuthenticationMainStore } from './app/modules/authenticationModule/index';
 
 let app = new Fluxible({
     component: Routes,
     stores: [
         ApplicationStore,
         ExampleStore,
-        AuthenticationStore
+        AuthenticationMainStore
     ]
 });
 

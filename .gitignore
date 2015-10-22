@@ -28,3 +28,7 @@ webpack/utils/webpack-stats.json
 dynamodbuser.json
 
 dynamodbuserreadonly.json
+
+smtpsetup.json
+
+.idea/typescript-compiler.xml
