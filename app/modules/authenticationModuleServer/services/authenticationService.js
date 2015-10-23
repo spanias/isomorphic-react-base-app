@@ -43,9 +43,12 @@ module.exports = {
                 email: parameters.data[0].email,
                 expiry: expiryDate
             }, key);
+
             if (parameters.rememberMe || parameters.refreshToken) {
                 request.res.cookie('authentoken', token, {expires: expiryDate, httpOnly: true /*, secure: true */});
             }
+            request.res.cookie('sessiontoken', token, {httpOnly: true /*, secure: true */});
+
             var result = {
                 user: parameters.data[0].username,
                 group: parameters.data[0].group,
@@ -59,14 +62,14 @@ module.exports = {
             };
             callback(null, result);
 
-            if (parameters.rememberMe || parameters.refreshToken) {
+            //if (parameters.rememberMe || parameters.refreshToken) {
                 debug("Saving new token to database...");
                 password(token).hash(function (error, hashedToken) {
                     if (!error) {
                         // pbkdf2  10000 iterations
                         // Store hash (incl. algorithm, iterations, and salt)
 
-                        parameters.currentDataConnection.updateAccessToken(parameters.prefix, hashedToken, parameters.data[0].userID, function (err, retrievedData) {
+                        parameters.currentDataConnection.updateAccessToken(parameters.prefix, hashedToken, parameters.data[0].username, function (err, retrievedData) {
                             if (err) {
                                 debug("Token not saved.", err)
                             }
@@ -76,7 +79,7 @@ module.exports = {
                         });
                     }
                 });
-            }
+            //}
         };
 
         if (params.accessToken && params.username == undefined ){
@@ -312,7 +315,7 @@ module.exports = {
                                                             throw new Error('AuthenticationService: Hash generation failed!');
 
                                                         debug("Generated new hash for password: " + newHash);
-                                                        currentDataConnection.updatePassword(prefix, newHash, data[0].userID, function (error, data) {
+                                                        currentDataConnection.updatePassword(prefix, newHash, data[0].username, function (error, data) {
                                                             if (error) {
                                                                 debug('Could not update hash: ' + JSON.stringify(error));
                                                                 callback(error, null);

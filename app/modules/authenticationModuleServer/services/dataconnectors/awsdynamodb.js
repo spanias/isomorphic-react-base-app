@@ -58,7 +58,6 @@ class AWSDynamoDB {
         if (this.accessTokenSet && !this.dbReadOnly) {
             var params = {
                 AttributeDefinitions: [
-                    {AttributeName: "userID", AttributeType: "N"},
                     {AttributeName: "username", AttributeType: "S"},
                     {AttributeName: "email", AttributeType: "S"}
                     /*
@@ -71,7 +70,7 @@ class AWSDynamoDB {
                     {AttributeName: "activeToken", AttributeType: "S"}*/
                 ],
                 KeySchema: [
-                    {AttributeName: "userID", KeyType: "HASH"}
+                    {AttributeName: "username", KeyType: "HASH"}
                 ],
                 ProvisionedThroughput: {
                     ReadCapacityUnits: 1,
@@ -79,19 +78,6 @@ class AWSDynamoDB {
                 },
                 TableName: prefix + "_users",
                 GlobalSecondaryIndexes: [
-                    {
-                        IndexName: 'username-index',
-                        KeySchema: [
-                            {AttributeName: "username", KeyType: "HASH"},
-                        ],
-                        ProvisionedThroughput: {
-                            ReadCapacityUnits: 1,
-                            WriteCapacityUnits: 1
-                        },
-                        Projection: {
-                            ProjectionType: 'ALL'
-                        }
-                    },
                     {
                         IndexName: 'email-index',
                         KeySchema: [
@@ -127,7 +113,6 @@ class AWSDynamoDB {
     readUser(prefix, user, callback) {
         DynDB.table(prefix + '_users')
             .where('username').eq(user.username)
-            .order_by('username-index').descending()
             .query(function (err, data) {
                 if (err) {
                     debug(err, err.stack);
@@ -139,7 +124,7 @@ class AWSDynamoDB {
                 }
             });
     };
-    updateAccessToken(prefix, token, userID, callback)
+    updateAccessToken(prefix, token, username, callback)
     {
         //TODO: Add multiple tokens to dataconnection for multiple browsers
         if (this.dbReadOnly)
@@ -148,9 +133,9 @@ class AWSDynamoDB {
         }
         else
         {
-            debug("Updating token for user with id:" + userID + " with token: " + token + " in table: " + prefix + "_users");
+            debug("Updating token for user with id:" + username + " with token: " + token + " in table: " + prefix + "_users");
             DynDB.table(prefix + '_users')
-                .where('userID').eq(userID)
+                .where('username').eq(username)
                 .return(DynDB.ALL_OLD)
                 .update(
                 {activeToken: token},
@@ -167,7 +152,7 @@ class AWSDynamoDB {
         }
     }
 
-    updatePassword(prefix, newPassword, userID, callback)
+    updatePassword(prefix, newPassword, username, callback)
     {
         //TODO: Add multiple tokens to dataconnection for multiple browsers
         if (this.dbReadOnly)
@@ -175,9 +160,9 @@ class AWSDynamoDB {
             callback(new Error( "Cannot write with readonly credentials!"), null);
         }
         else {
-            debug("Updating password hash for user with id:" + userID + " with hash: " + newPassword + " in table: " + prefix + "_users");
+            debug("Updating password hash for user with id:" + username + " with hash: " + newPassword + " in table: " + prefix + "_users");
             DynDB.table(prefix + '_users')
-                .where('userID').eq(userID)
+                .where('username').eq(username)
                 .return(DynDB.ALL_NEW)
                 .update(
                 {hash: newPassword},
@@ -204,44 +189,36 @@ class AWSDynamoDB {
 
             debug("Updating user details for user:" + newUserDetails.username + " with details: " + JSON.stringify(newUserDetails) + " in table: " + prefix + "_users");
             var updateStructure = {};
-            if (newUserDetails.firstName){
+            if (newUserDetails.firstName) {
                 updateStructure.firstName = newUserDetails.firstName;
             }
-            if (newUserDetails.lastName){
+            if (newUserDetails.lastName) {
                 updateStructure.lastName = newUserDetails.lastName;
             }
-            if (newUserDetails.email){
+            if (newUserDetails.email) {
                 updateStructure.email = newUserDetails.email;
             }
-            if (newUserDetails.verified != null){
+            if (newUserDetails.verified != null) {
                 updateStructure.verified = newUserDetails.verified;
             }
-            if (newUserDetails.imageURL){
+            if (newUserDetails.imageURL) {
                 updateStructure.imageURL = newUserDetails.imageURL;
             }
-            this.readUser(prefix, newUserDetails, function(err, data){
 
-                if (!err && data.length == 1) {
-                    DynDB.table(prefix + '_users')
-                        .where('userID').eq(data[0].userID)
-                        .return(DynDB.ALL_NEW)
-                        .update(
-                        updateStructure,
-                        function (err, data) {
-                            if (err) {
-                                debug(err, err.stack);
-                                callback(err, null);
-                            }
-                            else {
-                                callback(null, data);
-                            }
-                        });
-                }
-                else{
-                    callback(new Error("User " + newUserDetails.username +  " not found!"), null);
-                }
-            });
-
+            DynDB.table(prefix + '_users')
+                .where('username').eq(newUserDetails.username)
+                .return(DynDB.ALL_NEW)
+                .update(
+                updateStructure,
+                function (err, data) {
+                    if (err) {
+                        debug(err, err.stack);
+                        callback(err, null);
+                    }
+                    else {
+                        callback(null, data);
+                    }
+                });
         }
     }
     createUser(user, callback) {
