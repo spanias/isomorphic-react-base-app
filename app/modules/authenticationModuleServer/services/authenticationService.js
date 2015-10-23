@@ -85,8 +85,24 @@ module.exports = {
         if (params.accessToken && params.username == undefined ){
             //Token authentication
             debug("Attempting to login with token!");
-            if (req.cookies['authentoken']) {
-                jwt.verify(req.cookies['authentoken'], key, function (err, decoded) {
+            if (req.cookies['authentoken'] || req.cookies['sessiontoken']) {
+
+                var token = '';
+                var refreshAuthenToken = false;
+                if (req.cookies['authentoken'])
+                {
+                    debug('Logging in with long term cookie!');
+                    refreshAuthenToken = true;
+                    token = req.cookies['authentoken'];
+                }
+                else
+                {
+                    debug('Logging in with session cookie!');
+                    refreshAuthenToken = false;
+                    token = req.cookies['sessiontoken'];
+                }
+
+                jwt.verify(token, key, function (err, decoded) {
                     if (!err) {
                         myUser.username = decoded.user;
                         debug("Decrypted token: ", decoded);
@@ -95,10 +111,11 @@ module.exports = {
                                 currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
                                     debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
                                     if (data.length === 1) {
-                                        password(req.cookies['authentoken']).verifyAgainst(data[0].activeToken, function (error, verified) {
+                                        password(token).verifyAgainst(data[0].activeToken, function (error, verified) {
                                             if (!verified || !data[0].active) {
                                                 debug("Token hash failed to verify! ", verified, data[0].active);
                                                 req.res.clearCookie('authentoken');
+                                                req.res.clearCookie('sessiontoken');
                                                 callback(new Error('Token Authentication Failed'), null)
                                             }
                                             else {
@@ -106,7 +123,7 @@ module.exports = {
                                                 var forwardParameters = {
                                                     data: data,
                                                     rememberMe: params.rememberMe,
-                                                    refreshToken: true,
+                                                    refreshToken: refreshAuthenToken,
                                                     currentDataConnection: currentDataConnection,
                                                     prefix: prefix
                                                 };
@@ -122,12 +139,14 @@ module.exports = {
                         else {
                             debug("Token expired!");
                             req.res.clearCookie('authentoken');
+                            req.res.clearCookie('sessiontoken');
                             callback(new Error("Token is expired!"), null);
                         }
                     }
                     else {
                         debug("Token cannot be verified!");
                         req.res.clearCookie('authentoken');
+                        req.res.clearCookie('sessiontoken');
                         callback(new Error("Token cannot be verified!"), null);
                     }
                 });
@@ -143,6 +162,7 @@ module.exports = {
 
             debug("Removing cookie token!");
             req.res.clearCookie('authentoken');
+            req.res.clearCookie('sessiontoken');
 
             debug("Removing token from dataconnection!");
             //TODO: Remove tokens from dataconnection
