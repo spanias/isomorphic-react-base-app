@@ -9,7 +9,7 @@ import SaveState from '../elements/SaveState';
 import ModalExample from '../elements/ModalExample';
 import ReactSelectExample from '../elements/ReactSelectExample';
 
-import {AuthenticationComponent} from '../../modules/authenticationModule/index';
+import {AuthenticationPageButtons} from '../../modules/authenticationModule/index';
 
 class Home extends React.Component {
 
@@ -32,7 +32,7 @@ class Home extends React.Component {
 
 
                 <h1>Authentication</h1>
-				<AuthenticationComponent />
+				<AuthenticationPageButtons />
 			</div>
 		);
   	}

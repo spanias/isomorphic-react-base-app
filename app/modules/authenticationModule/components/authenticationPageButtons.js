@@ -10,9 +10,9 @@ import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 import AuthenticationModalView from './authenticationModalView';
 
-var debug = require('debug')('AuthenticationComponent');
+var debug = require('debug')('AuthenticationPageButtons');
 
-class AuthenticationComponent extends React.Component {
+class AuthenticationPageButtons extends React.Component {
 
     constructor(props, context) {
         super();
@@ -23,14 +23,8 @@ class AuthenticationComponent extends React.Component {
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
         this._showModal = this._showModal.bind(this);
         this._hideModal = this._hideModal.bind(this);
-        this.loginWithToken = this.loginWithToken.bind(this);
     }
 
-    componentDidMount(){
-        if (!this.props.loggedIn) {
-            this.loginWithToken();
-        }
-    }
     componentWillReceiveProps(nextProps) {
         debug("Receiving new props ->", nextProps);
         this._refreshStateWithProps(nextProps);
@@ -54,14 +48,6 @@ class AuthenticationComponent extends React.Component {
     }
     _logout() {
         context.executeAction(AuthenticationActions, ["Logout", {}])
-    }
-
-
-    loginWithToken() {
-        if (!this.props.loggedIn) {
-            //Authentication Service called here.
-            context.executeAction(AuthenticationActions, ["LoginWithToken", {}]);
-        }
     }
 
     render() {
@@ -105,11 +91,11 @@ class AuthenticationComponent extends React.Component {
     }
 }
 
-AuthenticationComponent.propTypes = {
+AuthenticationPageButtons.propTypes = {
 };
 
-AuthenticationComponent = connectToStores(AuthenticationComponent, [AuthenticationMainStore], function (context, props) {
+AuthenticationPageButtons = connectToStores(AuthenticationPageButtons, [AuthenticationMainStore], function (context, props) {
     return context.getStore(AuthenticationMainStore).getState()
 });
 
-export default AuthenticationComponent;
+export default AuthenticationPageButtons;

@@ -6,6 +6,9 @@ import React from 'react';
 import NavBar from './NavBar';
 import ApplicationStore from '../stores/ApplicationStore';
 import {connectToStores, provideContext} from 'fluxible-addons-react';
+import {AuthenticationTokenLogin} from '../modules/authenticationModule/index';
+import {AuthenticationActions} from '../modules/authenticationModule/index';
+
 var RouteHandler = require('react-router').RouteHandler;
 
 /*
@@ -21,7 +24,9 @@ class Application extends React.Component {
     constructor(props, context) {
         super(props, context);
     }
-    
+    componentDidMount(){
+        context.executeAction(AuthenticationActions, ["LoginWithToken", {}]);
+    }
     componentDidUpdate(prevProps) {
         let newProps = this.props;
         if (newProps.ApplicationStore.pageTitle === prevProps.ApplicationStore.pageTitle) {

@@ -74,7 +74,7 @@ class EmailVerificationPage extends React.Component {
             loginForm =
                 <div>
                     <h2>
-                        You need to log in before we can verify your email address
+                        You need to log in before we can verify your email address.
                     </h2>
                     <AuthenticationLoginView ref='loginView' onSubmit={this._login} />
                 </div>;

@@ -2,8 +2,12 @@
 import _Actions from './actions/constant';
 export {_Actions as Actions};
 
-import _AuthenticationComponent from './components/authenticationComponent';
-export  {_AuthenticationComponent as AuthenticationComponent};
+
+import _AuthenticationTokenLogin from './components/authenticationTokenLogin';
+export  {_AuthenticationTokenLogin as AuthenticationTokenLogin};
+
+import _AuthenticationPageButtons from './components/authenticationPageButtons';
+export  {_AuthenticationPageButtons as AuthenticationPageButtons};
 
 import _AuthenticationActions from './actions/authenticationActions';
 export {_AuthenticationActions as AuthenticationActions};
