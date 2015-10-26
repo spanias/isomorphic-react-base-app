@@ -1,7 +1,8 @@
 /**
- * Created by Turmoil on 07/10/2015.
-
+ * Copyright 2015, Digital Optimization Group, LLC.
+ * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
  */
+
 import keyMirror from  "react/lib/keyMirror";
 
 const Actions = keyMirror({
@@ -16,6 +17,9 @@ const Actions = keyMirror({
 
     CHANGE_USER_DETAILS_ACTION: null,
     CHANGE_USER_DETAILS_FAILED_ACTION: null,
+
+    VERIFY_EMAIL_FAILED: null,
+    VERIFIED_EMAIL: null,
 
     RESET_MESSAGES_ACTION: null
 });

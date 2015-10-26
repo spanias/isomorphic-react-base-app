@@ -81,6 +81,22 @@ export default function (context, payload, done) {
                 done();
             });
             break;
+
+        case "VerifyEmail":
+            var parameters = {verifyEmail: true , jwt: payload[1].jwt, emailToken: payload[1].token};
+            debug("Updating AuthenticationService ->", parameters);
+            context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+                //TODO: Take actions in the store for these actions
+                if (err || !data) {
+                    debug("Calling VERIFY_EMAIL_FAILED action, Err: ", err, " data:", data);
+                    context.dispatch(Actions.VERIFY_EMAIL_FAILED, err);
+                }
+                else {
+                    context.dispatch(Actions.VERIFIED_EMAIL, data);
+                }
+                done();
+            });
+            break;
         
         case "Logout":
             var store = context.getStore(AuthenticationMainStore).getState();

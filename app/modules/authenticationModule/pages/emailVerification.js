@@ -16,20 +16,22 @@ class EmailVerificationPage extends React.Component {
         super(props, context);
         this.state = {
             message: "",
-            messageClass: "danger"
-        }
+            messageClass: "danger",
+            tokenSubmitted: false
+        };
         this._login=this._login.bind(this);
+        this._submitToken = this._submitToken.bind(this);
     }
-    componentDidMount(){
-        if (this.props.loggedIn){
-            if(props.params.token){
-                //verify email
 
-            }
+    _submitToken()
+    {
+        if (this.props.loggedIn && this.props.params.token) {
+            this.setState({tokenSubmitted: true});
+            context.executeAction(AuthenticationAction, ["VerifyEmail", {
+                jwt: this.props.jwt,
+                token: this.props.params.token
+            }]);
         }
-    }
-    _verifyEmailWithToken() {
-
     }
 
     _login(event) {
@@ -63,6 +65,10 @@ class EmailVerificationPage extends React.Component {
     render(){
         var loginForm = '';
         var alert ='';
+        var loginButton = '';
+
+        var tokenForm = '';
+
         if (this.state.message !== "")
         {
             alert= <Alert bsSize="medium" bsStyle={this.state.messageClass}>{this.state.message}</Alert>
@@ -70,7 +76,7 @@ class EmailVerificationPage extends React.Component {
 
         //if there is no user logged in show the input form and change the main page buttons
         if (!this.props.loggedIn){
-
+            loginButton = <Button onClick={this._login} bsStyle="primary">Sign In</Button>;
             loginForm =
                 <div>
                     <h2>
@@ -79,12 +85,28 @@ class EmailVerificationPage extends React.Component {
                     <AuthenticationLoginView ref='loginView' onSubmit={this._login} />
                 </div>;
         }
+        else {
+            tokenForm=
+                <div>
+                    <Input type='text' value={this.props.params.token} />
+                    <Button onClick={this._submitToken} bsStyle='primary' disabled>Verify</Button>
+                </div>;
+            if(!this.state.tokenSubmitted){
+                tokenForm=
+                    <div>
+                        <Input type='text' value={this.props.params.token} />
+                        <Button onClick={this._submitToken} bsStyle='primary'>Verify</Button>
+                    </div>;
+            }
+        }
 
         return (
         <div className="container">
             <h1> Email Verification Page! </h1>
             {loginForm}
             {alert}
+            {loginButton}
+            {tokenForm}
         </div>
         );
     }

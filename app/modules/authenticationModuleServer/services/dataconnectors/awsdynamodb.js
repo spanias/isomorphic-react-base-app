@@ -151,7 +151,33 @@ class AWSDynamoDB {
                 });
         }
     }
-
+    updateEmailVerificationToken(prefix, token, username, callback)
+    {
+        //TODO: Add multiple tokens to dataconnection for multiple browsers
+        if (this.dbReadOnly)
+        {
+            callback(new Error( "Cannot write with readonly credentials!"), null);
+        }
+        else
+        {
+            debug("Updating email verification token for user with id:" + username + " with token: " + token + " in table: " + prefix + "_users");
+            DynDB.table(prefix + '_users')
+                .where('username').eq(username)
+                .return(DynDB.ALL_NEW)
+                .update(
+                {emailVerificationToken: token},
+                function (err, data) {
+                    if (err) {
+                        debug(err, err.stack);
+                        callback(err, null);
+                    } // an error occurred
+                    else {
+                        //debug(data);           // successful response
+                        callback(null, data);
+                    }
+                });
+        }
+    }
     updatePassword(prefix, newPassword, username, callback)
     {
         //TODO: Add multiple tokens to dataconnection for multiple browsers
