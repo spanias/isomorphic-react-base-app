@@ -2,18 +2,14 @@
 * Copyright 2015, Digital Optimization Group, LLC.
 * Copyrights licensed under the APACHE 2 License. See the accompanying LICENSE file for terms.
 **/
+
+var dateAdd = require('../utils').DateAdd;
 var jwt = require('jsonwebtoken');
 
 //using https://www.npmjs.com/package/password-hash-and-salt
 var password = require('password-hash-and-salt');
 var UserModel = require('./dataconnectors/userModel');
 var debug = require('debug')('AuthenticationService');
-
-//change this key to something random
-//var key = 'ACsoiaeaeOE128jJA£7121WNnAWnnnACVjjawUEwj';
-
-//the amount of days to keep the session token
-//var tokenexpirydays = 7;
 
 module.exports = {
     name: 'AuthenticationService',
@@ -73,24 +69,7 @@ module.exports = {
         });
     },
 
-    dateAdd(date, interval, units) {
-        var ret = new Date(date); //don't change original date
-        switch(interval.toLowerCase()) {
-            case 'year'   :  ret.setFullYear(ret.getFullYear() + units);  break;
-            case 'quarter':  ret.setMonth(ret.getMonth() + 3*units);  break;
-            case 'month'  :  ret.setMonth(ret.getMonth() + units);  break;
-            case 'week'   :  ret.setDate(ret.getDate() + 7*units);  break;
-            case 'day'    :  ret.setDate(ret.getDate() + units);  break;
-            case 'hour'   :  ret.setTime(ret.getTime() + units*3600000);  break;
-            case 'minute' :  ret.setTime(ret.getTime() + units*60000);  break;
-            case 'second' :  ret.setTime(ret.getTime() + units*1000);  break;
-            default       :  ret = undefined;  break;
-        }
-        return ret;
-    },
-
     read: function (req, resource, params, config, callback) {
-        var dateAdd = this.dateAdd;
         var successfulLogin = function (request, parameters, callback) {
             debug("Successful login procedure: ", parameters);
             var token = null;
@@ -370,7 +349,6 @@ module.exports = {
         var currentReadOnlyDataConnection = this.readOnlyDataConnection;
         var key = this.key;
         var prefix = this.prefix;
-        var dateAdd = this.dateAdd;
         //var tokenExpiryDays = this.tokenExpiryDays;
         if (params.jwt) {
             jwt.verify(params.jwt, key, function (err, decoded) {
