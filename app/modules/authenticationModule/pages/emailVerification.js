@@ -64,15 +64,19 @@ class EmailVerificationPage extends React.Component {
 
     render(){
         var loginForm = '';
-        var alert ='';
+        var loginAlert ='';
         var loginButton = '';
         var tokenForm = '';
+        var verificationAlert = '';
 
         if (this.state.message !== "")
         {
-            alert= <Alert bsSize="medium" bsStyle={this.state.messageClass}>{this.state.message}</Alert>
+            loginAlert= <Alert bsSize="medium" bsStyle={this.state.messageClass}>{this.state.message}</Alert>;
         }
 
+        if (this.props.verifyEmailMessage){
+            verificationAlert = <Alert bsSize="medium" bsStyle={this.props.verifyEmailFailed ? 'danger' : 'info'}>{this.props.verifyEmailMessage}</Alert>;
+        }
         //if there is no user logged in show the input form and change the main page buttons
         if (!this.props.loggedIn){
             loginButton = <Button onClick={this._login} bsStyle="primary">Sign In</Button>;
@@ -88,12 +92,14 @@ class EmailVerificationPage extends React.Component {
             tokenForm=
                 <div>
                     <Input type='text' value={this.props.params.token} />
+                    {verificationAlert}
                     <Button onClick={this._submitToken} bsStyle='primary' disabled>Verify</Button>
                 </div>;
             if(!this.state.tokenSubmitted){
                 tokenForm=
                     <div>
                         <Input type='text' value={this.props.params.token} />
+                        {verificationAlert}
                         <Button onClick={this._submitToken} bsStyle='primary'>Verify</Button>
                     </div>;
             }
@@ -103,7 +109,7 @@ class EmailVerificationPage extends React.Component {
         <div className="container">
             <h1> Email Verification Page! </h1>
             {loginForm}
-            {alert}
+            {loginAlert}
             {loginButton}
             {tokenForm}
         </div>
@@ -115,6 +121,6 @@ EmailVerificationPage.propTypes = {
 };
 
 EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore], function (context, props) {
-    return context.getStore(AuthenticationMainStore).getState()
+    return context.getStore(AuthenticationMainStore).getState();
 });
 export default EmailVerificationPage;

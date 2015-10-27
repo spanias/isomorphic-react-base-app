@@ -204,6 +204,53 @@ module.exports = {
                     callback(new Error("Token cannot be found!"), null);
                 }
             }
+            else  if (params.refreshUser) {
+                //Token authentication
+                if (params.jwt) {
+                    debug("Attempting to login with token!");
+                    jwt.verify(params.jwt, key, function (err, decoded) {
+                        if (!err) {
+                            myUser.username = decoded.user;
+                            debug("Decrypted token: ", decoded);
+                            if (new Date(decoded.expiry) >= new Date()) {
+                                if (currentReadOnlyDataConnection) {
+                                    currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                        if (data.length == 1) {
+                                            var myUser = {
+                                                username: data[0].username,
+                                                email: data[0].email,
+                                                firstName: data[0].firstName,
+                                                lastName:data[0].lastName,
+                                                imageURL: data[0].imageURL,
+                                                verified : data[0].verified
+
+                                        };
+                                            callback(null, myUser);
+                                        }
+                                        else {
+                                            debug("User not found!");
+                                            callback(new Error("User not found!"), null);
+                                        }
+                                    });
+                                }
+                            }
+                            else {
+                                debug("Token expired!");
+                                callback(new Error("Token is expired!"), null);
+                            }
+                        }
+                        else {
+                            debug("Token cannot be verified!");
+                            callback(new Error("Session token cannot be verified!"), null);
+                        }
+                    });
+                }
+                else {
+                    debug("Session token not set! Aborting login procedure.");
+                    callback(new Error("Session token not set!"), null);
+                }
+            }
             else if (params.logout) {
                 debug("Invoking logout procedure!");
 
@@ -455,29 +502,34 @@ module.exports = {
                             if (currentDataConnection) {
                                 if (params.emailToken) {
                                     jwt.verify(params.emailToken, key, function (error, dec) {
-                                        if (new Date(dec.expiry) >= new Date()) {
-                                            if (dec.email == decoded.email) {
-                                                myUser.verified = true;
-                                                currentDataConnection.updateUser(prefix, myUser, function (err, data) {
-                                                    if (!err) {
-                                                        debug("Verified email address successfully! ", data);
-                                                        callback(null, data);
-                                                    }
-                                                    else {
-                                                        debug("Could not verify email address! ", err);
-                                                        callback(err, null);
-                                                    }
-                                                });
+                                        if (!error && dec) {
+                                            if (new Date(dec.expiry) >= new Date()) {
+                                                if (dec.email == decoded.email) {
+                                                    myUser.verified = true;
+                                                    currentDataConnection.updateUser(prefix, myUser, function (err, data) {
+                                                        if (!err) {
+                                                            debug("Verified email address successfully! ", data);
+                                                            callback(null, data);
+                                                        }
+                                                        else {
+                                                            debug("Could not verify email address! ", err);
+                                                            callback(err, null);
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    debug('Invalid email verification token. Email does not match the account email');
+                                                    callback(new Error('Invalid verification token!'), null);
+                                                }
                                             }
                                             else {
-                                                debug('Invalid email verification token. Email does not match the account email');
-                                                callback(new Error('Invalid verification token!'), null);
+                                                debug('Invalid email verification token. Token expired');
+                                                callback(new Error('Invalid verification token! Token expired!'), null);
                                             }
                                         }
-                                        else
-                                        {
-                                            debug('Invalid email verification token. Token expired');
-                                            callback(new Error('Invalid verification token! Token expired!'), null);
+                                        else{
+                                            debug('Invalid email verification token.');
+                                            callback(new Error('Invalid verification token!!'), null);
                                         }
 
                                     });

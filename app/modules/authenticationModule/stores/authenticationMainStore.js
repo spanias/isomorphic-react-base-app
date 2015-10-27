@@ -24,7 +24,11 @@ class AuthenticationMainStore extends BaseStore {
             changePasswordFailed: false,
             changePasswordErrorMessage: null,
             changeUserDetailsFailed: false,
-            changeUserDetailsMessage: null
+            changeUserDetailsMessage: null,
+            requestVerificationEmailFailed: false,
+            requestVerificationEmailMessage: null,
+            verifyEmailFailed: false,
+            verifyEmailMessage: null
         };
     }
     loginAction(payload) {
@@ -43,7 +47,11 @@ class AuthenticationMainStore extends BaseStore {
             changePasswordFailed: false,
             changePasswordErrorMessage: null,
             changeUserDetailsFailed: false,
-            changeUserDetailsMessage: null
+            changeUserDetailsMessage: null,
+            requestVerificationEmailFailed: false,
+            requestVerificationEmailMessage: null,
+            verifyEmailFailed: false,
+            verifyEmailMessage: null
         };
         this.emitChange();
     }
@@ -86,7 +94,11 @@ class AuthenticationMainStore extends BaseStore {
             changePasswordFailed: false,
             changePasswordErrorMessage: null,
             changeUserDetailsFailed: false,
-            changeUserDetailsMessage: null
+            changeUserDetailsMessage: null,
+            requestVerificationEmailFailed: false,
+            requestVerificationEmailMessage: null,
+            verifyEmailFailed: false,
+            verifyEmailMessage: null
         };
 
         this.emitChange();
@@ -107,16 +119,34 @@ class AuthenticationMainStore extends BaseStore {
             changePasswordFailed: false,
             changePasswordErrorMessage: null,
             changeUserDetailsFailed: false,
-            changeUserDetailsMessage: null
+            changeUserDetailsMessage: null,
+            requestVerificationEmailFailed: false,
+            requestVerificationEmailMessage: null,
+            verifyEmailFailed: false,
+            verifyEmailMessage: null
         };
         this.emitChange();
     }
 
     resetMessagesAction(payload) {
+
+        //Messages displayed after user detail change request
         this.propStore.changeUserDetailsFailed = false;
         this.propStore.changeUserDetailsMessage = null;
+
+        //Messages displayed after password change request
         this.propStore.changePasswordFailed= false;
         this.propStore.changePasswordErrorMessage=  null;
+
+        //Messages displayed after request of verification email
+        this.propStore.requestVerificationEmailFailed = false;
+        this.propStore.requestVerificationEmailMessage= null;
+
+        //Messages displayed email verification request
+        this.propStore.verifyEmailFailed= false;
+        this.propStore.verifyEmailMessage = null;
+
+        //Messages displayed after login attempt
         this.propStore.errorMessage = null;
 
         this.emitChange();
@@ -177,18 +207,58 @@ class AuthenticationMainStore extends BaseStore {
     }
 
     verifiedEmail(payload){
+        this.propStore.verifyEmailFailed =false;
+        this.propStore.verifyEmailMessage = "Email Verification was successful!";
+        this.propStore.verified = payload.verified;
 
+        this.emitChange();
     }
 
     verifyEmailFailed(payload){
+        this.propStore.verifyEmailFailed =true;
 
+        if (payload.message === "XMLHttpRequest timeout")
+        {
+            debug("changePasswordFailedAction -  Timeout detected!");
+            this.propStore.verifyEmailMessage = "Email Verification was unsuccessful! Request timed out!";
+        }
+        else
+        {
+            this.propStore.verifyEmailMessage = "Email Verification was unsuccessful! " + payload.message;
+        }
+
+        this.emitChange();
     }
 
     requestEmailVerification(payload){
+        this.propStore.verifyEmailFailed =false;
+        this.propStore.verifyEmailMessage = "A verification email has been sent to your email address!";
 
+        this.emitChange();
     }
     requestEmailVerificationFailed(payload){
+        this.propStore.verifyEmailFailed =true;
 
+        if (payload.message === "XMLHttpRequest timeout") {
+            debug("changePasswordFailedAction -  Timeout detected!");
+            this.propStore.verifyEmailMessage = "Request for verification email was unsuccessful! Request timed out!";
+        }
+        else {
+            this.propStore.verifyEmailMessage = "Verification email request failed. " + payload.message;
+        }
+
+        this.emitChange();
+    }
+
+    refreshUser(payload){
+        this.propStore.group = payload.group;
+        this.propStore.email =  payload.email;
+        this.propStore.firstName = payload.firstName;
+        this.propStore.lastName = payload.lastName;
+        this.propStore.imageURL = payload.imageURL;
+        this.propStore.verified = payload.verified;
+
+        this.emitChange();
     }
     getState() {
         return this.propStore;
@@ -214,7 +284,8 @@ AuthenticationMainStore.handlers = {
     [Actions.VERIFIED_EMAIL]: 'verifiedEmail',
     [Actions.VERIFY_EMAIL_FAILED]: 'verifyEmailFailed',
     [Actions.REQUEST_EMAIL_VERIFICATION_FAILED]: 'requestEmailVerificationFailed',
-    [Actions.REQUEST_EMAIL_VERIFICATION]: 'requestEmailVerification'
+    [Actions.REQUEST_EMAIL_VERIFICATION]: 'requestEmailVerification',
+    [Actions.REFRESH_USER_ACTION]: 'refreshUser'
 };
 
 export default AuthenticationMainStore;

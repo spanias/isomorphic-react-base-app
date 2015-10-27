@@ -37,6 +37,7 @@ class AuthenticationPageButtons extends React.Component {
         this.setState({
             show: true
         });
+        context.executeAction(AuthenticationActions, ["RefreshUser", {jwt: this.props.jwt}]);
         context.executeAction(AuthenticationActions, ["ResetMessages", {}]);
     }
 

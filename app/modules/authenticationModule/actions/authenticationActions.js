@@ -11,6 +11,7 @@ var debug = require('debug')('AuthenticationAction');
  could get the whole store here like this if you wanted to save it to the server:
  var store = context.getStore(exampleStore).getState()
  */
+
 export default function (context, payload, done) {
     debug("The payload in the Action function  ->", payload);
     var loginTimeOut = 20000;
@@ -31,6 +32,25 @@ export default function (context, payload, done) {
 
             break;
 
+        case "RefreshUser":
+            if (payload[1].jwt) {
+                debug("Reading AuthenticationService ->", payload[1]);
+                context.service.read('AuthenticationService', {
+                    refreshUser: true,
+                    jwt: payload[1].jwt
+                }, {timeout: loginTimeOut}, function (err, data) {
+                    debug("Calling REFRESH_USER_ACTION, Err: ", err, " data:", data);
+                    if (err || !data) {
+                        //COULDN'T RETRIEVE USER. DO NOTHING
+                    }
+                    else {
+                        context.dispatch(Actions.REFRESH_USER_ACTION, data);
+                    }
+                    done();
+                });
+            }
+            done();
+            break;
         case "ResetMessages":
             var store = context.getStore(AuthenticationMainStore).getState();
                 context.dispatch(Actions.RESET_MESSAGES_ACTION, null);
