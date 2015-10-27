@@ -27,7 +27,7 @@ class EmailVerificationPage extends React.Component {
     {
         if (this.props.loggedIn && this.props.params.token) {
             this.setState({tokenSubmitted: true});
-            context.executeAction(AuthenticationAction, ["VerifyEmail", {
+            context.executeAction(AuthenticationActions, ["VerifyEmail", {
                 jwt: this.props.jwt,
                 token: this.props.params.token
             }]);
@@ -66,7 +66,6 @@ class EmailVerificationPage extends React.Component {
         var loginForm = '';
         var alert ='';
         var loginButton = '';
-
         var tokenForm = '';
 
         if (this.state.message !== "")
@@ -112,6 +111,7 @@ class EmailVerificationPage extends React.Component {
     }
 }
 EmailVerificationPage.propTypes = {
+
 };
 
 EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore], function (context, props) {

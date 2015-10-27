@@ -21,6 +21,9 @@ const Actions = keyMirror({
     VERIFY_EMAIL_FAILED: null,
     VERIFIED_EMAIL: null,
 
+    REQUEST_EMAIL_VERIFICATION_FAILED: null,
+    REQUEST_EMAIL_VERIFICATION: null,
+
     RESET_MESSAGES_ACTION: null
 });
 

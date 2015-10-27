@@ -82,6 +82,21 @@ export default function (context, payload, done) {
             });
             break;
 
+        case "RequestVerificationEmail":
+            var parameters = {requestEmailVerificationToken: true , jwt: payload[1].jwt};
+            debug("Reading AuthenticationService ->", parameters);
+            context.service.read('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+                //TODO: Take actions in the store for these actions
+                if (err || !data) {
+                    debug("Calling REQUEST_EMAIL_VERIFICATION_FAILED action, Err: ", err, " data:", data);
+                    context.dispatch(Actions.REQUEST_EMAIL_VERIFICATION_FAILED, err);
+                }
+                else {
+                    context.dispatch(Actions.REQUEST_EMAIL_VERIFICATION, data);
+                }
+                done();
+            });
+            break;
         case "VerifyEmail":
             var parameters = {verifyEmail: true , jwt: payload[1].jwt, emailToken: payload[1].token};
             debug("Updating AuthenticationService ->", parameters);

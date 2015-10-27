@@ -145,7 +145,6 @@ class AuthenticationMainStore extends BaseStore {
         this.propStore.changePasswordFailed= true;
         this.propStore.changePasswordErrorMessage =  message;
 
-
         this.emitChange();
     }
 
@@ -177,6 +176,20 @@ class AuthenticationMainStore extends BaseStore {
         this.emitChange();
     }
 
+    verifiedEmail(payload){
+
+    }
+
+    verifyEmailFailed(payload){
+
+    }
+
+    requestEmailVerification(payload){
+
+    }
+    requestEmailVerificationFailed(payload){
+
+    }
     getState() {
         return this.propStore;
     }
@@ -197,8 +210,11 @@ AuthenticationMainStore.handlers = {
     [Actions.CHANGE_PASSWORD_FAILED_ACTION]: 'changePasswordFailedAction',
     [Actions.RESET_MESSAGES_ACTION]: 'resetMessagesAction',
     [Actions.CHANGE_USER_DETAILS_ACTION]: 'changeUserDetailsAction',
-    [Actions.CHANGE_USER_DETAILS_FAILED_ACTION]: 'changeUserDetailsFailedAction'
-
+    [Actions.CHANGE_USER_DETAILS_FAILED_ACTION]: 'changeUserDetailsFailedAction',
+    [Actions.VERIFIED_EMAIL]: 'verifiedEmail',
+    [Actions.VERIFY_EMAIL_FAILED]: 'verifyEmailFailed',
+    [Actions.REQUEST_EMAIL_VERIFICATION_FAILED]: 'requestEmailVerificationFailed',
+    [Actions.REQUEST_EMAIL_VERIFICATION]: 'requestEmailVerification'
 };
 
 export default AuthenticationMainStore;

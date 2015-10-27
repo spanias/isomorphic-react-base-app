@@ -72,6 +72,7 @@ module.exports = {
             }
         });
     },
+
     dateAdd(date, interval, units) {
         var ret = new Date(date); //don't change original date
         switch(interval.toLowerCase()) {
@@ -89,7 +90,7 @@ module.exports = {
     },
 
     read: function (req, resource, params, config, callback) {
-
+        var dateAdd = this.dateAdd;
         var successfulLogin = function (request, parameters, callback) {
             debug("Successful login procedure: ", parameters);
             var token = null;
@@ -259,7 +260,8 @@ module.exports = {
                                                 debug('Updating email verification token in datastore');
                                                 currentDataConnection.updateEmailVerificationToken(prefix,token,data[0].username,function(errorneus, success){
                                                    if (!errorneus) {
-                                                       debug('Sending token email!', token);
+                                                       debug('Sending token email with link: http://localhost:3000/verifyEmail/' + token);
+
                                                        //TODO: Implement SMTP Sending of emails
                                                    }
                                                     else{
@@ -368,6 +370,7 @@ module.exports = {
         var currentReadOnlyDataConnection = this.readOnlyDataConnection;
         var key = this.key;
         var prefix = this.prefix;
+        var dateAdd = this.dateAdd;
         //var tokenExpiryDays = this.tokenExpiryDays;
         if (params.jwt) {
             jwt.verify(params.jwt, key, function (err, decoded) {
@@ -471,8 +474,45 @@ module.exports = {
                             }
                         }
                         else if (params.verifyEmail){
-                            //TODO: Implement this function
-                            callback(new Error('Not implemented yet!'), null);
+                            if (currentDataConnection) {
+                                if (params.emailToken) {
+                                    jwt.verify(params.emailToken, key, function (error, dec) {
+                                        if (new Date(dec.expiry) >= new Date()) {
+                                            if (dec.email == decoded.email) {
+                                                myUser.verified = true;
+                                                currentDataConnection.updateUser(prefix, myUser, function (err, data) {
+                                                    if (!err) {
+                                                        debug("Verified email address successfully! ", data);
+                                                        callback(null, data);
+                                                    }
+                                                    else {
+                                                        debug("Could not verify email address! ", err);
+                                                        callback(err, null);
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                debug('Invalid email verification token. Email does not match the account email');
+                                                callback(new Error('Invalid verification token!'), null);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            debug('Invalid email verification token. Token expired');
+                                            callback(new Error('Invalid verification token! Token expired!'), null);
+                                        }
+
+                                    });
+                                }
+                                else{
+                                    debug("Token not set!");
+                                    callback(new Error('Token not set!'), null);
+                                }
+                            }
+                            else {
+                                debug("Data connection not set!");
+                                callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                            }
                         }
                         else {
                             debug("Update action not defined!");

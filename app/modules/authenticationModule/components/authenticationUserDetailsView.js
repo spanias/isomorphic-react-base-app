@@ -31,6 +31,7 @@ class AuthenticationUserDetailsView extends React.Component {
         this._handleLastNameInput = this._handleLastNameInput.bind(this);
         this._validateEmail = this._validateEmail.bind(this);
         this._updateUserDetails =this._updateUserDetails.bind(this);
+        this._requestValidationEmail = this._requestValidationEmail.bind(this);
 
         this._hasChanges = this._hasChanges.bind(this);
     }
@@ -82,6 +83,12 @@ class AuthenticationUserDetailsView extends React.Component {
             return 'error';
         }
     }
+
+    _requestValidationEmail(){
+        debug("Calling request verification email!");
+        context.executeAction(AuthenticationActions, ["RequestVerificationEmail", {jwt: this.props.jwt}]);
+    }
+
     _hasChanges()
     {
         return (this.state.email != this.props.email ||
@@ -141,7 +148,7 @@ class AuthenticationUserDetailsView extends React.Component {
         if (this._validateEmail() == 'success' && this._hasChanges()){
             saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
         }
-        var verifiedLabel = <span><Label bsSize="xs" bsStyle="danger">Unverified</Label></span>;
+        var verifiedLabel = <span><Button bsSize="xsmall" bsStyle="danger" onClick={this._requestValidationEmail}>Unverified</Button></span>;
         if (this.state.verified)
         {
             verifiedLabel = <span><Label bsSize="xs" bsStyle="success">Verified</Label></span>;
