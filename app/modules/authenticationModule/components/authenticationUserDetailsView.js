@@ -8,6 +8,9 @@ import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
+import AuthenticationFirstNameInput from "./authenticationFirstNameInput";
+import AuthenticationLastNameInput from "./authenticationLastNameInput";
+import AuthenticationEmailInput from "./authenticationEmailInput";
 var debug = require('debug')('AuthenticationUserDetailsView');
 
 class AuthenticationUserDetailsView extends React.Component {
@@ -15,24 +18,21 @@ class AuthenticationUserDetailsView extends React.Component {
     constructor(props, context) {
         super(props,context);
         this.state = {
-            visible: false,
             user: "",
             imageURL: "",
             firstName: "",
             lastName: "",
             email: "",
+            emailValid: false,
             verified: false
         };
 
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
-
-        this._handleEmailInput = this._handleEmailInput.bind(this);
         this._handleFirstNameInput = this._handleFirstNameInput.bind(this);
         this._handleLastNameInput = this._handleLastNameInput.bind(this);
-        this._validateEmail = this._validateEmail.bind(this);
+        this._handleEmailChange = this._handleEmailChange.bind(this);
         this._updateUserDetails =this._updateUserDetails.bind(this);
         this._requestValidationEmail = this._requestValidationEmail.bind(this);
-
         this._hasChanges = this._hasChanges.bind(this);
     }
     componentDidMount() {
@@ -49,38 +49,25 @@ class AuthenticationUserDetailsView extends React.Component {
     _refreshStateWithProps(nextProps) {
         if (typeof nextProps !== "undefined" && nextProps.loggedIn) {
             this.setState({
-                visible: true,
                 user: nextProps.user,
                 imageURL: nextProps.imageURL,
                 firstName: nextProps.firstName,
                 lastName: nextProps.lastName,
                 email: nextProps.email,
+                emailValid: this.refs.AuthenticationEmailInput.isValid(),
                 verified: nextProps.verified
             });
         }
         else {
             this.setState({
-                visible: false,
                 user: "",
                 imageURL:"",
                 firstName: "",
                 lastName: "",
                 email:"",
+                emailValid: false,
                 verified: false
             });
-        }
-    }
-
-    _validateEmail() {
-        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
-        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        if  (re.test(this.state.email))
-        {
-            return 'success';
-        }
-        else {
-            return 'error';
         }
     }
 
@@ -94,7 +81,6 @@ class AuthenticationUserDetailsView extends React.Component {
         return (this.state.email != this.props.email ||
             this.state.firstName != this.props.firstName ||
             this.state.lastName != this.props.lastName );
-
     }
 
     _updateUserDetails() {
@@ -105,53 +91,48 @@ class AuthenticationUserDetailsView extends React.Component {
             //parameters checked one by one server side as well
             myUser.username = this.props.user;
 
-            if (this.state.firstName != this.props.firstName)
+            if (this.refs.AuthenticationFirstNameInput.hasChanges())
             {
-                myUser.firstName = this.state.firstName;
+                myUser.firstName = this.refs.AuthenticationFirstNameInput.getValue();
             }
-            if (this.state.lastName != this.props.lastName)
+            if (this.refs.AuthenticationLastNameInput.hasChanges())
             {
-                myUser.lastName = this.state.lastName;
+                myUser.lastName = this.refs.AuthenticationLastNameInput.getValue();
             }
-            if (this.state.email != this.props.email)
+            if (this.refs.AuthenticationEmailInput.hasChanges() && this.refs.AuthenticationEmailInput.isValid())
             {
-                myUser.email = this.state.email;
+                myUser.email = this.refs.AuthenticationEmailInput.getValue();
             }
             context.executeAction(AuthenticationActions, ["ChangeUserDetails", {jwt: this.props.jwt, myUser: myUser}]);
         }
     }
 
-    _handleEmailInput(){
-        this.setState({
-            email: this.refs.email.getValue()
-        });
-    }
     _handleFirstNameInput() {
         this.setState({
-            firstName: this.refs.firstName.getValue()
+            firstName: this.refs.AuthenticationFirstNameInput.getValue()
         });
     }
 
     _handleLastNameInput() {
         this.setState({
-            lastName: this.refs.lastName.getValue()
+            lastName: this.refs.AuthenticationLastNameInput.getValue()
+        });
+    }
+
+    _handleEmailChange() {
+        this.setState({
+            email: this.refs.AuthenticationEmailInput.getValue(),
+            emailValid: this.refs.AuthenticationEmailInput.isValid()
         });
     }
 
     render() {
         debug("Rendering");
-        var userDetailsView =
-            <div className="authentication-userDetailsView-group">
-            </div>;
+        var userDetailsView = "";
 
         var saveButton = <Button disabled>Save changes</Button>;
-        if (this._validateEmail() == 'success' && this._hasChanges()){
+        if (this._hasChanges() && this.state.emailValid){
             saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
-        }
-        var verifiedLabel = <span><Button bsSize="xsmall" bsStyle="danger" onClick={this._requestValidationEmail}>Unverified</Button></span>;
-        if (this.state.verified)
-        {
-            verifiedLabel = <span><Label bsSize="xs" bsStyle="success">Verified</Label></span>;
         }
 
         var errorAlert =  '';
@@ -202,38 +183,27 @@ class AuthenticationUserDetailsView extends React.Component {
                         </Row>
                         <Row>
                             <Col xs={6}>
-                                <Input
-                                    type="text"
-                                    placeholder="Enter text"
-                                    label="First Name"
-                                    ref="firstName"
-                                    value={this.state.firstName}
-                                    defaultValue={this.props.firstName}
-                                    onChange={this._handleFirstNameInput}/>
+                                <AuthenticationFirstNameInput
+                                    ref="AuthenticationFirstNameInput"
+                                    firstName={this.props.firstName}
+                                    onChange={this._handleFirstNameInput}
+                                    />
                             </Col>
                             <Col xs={6}>
-                                <Input
-                                    type="text"
-                                    placeholder="Enter text"
-                                    label="Last Name"
-                                    ref="lastName"
-                                    value = {this.state.lastName}
-                                    defaultValue={this.props.lastName}
+                                <AuthenticationLastNameInput
+                                    ref="AuthenticationLastNameInput"
+                                    lastName={this.props.lastName}
                                     onChange={this._handleLastNameInput}/>
                             </Col>
                         </Row>
                         <Row>
                             <Col xs={12}>
-                                <Input
-                                    type="text"
-                                    placeholder="someone@somewhere.com"
-                                    label="E-Mail Address"
-                                    addonAfter={verifiedLabel}
-                                    ref="email"
-                                    bsStyle={this._validateEmail()}
-                                    value = {this.state.email}
-                                    defaultValue={this.props.email}
-                                    onChange={this._handleEmailInput}
+                                <AuthenticationEmailInput
+                                    ref="AuthenticationEmailInput"
+                                    email={this.props.email}
+                                    verified={this.props.verified}
+                                    requestValidationEmail={this._requestValidationEmail}
+                                    onChange={this._handleEmailChange}
                                     />
                             </Col>
                         </Row>
@@ -242,6 +212,9 @@ class AuthenticationUserDetailsView extends React.Component {
                     </Panel>
                 </div>;
         }
+
+
+
         return (
             <div>
                 {userDetailsView}

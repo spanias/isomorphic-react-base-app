@@ -53,9 +53,6 @@ class AuthenticationUserSecurityView extends React.Component {
     }
 
     _validateCurrentPassword() {
-        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
-        //var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
         if  (this.state.currentPassword != "")
         {
             return 'success';
@@ -66,9 +63,6 @@ class AuthenticationUserSecurityView extends React.Component {
     }
 
     _validateNewPasswords() {
-        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
-        //var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
         if  (this.state.newPassword == this.state.confirmPassword && this.state.newPassword != '')
         {
             return 'success';

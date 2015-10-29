@@ -16,46 +16,8 @@ class AuthenticationUserView extends React.Component {
 
     constructor(props, context) {
         super(props,context);
-
-        this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
-        //this._refreshStateWithProps(props);
-    }
-    componentDidMount() {
-        if (this.props != null) {
-            debug("didMount ->", this.props);
-            this._refreshStateWithProps(this.props);
-        }
-    }
-    componentWillReceiveProps(nextProps) {
-        debug("willReceiveProps ->", nextProps);
-        this._refreshStateWithProps(nextProps);
     }
 
-    _refreshStateWithProps(nextProps) {
-        if (typeof nextProps !== "undefined" && nextProps.loggedIn) {
-            this.setState({
-                visible: true,
-                user: nextProps.user,
-                imageURL: nextProps.imageURL,
-                firstName: nextProps.firstName,
-                lastName: nextProps.lastName,
-                email: nextProps.email,
-                verified: nextProps.verified
-            });
-        }
-        else {
-            this.setState({
-                visible: false,
-                user: "",
-                imageURL:"",
-                firstName: "",
-                lastName: "",
-                email:"",
-                verified: false
-            });
-        }
-    }
-    
     render() {
         debug("Rendering");
         //Contains the main component (empty if not logged in)
