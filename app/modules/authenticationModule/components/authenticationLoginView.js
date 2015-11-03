@@ -77,6 +77,9 @@ class AuthenticationLoginView extends React.Component {
 }
 
 AuthenticationLoginView.propTypes = {
+    usernameText: React.PropTypes.string,
+    passwordText: React.PropTypes.string,
+    onSubmit: React.PropTypes.func
 };
 
 export default AuthenticationLoginView;

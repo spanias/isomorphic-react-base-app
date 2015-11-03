@@ -22,7 +22,7 @@ class AuthenticationMainStore extends BaseStore {
             imageURL: null,
             verified: false,
 
-            loginMessageStyle: false,
+            loginMessageStyle: null,
             loginMessage: null,
             loginMessageValidUntil: null,
 

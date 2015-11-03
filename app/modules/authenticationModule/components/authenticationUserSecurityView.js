@@ -76,8 +76,8 @@ class AuthenticationUserSecurityView extends React.Component {
     _changePassword() {
         if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
         {
-            context.executeAction(AuthenticationActions, ["UpdateChangePasswordMessage",
-                {style: "info", message: "Verification email requested.", appearFor: 10}
+            context.executeAction(AuthenticationActions, ["UpdateSecurityMessage",
+                {style: "info", message: "Changing password...", appearFor: 10}
             ]);
             context.executeAction(AuthenticationActions, ["ChangePassword", {
                 jwt: this.props.jwt,
@@ -87,7 +87,7 @@ class AuthenticationUserSecurityView extends React.Component {
             }]);
         }
         else{
-            context.executeAction(AuthenticationActions, ["UpdateChangePasswordMessage",
+            context.executeAction(AuthenticationActions, ["UpdateSecurityMessage",
                 {style: "danger", message: "Cannot validate form. Please re-check details.", appearFor: 10}
             ]);
         }
@@ -111,23 +111,19 @@ class AuthenticationUserSecurityView extends React.Component {
 
         debug("Rendering");
         var changePasswordButton = <Button disabled>Change Password</Button>;
-        if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
-        {
+        if (this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success') {
             changePasswordButton = <Button onClick={this._changePassword}>Change Password</Button>;
         }
 
-        var errorLabel =  '';
-        if (this.props.changePasswordMessage)
-        {
-            errorLabel =  <TimedAlertBox style={this.props.changePasswordMessageStyle} message={this.props.changePasswordMessage} appearsUntil={this.props.changePasswordMessageValidUntil}/>;
+        var errorLabel = '';
+        if (this.props.changePasswordMessage) {
+            errorLabel =
+                <TimedAlertBox style={this.props.changePasswordMessageStyle} message={this.props.changePasswordMessage}
+                               appearsUntil={this.props.changePasswordMessageValidUntil}/>;
         }
 
-        var userSecurityView =
-            <div className="authentication-userSecurityView-group">
-            </div>;
-
-        if (this.props.loggedIn){
-            userSecurityView =
+        return (
+            <div>
                 <div className="authentication-userSecurityView-group">
                     <Panel header="Security" bsStyle="primary">
                         <Row>
@@ -139,7 +135,7 @@ class AuthenticationUserSecurityView extends React.Component {
                                     ref="currentPassword"
                                     bsStyle={this._validateCurrentPassword()}
                                     onChange={this._handleCurrentPasswordInput}
-                                    value={this.state.currentPassword} />
+                                    value={this.state.currentPassword}/>
                             </Col>
                         </Row>
                         <Row>
@@ -151,7 +147,7 @@ class AuthenticationUserSecurityView extends React.Component {
                                     ref="newPassword"
                                     bsStyle={this._validateNewPasswords()}
                                     onChange={this._handleNewPasswordInput}
-                                    value={this.state.newPassword} />
+                                    value={this.state.newPassword}/>
                             </Col>
                             <Col xs={6}>
                                 <Input
@@ -161,23 +157,25 @@ class AuthenticationUserSecurityView extends React.Component {
                                     bsStyle={this._validateNewPasswords()}
                                     onChange={this._handleConfirmPasswordInput}
                                     ref="confirmPassword"
-                                    value={this.state.confirmPassword} />
+                                    value={this.state.confirmPassword}/>
                             </Col>
                         </Row>
                         {errorLabel}
                         {changePasswordButton}
                     </Panel>
                 </div>
-        }
-        return (
-            <div>
-                {userSecurityView}
             </div>
         );
     }
 }
 
 AuthenticationUserSecurityView.propTypes = {
+    jwt: React.PropTypes.string.isRequired,
+    user:React.PropTypes.string.isRequired,
+
+    changePasswordMessageStyle: React.PropTypes.string,
+    changePasswordMessage: React.PropTypes.string,
+    changePasswordMessageValidUntil: React.PropTypes.object
 };
 
 export default AuthenticationUserSecurityView;

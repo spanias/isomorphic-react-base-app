@@ -31,10 +31,6 @@ class AuthenticationFirstNameInput extends React.Component {
             this._refreshStateWithProps(this.props);
         }
     }
-    componentWillReceiveProps(nextProps) {
-        //debug("willReceiveProps ->", nextProps);
-        //this._refreshStateWithProps(nextProps);
-    }
 
     _refreshStateWithProps(nextProps) {
         if (typeof nextProps !== "undefined") {
@@ -53,7 +49,10 @@ class AuthenticationFirstNameInput extends React.Component {
         this.setState({
             firstName: this.refs.firstName.getValue()
         });
-        this.props.onChange();
+
+        if (this.props.onChange) {
+            this.props.onChange();
+        }
     }
 
 
@@ -71,25 +70,25 @@ class AuthenticationFirstNameInput extends React.Component {
 
     render() {
         debug("Rendering");
-        var firstNameInput =
-            <Input
-                type="text"
-                placeholder="Enter text"
-                label="First Name"
-                ref="firstName"
-                value={this.state.firstName}
-                defaultValue={this.props.firstName}
-                onChange={this._handleFirstNameInput}/>;
-
         return (
             <div>
-                {firstNameInput}
+                <Input
+                    type="text"
+                    placeholder="Enter text"
+                    label="First Name"
+                    ref="firstName"
+                    value={this.state.firstName}
+                    defaultValue={this.props.firstName}
+                    onChange={this._handleFirstNameInput}/>
             </div>
         );
     }
 }
 
 AuthenticationFirstNameInput.propTypes = {
+    firstName: React.PropTypes.string,
+    onChange: React.PropTypes.func
+
 };
 
 export default AuthenticationFirstNameInput;

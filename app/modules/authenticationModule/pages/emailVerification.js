@@ -9,14 +9,14 @@ import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 import AuthenticationLoginView from '../components/authenticationLoginView';
+import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+
 var debug = require('debug')('EmailVerificationPage');
 
 class EmailVerificationPage extends React.Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            message: "",
-            messageClass: "danger",
             tokenToSubmit: "",
             tokenSubmitted: false
         };
@@ -31,6 +31,9 @@ class EmailVerificationPage extends React.Component {
     _submitToken()
     {
         if (this.props.loggedIn && this.state.tokenToSubmit) {
+            context.executeAction(AuthenticationActions, ["UpdateVerifyEmailMessage",
+                {style: "info", message: "Verifying email " + this.props.email + "...", appearFor: 10}
+            ]);
             context.executeAction(AuthenticationActions, ["VerifyEmail", {
                 jwt: this.props.jwt,
                 token: this.state.tokenToSubmit
@@ -45,13 +48,11 @@ class EmailVerificationPage extends React.Component {
             event.preventDefault();
         }
         if (!this.props.loggedIn) {
-            this.setState({
-                message: "Attempting login with Username " + this.refs.loginView.getUsernameValue(),
-                messageClass: "info"
-            });
 
             if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
-                //Authentication Service called here.
+                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
+                    {style: "info", message: "Attempting login...", appearFor: 10}
+                ]);
                 context.executeAction(AuthenticationActions, ["Login", {
                     username: this.refs.loginView.getUsernameValue(),
                     password: this.refs.loginView.getPasswordValue(),
@@ -59,10 +60,9 @@ class EmailVerificationPage extends React.Component {
                 }]);
             }
             else {
-                this.setState({
-                    message: "Username or password cannot be empty!",
-                    messageClass: "danger"
-                });
+                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
+                    {style: "danger", message: "Username and Password cannot be empty!", appearFor: 10}
+                ]);
             }
         }
     }
@@ -76,13 +76,16 @@ class EmailVerificationPage extends React.Component {
         var tokenForm = '';
         var verificationAlert = '';
 
-        if (this.state.message !== "")
-        {
-            loginAlert= <Alert bsSize="medium" bsStyle={this.state.messageClass}>{this.state.message}</Alert>;
-        }
 
-        if (this.props.verifyEmailMessage){
-            verificationAlert = <Alert bsSize="medium" bsStyle={this.props.verifyEmailFailed ? 'danger' : 'info'}>{this.props.verifyEmailMessage}</Alert>;
+        if (this.props.loginMessage) {
+            loginAlert = <TimedAlertBox style={this.props.loginMessageStyle}
+                                        message={this.props.loginMessage}
+                                        appearsUntil={this.props.loginMessageValidUntil}/>;
+        }
+        if (this.props.verifyEmailMessage) {
+            verificationAlert =  <TimedAlertBox style={this.props.verifyEmailMessageStyle}
+                                                message={this.props.verifyEmailMessage}
+                                                appearsUntil={this.props.verifyEmailMessageValidUntil}/>;
         }
         //if there is no user logged in show the input form and change the main page buttons
         if (!this.props.loggedIn){

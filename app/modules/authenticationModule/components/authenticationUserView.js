@@ -18,26 +18,37 @@ class AuthenticationUserView extends React.Component {
 
     render() {
         debug("Rendering");
-        //Contains the main component (empty if not logged in)
-        var userView =
-            <div className="authentication-userView-group">
-            </div>;
-
-        if (this.props.loggedIn){
+        var userView = '';
+        if (this.props.loggedIn) {
             userView =
-                <div className="authentication-userView-group">
-                    <Tabs defaultActiveKey={1}>
-                        <Tab eventKey={1} title= "Contact">
-                            <AuthenticationUserDetailsView {...this.props} />
-                        </Tab>
-                        <Tab eventKey={2} title="Security">
-                            <AuthenticationUserSecurityView {...this.props} />
-                        </Tab>
-                    </Tabs>
-                </div>
+                <Tabs defaultActiveKey={1}>
+                    <Tab eventKey={1} title="Contact">
+                        <AuthenticationUserDetailsView
+                            jwt={this.props.jwt}
+                            user={this.props.user}
+                            imageURL={this.props.imageURL}
+                            firstName={this.props.firstName}
+                            lastName={this.props.lastName}
+                            email={this.props.email}
+                            verified={this.props.verified}
+                            changeUserDetailsMessageStyle={this.props.changeUserDetailsMessageStyle}
+                            changeUserDetailsMessage={this.props.changeUserDetailsMessage}
+                            changeUserDetailsMessageValidUntil={this.props.changeUserDetailsMessageValidUntil}
+                            />
+                    </Tab>
+                    <Tab eventKey={2} title="Security">
+                        <AuthenticationUserSecurityView
+                            jwt={this.props.jwt}
+                            user={this.props.user}
+                            changePasswordMessageStyle={this.props.changePasswordMessageStyle}
+                            changePasswordMessage={this.props.changePasswordMessage}
+                            changePasswordMessageValidUntil={this.props.changePasswordMessageValidUntil}
+                            />
+                    </Tab>
+                </Tabs>
         }
         return (
-            <div>
+            <div className="authentication-userView-group">
                 {userView}
             </div>
         );
@@ -45,7 +56,22 @@ class AuthenticationUserView extends React.Component {
 }
 
 AuthenticationUserView.propTypes = {
+    loggedIn: React.PropTypes.bool.isRequired,
+    jwt: React.PropTypes.string,
+    user:React.PropTypes.string,
+    imageURL: React.PropTypes.string,
+    firstName: React.PropTypes.string,
+    lastName: React.PropTypes.string,
+    email: React.PropTypes.string,
+    verified: React.PropTypes.bool,
 
+    changePasswordMessageStyle: React.PropTypes.string,
+    changePasswordMessage: React.PropTypes.string,
+    changePasswordMessageValidUntil: React.PropTypes.object,
+
+    changeUserDetailsMessageStyle: React.PropTypes.string,
+    changeUserDetailsMessage: React.PropTypes.string,
+    changeUserDetailsMessageValidUntil: React.PropTypes.object
 };
 
 export default AuthenticationUserView;

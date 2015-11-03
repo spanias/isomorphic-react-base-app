@@ -40,12 +40,12 @@ class AuthenticationEmailInput extends React.Component {
     _refreshStateWithProps(nextProps) {
         if (typeof nextProps !== "undefined") {
             this.setState({
-                email: nextProps.email,
+                email: nextProps.email
             });
         }
         else {
             this.setState({
-                email:"",
+                email:""
             });
         }
     }
@@ -61,9 +61,11 @@ class AuthenticationEmailInput extends React.Component {
             return 'error';
         }
     }
-    _handleEmailInput(){
+    _handleEmailInput() {
         this.setState({email: this.getValue()});
-        this.props.onChange();
+        if (this.props.onChange) {
+            this.props.onChange();
+        }
     }
 
     hasChanges() {
@@ -105,6 +107,10 @@ class AuthenticationEmailInput extends React.Component {
 }
 
 AuthenticationEmailInput.propTypes = {
+    email: React.PropTypes.string,
+    verified: React.PropTypes.bool,
+    requestValidationEmail: React.PropTypes.func.isRequired,
+    onChange: React.PropTypes.func
 };
 
 export default AuthenticationEmailInput;

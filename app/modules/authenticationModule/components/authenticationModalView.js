@@ -97,7 +97,24 @@ class AuthenticationModalView extends React.Component {
                         {form}
                         {rememberMeCheckbox}
                         {alert}
-                        <AuthenticationUserView {...this.props}/>
+                        <AuthenticationUserView
+                            loggedIn = {this.props.loggedIn}
+                            jwt = {this.props.jwt}
+                            user = {this.props.user}
+                            imageURL = {this.props.imageURL}
+                            firstName = {this.props.firstName}
+                            lastName = {this.props.lastName}
+                            email = {this.props.email}
+                            verified = {this.props.verified}
+
+                            changePasswordMessageStyle = {this.props.changePasswordMessageStyle}
+                            changePasswordMessage = {this.props.changePasswordMessage}
+                            changePasswordMessageValidUntil = {this.props.changePasswordMessageValidUntil}
+
+                            changeUserDetailsMessageStyle = {this.props.changeUserDetailsMessageStyle}
+                            changeUserDetailsMessage = {this.props.changeUserDetailsMessage}
+                            changeUserDetailsMessageValidUntil = {this.props.changeUserDetailsMessageValidUntil}
+                            />
                     </Modal.Body>
                     <Modal.Footer>
                         <Button onClick={this.props.hideModal}>Close</Button>
@@ -109,6 +126,29 @@ class AuthenticationModalView extends React.Component {
 }
 
 AuthenticationModalView.propTypes = {
+    jwt: React.PropTypes.string,
+    user:React.PropTypes.string,
+    loggedIn: React.PropTypes.bool,
+    imageURL: React.PropTypes.string,
+    firstName: React.PropTypes.string,
+    lastName: React.PropTypes.string,
+    email: React.PropTypes.string,
+    verified: React.PropTypes.bool,
+
+    changePasswordMessageStyle: React.PropTypes.string,
+    changePasswordMessage: React.PropTypes.string,
+    changePasswordMessageValidUntil: React.PropTypes.object,
+
+    changeUserDetailsMessageStyle: React.PropTypes.string,
+    changeUserDetailsMessage: React.PropTypes.string,
+    changeUserDetailsMessageValidUntil: React.PropTypes.object,
+
+    loginMessageStyle: React.PropTypes.string,
+    loginMessage: React.PropTypes.string,
+    loginMessageValidUntil: React.PropTypes.object,
+
+    hideModal: React.PropTypes.func.isRequired,
+    show: React.PropTypes.bool.isRequired
 
 };
 

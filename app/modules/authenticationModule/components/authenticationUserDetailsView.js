@@ -20,13 +20,10 @@ class AuthenticationUserDetailsView extends React.Component {
     constructor(props, context) {
         super(props,context);
         this.state = {
-            user: "",
-            imageURL: "",
             firstName: "",
             lastName: "",
             email: "",
-            emailValid: false,
-            verified: false
+            emailValid: false
         };
 
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
@@ -49,26 +46,12 @@ class AuthenticationUserDetailsView extends React.Component {
     }
 
     _refreshStateWithProps(nextProps) {
-        if (typeof nextProps !== "undefined" && nextProps.loggedIn) {
+        if (typeof nextProps !== "undefined") {
             this.setState({
-                user: nextProps.user,
-                imageURL: nextProps.imageURL,
                 firstName: nextProps.firstName,
                 lastName: nextProps.lastName,
                 email: nextProps.email,
-                emailValid: this.refs.AuthenticationEmailInput.isValid(),
-                verified: nextProps.verified
-            });
-        }
-        else {
-            this.setState({
-                user: "",
-                imageURL:"",
-                firstName: "",
-                lastName: "",
-                email:"",
-                emailValid: false,
-                verified: false
+                emailValid: this.refs.AuthenticationEmailInput.isValid()
             });
         }
     }
@@ -129,16 +112,17 @@ class AuthenticationUserDetailsView extends React.Component {
 
     render() {
         debug("Rendering");
-        var userDetailsView = "";
+        debug ("HasChanges: " + this._hasChanges() + " emailValid: " + this.state.emailValid)
         var saveButton = <Button disabled>Save changes</Button>;
-        if (this._hasChanges() && this.state.emailValid){
+        if (this._hasChanges() && this.state.emailValid) {
             saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
         }
 
-        var errorAlert =  '';
-        if (this.props.changeUserDetailsMessage)
-        {
-            errorAlert =  <TimedAlertBox style={this.props.changeUserDetailsMessageStyle} message={this.props.changeUserDetailsMessage} appearsUntil={this.props.changeUserDetailsMessageValidUntil}/>;
+        var errorAlert = '';
+        if (this.props.changeUserDetailsMessage) {
+            errorAlert = <TimedAlertBox style={this.props.changeUserDetailsMessageStyle}
+                                        message={this.props.changeUserDetailsMessage}
+                                        appearsUntil={this.props.changeUserDetailsMessageValidUntil}/>;
         }
         var avatarStyle = {
             "borderRadius": '50px',
@@ -162,64 +146,68 @@ class AuthenticationUserDetailsView extends React.Component {
             "paddingLeft": "5px"
         };
 
-        if (this.props.loggedIn){
-            userDetailsView =
-                <div className="authentication-userView-group">
-                    <Panel header="User Information" bsStyle="primary">
-                        <Row>
-                            <Col xs={6}>
-                                <img src={this.state.imageURL} style={avatarStyle} className="authenticationUserView-avatar"/>
-                            </Col>
-                            <Col xs={6}>
-                                <div style={usernameDIV}>
-                                    <span style={usernameLabelSpan}>Username:</span>
-                                    <span style={usernameSpan}>{this.state.user}</span>
-                                </div>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={6}>
-                                <AuthenticationFirstNameInput
-                                    ref="AuthenticationFirstNameInput"
-                                    firstName={this.props.firstName}
-                                    onChange={this._handleFirstNameInput}
-                                    />
-                            </Col>
-                            <Col xs={6}>
-                                <AuthenticationLastNameInput
-                                    ref="AuthenticationLastNameInput"
-                                    lastName={this.props.lastName}
-                                    onChange={this._handleLastNameInput}/>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12}>
-                                <AuthenticationEmailInput
-                                    ref="AuthenticationEmailInput"
-                                    email={this.props.email}
-                                    verified={this.props.verified}
-                                    requestValidationEmail={this._requestValidationEmail}
-                                    onChange={this._handleEmailChange}
-                                    />
-                            </Col>
-                        </Row>
-                        {errorAlert}
-                        {saveButton}
-                    </Panel>
-                </div>;
-        }
-
-
 
         return (
-            <div>
-                {userDetailsView}
+            <div className="authentication-userView-group">
+                <Panel header="User Information" bsStyle="primary">
+                    <Row>
+                        <Col xs={6}>
+                            <img src={this.props.imageURL} style={avatarStyle}
+                                 className="authenticationUserView-avatar"/>
+                        </Col>
+                        <Col xs={6}>
+                            <div style={usernameDIV}>
+                                <span style={usernameLabelSpan}>Username:</span>
+                                <span style={usernameSpan}>{this.props.user}</span>
+                            </div>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs={6}>
+                            <AuthenticationFirstNameInput
+                                ref="AuthenticationFirstNameInput"
+                                firstName={this.props.firstName}
+                                onChange={this._handleFirstNameInput}
+                                />
+                        </Col>
+                        <Col xs={6}>
+                            <AuthenticationLastNameInput
+                                ref="AuthenticationLastNameInput"
+                                lastName={this.props.lastName}
+                                onChange={this._handleLastNameInput}/>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs={12}>
+                            <AuthenticationEmailInput
+                                ref="AuthenticationEmailInput"
+                                email={this.props.email}
+                                verified={this.props.verified}
+                                requestValidationEmail={this._requestValidationEmail}
+                                onChange={this._handleEmailChange}
+                                />
+                        </Col>
+                    </Row>
+                    {errorAlert}
+                    {saveButton}
+                </Panel>
             </div>
         );
     }
 }
 
 AuthenticationUserDetailsView.propTypes = {
+    jwt: React.PropTypes.string.isRequired,
+    user:React.PropTypes.string.isRequired,
+    imageURL: React.PropTypes.string,
+    firstName: React.PropTypes.string.isRequired,
+    lastName: React.PropTypes.string.isRequired,
+    email: React.PropTypes.string.isRequired,
+    verified: React.PropTypes.bool.isRequired,
+
+    changeUserDetailsMessageStyle: React.PropTypes.string,
+    changeUserDetailsMessage: React.PropTypes.string,
+    changeUserDetailsMessageValidUntil: React.PropTypes.object
 };
 
 export default AuthenticationUserDetailsView;

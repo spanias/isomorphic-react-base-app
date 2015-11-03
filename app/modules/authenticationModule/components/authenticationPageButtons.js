@@ -61,7 +61,6 @@ class AuthenticationPageButtons extends React.Component {
         }
 
         //Main page buttons which serve as the entrypoint of the modal
-        // TODO: have style props which change how main buttons look
         var mainbuttons =
             <div className="login-mainButtons">
                 <Button bsStyle="info" onClick={this._showModal}>
