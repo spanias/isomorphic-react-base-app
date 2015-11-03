@@ -8,6 +8,7 @@ import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
+import AuthenticationNewPasswordInput from './authenticationNewPasswordInput';
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 var debug = require('debug')('AuthenticationUserSecurityView');
@@ -19,39 +20,15 @@ class AuthenticationUserSecurityView extends React.Component {
         this.state = {
             currentPassword: "",
             newPassword: "",
+            newPasswordInputValid: false,
             confirmPassword: ""
         };
 
-        this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
         this._validateCurrentPassword = this._validateCurrentPassword.bind(this);
-        this._validateNewPasswords = this._validateNewPasswords.bind(this);
         this._handleCurrentPasswordInput = this._handleCurrentPasswordInput.bind(this);
         this._handleNewPasswordInput = this._handleNewPasswordInput.bind(this);
         this._handleConfirmPasswordInput = this._handleConfirmPasswordInput.bind(this);
         this._changePassword = this._changePassword.bind(this);
-    }
-    componentDidMount() {
-        if (this.props != null) {
-            debug("didMount ->", this.props);
-            this._refreshStateWithProps(this.props);
-        }
-    }
-    componentWillReceiveProps(nextProps) {
-        debug("willReceiveProps ->", nextProps);
-        this._refreshStateWithProps(nextProps);
-    }
-
-    _refreshStateWithProps(nextProps) {
-        if (typeof nextProps !== "undefined" && nextProps.loggedIn) {
-            this.setState({
-                visible: true
-            });
-        }
-        else {
-            this.setState({
-                visible: false
-            });
-        }
     }
 
     _validateCurrentPassword() {
@@ -64,17 +41,8 @@ class AuthenticationUserSecurityView extends React.Component {
         }
     }
 
-    _validateNewPasswords() {
-        if  (this.state.newPassword == this.state.confirmPassword && this.state.newPassword != '')
-        {
-            return 'success';
-        }
-        else {
-            return 'error';
-        }
-    }
     _changePassword() {
-        if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
+        if(this._validateCurrentPassword() == 'success' && this.state.newPasswordInputValid)
         {
             context.executeAction(AuthenticationActions, ["UpdateSecurityMessage",
                 {style: "info", message: "Changing password...", appearFor: 10}
@@ -95,23 +63,26 @@ class AuthenticationUserSecurityView extends React.Component {
     _handleCurrentPasswordInput() {
         this.setState({
             currentPassword: this.refs.currentPassword.getValue()
+
         });
     }
     _handleNewPasswordInput() {
         this.setState({
-            newPassword: this.refs.newPassword.getValue()
+            newPassword: this.refs.newPasswordInput.getNewPasswordValue(),
+            newPasswordInputValid: this.refs.newPasswordInput.isValid()
         });
     }
     _handleConfirmPasswordInput() {
         this.setState({
-            confirmPassword: this.refs.confirmPassword.getValue()
+            confirmPassword: this.refs.newPasswordInput.getConfirmPasswordValue(),
+            newPasswordInputValid: this.refs.newPasswordInput.isValid()
         });
     }
     render() {
 
         debug("Rendering");
         var changePasswordButton = <Button disabled>Change Password</Button>;
-        if (this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success') {
+        if (this._validateCurrentPassword() == 'success' && this.state.newPasswordInputValid) {
             changePasswordButton = <Button onClick={this._changePassword}>Change Password</Button>;
         }
 
@@ -138,28 +109,11 @@ class AuthenticationUserSecurityView extends React.Component {
                                     value={this.state.currentPassword}/>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col xs={6}>
-                                <Input
-                                    type="password"
-                                    placeholder="New Password"
-                                    label="New password"
-                                    ref="newPassword"
-                                    bsStyle={this._validateNewPasswords()}
-                                    onChange={this._handleNewPasswordInput}
-                                    value={this.state.newPassword}/>
-                            </Col>
-                            <Col xs={6}>
-                                <Input
-                                    type="password"
-                                    placeholder="Confirm password"
-                                    label="Confirm password"
-                                    bsStyle={this._validateNewPasswords()}
-                                    onChange={this._handleConfirmPasswordInput}
-                                    ref="confirmPassword"
-                                    value={this.state.confirmPassword}/>
-                            </Col>
-                        </Row>
+                        <AuthenticationNewPasswordInput ref='newPasswordInput'
+                            onNewPasswordChange = {this._handleNewPasswordInput}
+                            onConfirmPasswordChange = {this._handleConfirmPasswordInput}
+                            />
+
                         {errorLabel}
                         {changePasswordButton}
                     </Panel>

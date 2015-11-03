@@ -13,12 +13,33 @@ import AuthenticationFirstNameInput from "../components/authenticationFirstNameI
 import AuthenticationUsernameInput from "../components/authenticationUsernameInput";
 import AuthenticationLastNameInput from "../components/authenticationLastNameInput";
 import AuthenticationEmailInput from "../components/authenticationEmailInput";
+import AuthenticationNewPasswordInput from '../components/authenticationNewPasswordInput';
 
 var debug = require('debug')('CreateUserPage');
 
 class CreateUserPage extends React.Component {
     constructor(props, context) {
         super(props, context);
+        this.state = {
+            newPassword: "",
+            newPasswordInputValid: false,
+            confirmPassword: ""
+        };
+        this._handleNewPasswordInput = this._handleNewPasswordInput.bind(this);
+        this._handleConfirmPasswordInput = this._handleConfirmPasswordInput.bind(this);
+    }
+
+    _handleNewPasswordInput() {
+        this.setState({
+            newPassword: this.refs.newPasswordInput.getNewPasswordValue(),
+            newPasswordInputValid: this.refs.newPasswordInput.isValid()
+        });
+    }
+    _handleConfirmPasswordInput() {
+        this.setState({
+            confirmPassword: this.refs.newPasswordInput.getConfirmPasswordValue(),
+            newPasswordInputValid: this.refs.newPasswordInput.isValid()
+        });
     }
 
     render() {
@@ -46,11 +67,10 @@ class CreateUserPage extends React.Component {
                         </Col>
                     </Row>
 
-                    <Row>
-                        <Col xs={12}>
-
-                        </Col>
-                    </Row>
+                    <AuthenticationNewPasswordInput ref='newPasswordInput'
+                                                    onNewPasswordChange = {this._handleNewPasswordInput}
+                                                    onConfirmPasswordChange = {this._handleConfirmPasswordInput}
+                        />
 
                     <Row>
                         <Col xs={6}>
