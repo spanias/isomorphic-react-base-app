@@ -76,7 +76,7 @@ class AuthenticationUserSecurityView extends React.Component {
     _changePassword() {
         if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
         {
-            context.executeAction(AuthenticationAction, ["UpdateChangePasswordMessage",
+            context.executeAction(AuthenticationActions, ["UpdateChangePasswordMessage",
                 {style: "info", message: "Verification email requested.", appearFor: 10}
             ]);
             context.executeAction(AuthenticationActions, ["ChangePassword", {
@@ -87,7 +87,7 @@ class AuthenticationUserSecurityView extends React.Component {
             }]);
         }
         else{
-            context.executeAction(AuthenticationAction, ["UpdateChangePasswordMessage",
+            context.executeAction(AuthenticationActions, ["UpdateChangePasswordMessage",
                 {style: "danger", message: "Cannot validate form. Please re-check details.", appearFor: 10}
             ]);
         }

@@ -14,11 +14,11 @@ var debug = require('debug')('AuthenticationAction');
 
 export default function (context, payload, done) {
     debug("The payload in the Action function  ->", payload);
-    var loginTimeOut = 20000;
+    var serviceTimeOut = 20000;
     switch(payload[0]) {
         case "Login":
             debug("Reading AuthenticationService ->", payload[1]);
-            context.service.read('AuthenticationService', payload[1], {timeout: loginTimeOut}, function (err, data) {
+            context.service.read('AuthenticationService', payload[1], {timeout: serviceTimeOut}, function (err, data) {
                 if (err || !data) {
                     debug("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
                     context.dispatch(Actions.LOGINFAILED_ACTION, err);
@@ -27,9 +27,8 @@ export default function (context, payload, done) {
                     //https://www.npmjs.com/package/react-cookie
                     context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
                 }
-                done();
             });
-
+            done();
             break;
 
         case "RefreshUser":
@@ -38,7 +37,7 @@ export default function (context, payload, done) {
                 context.service.read('AuthenticationService', {
                     refreshUser: true,
                     jwt: payload[1].jwt
-                }, {timeout: loginTimeOut}, function (err, data) {
+                }, {timeout: serviceTimeOut}, function (err, data) {
                     debug("Calling REFRESH_USER_ACTION, Err: ", err, " data:", data);
                     if (err || !data) {
                         //COULDN'T RETRIEVE USER. DO NOTHING
@@ -59,6 +58,7 @@ export default function (context, payload, done) {
                 style: payload[1].style
             };
             context.dispatch(Actions.UPDATE_LOGIN_MESSAGE_ACTION, parameters);
+            done();
             break;
 
         case "UpdateSecurityMessage":
@@ -68,6 +68,7 @@ export default function (context, payload, done) {
                 style: payload[1].style
             };
             context.dispatch(Actions.UPDATE_SECURITY_MESSAGE_ACTION, parameters);
+            done();
             break;
 
         case "UpdateUserDetailsMessage":
@@ -77,6 +78,7 @@ export default function (context, payload, done) {
                 style: payload[1].style
             };
             context.dispatch(Actions.UPDATE_USER_DETAILS_MESSAGE_ACTION, parameters);
+            done();
             break;
 
         case "UpdateVerifyEmailMessage":
@@ -86,18 +88,19 @@ export default function (context, payload, done) {
                 style: payload[1].style
             };
             context.dispatch(Actions.UPDATE_VERIFY_EMAIL_MESSAGE_ACTION, parameters);
+            done();
             break;
 
         case "ResetMessages":
             var store = context.getStore(AuthenticationMainStore).getState();
-                context.dispatch(Actions.RESET_MESSAGES_ACTION, null);
-                done();
+            context.dispatch(Actions.RESET_MESSAGES_ACTION, null);
+            done();
             break;
 
         case "LoginWithToken":
                 var parameters = {accessToken: true };
                 debug("Reading AuthenticationService ->", parameters);
-                context.service.read('AuthenticationService', parameters, {timeout: loginTimeOut}, function (err, data) {
+                context.service.read('AuthenticationService', parameters, {timeout: serviceTimeOut}, function (err, data) {
                     if (err || !data) {
                         debug("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
                         context.dispatch(Actions.LOGINFAILED_ACTION, err);
@@ -105,14 +108,14 @@ export default function (context, payload, done) {
                     else {
                         context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
                     }
-                    done();
                 });
+            done();
             break;
 
         case "ChangePassword":
             var parameters = {changePassword: true , jwt: payload[1].jwt, username: payload[1].username, password: payload[1].password, newPassword: payload[1].newPassword};
             debug("Updating AuthenticationService ->", parameters);
-            context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+            context.service.update('AuthenticationService', parameters, {}, {timeout: serviceTimeOut}, function (err, data) {
                 if (err || !data) {
                     debug("Calling CHANGE_PASSWORD action, Err: ", err, " data:", data);
                     context.dispatch(Actions.CHANGE_PASSWORD_FAILED_ACTION, err);
@@ -120,14 +123,14 @@ export default function (context, payload, done) {
                 else {
                     context.dispatch(Actions.CHANGE_PASSWORD_ACTION, data);
                 }
-                done();
             });
+            done();
             break;
 
         case "ChangeUserDetails":
             var parameters = {updateUserDetails: true , jwt: payload[1].jwt, myUser: payload[1].myUser};
             debug("Updating AuthenticationService ->", parameters);
-            context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+            context.service.update('AuthenticationService', parameters, {}, {timeout: serviceTimeOut}, function (err, data) {
                 if (err || !data) {
                     debug("Calling CHANGE_PASSWORD action, Err: ", err, " data:", data);
                     context.dispatch(Actions.CHANGE_USER_DETAILS_FAILED_ACTION, err);
@@ -135,14 +138,14 @@ export default function (context, payload, done) {
                 else {
                     context.dispatch(Actions.CHANGE_USER_DETAILS_ACTION, data);
                 }
-                done();
             });
+            done();
             break;
 
         case "RequestVerificationEmail":
             var parameters = {requestEmailVerificationToken: true , jwt: payload[1].jwt};
             debug("Reading AuthenticationService ->", parameters);
-            context.service.read('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+            context.service.read('AuthenticationService', parameters, {timeout: serviceTimeOut}, function (err, data) {
                 //TODO: Take actions in the store for these actions
                 if (err || !data) {
                     debug("Calling REQUEST_EMAIL_VERIFICATION_FAILED action, Err: ", err, " data:", data);
@@ -151,13 +154,13 @@ export default function (context, payload, done) {
                 else {
                     context.dispatch(Actions.REQUEST_EMAIL_VERIFICATION, data);
                 }
-                done();
             });
+            done();
             break;
         case "VerifyEmail":
             var parameters = {verifyEmail: true , jwt: payload[1].jwt, emailToken: payload[1].token};
             debug("Updating AuthenticationService ->", parameters);
-            context.service.update('AuthenticationService', parameters, {}, {timeout: loginTimeOut}, function (err, data) {
+            context.service.update('AuthenticationService', parameters, {}, {timeout: serviceTimeOut}, function (err, data) {
                 //TODO: Take actions in the store for these actions
                 if (err || !data) {
                     debug("Calling VERIFY_EMAIL_FAILED action, Err: ", err, " data:", data);
@@ -166,8 +169,8 @@ export default function (context, payload, done) {
                 else {
                     context.dispatch(Actions.VERIFIED_EMAIL, data);
                 }
-                done();
             });
+            done();
             break;
         
         case "Logout":
@@ -175,7 +178,7 @@ export default function (context, payload, done) {
             if (store.loggedIn){
 
                 var parameters = {logout: true };
-                context.service.read('AuthenticationService', parameters, {timeout: loginTimeOut}, function (err, data) {
+                context.service.read('AuthenticationService', parameters, {timeout: serviceTimeOut}, function (err, data) {
                     if (err) {
                         debug("Logout failed! ", err);
                     }
@@ -184,8 +187,8 @@ export default function (context, payload, done) {
                     }
                 });
                 context.dispatch(Actions.LOGOUT_ACTION, null);
-                done();
             }
+            done();
             break;
     }
 };

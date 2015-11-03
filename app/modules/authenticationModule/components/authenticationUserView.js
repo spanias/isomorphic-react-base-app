@@ -4,9 +4,7 @@
  */
 
 import React from 'react';
-import {connectToStores} from 'fluxible-addons-react';
-import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
-import {Image, Label, Tabs, Tab} from 'react-bootstrap';
+import {Tabs, Tab} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserDetailsView from './authenticationUserDetailsView';
 import AuthenticationUserSecurityView from './authenticationUserSecurityView';
@@ -47,10 +45,7 @@ class AuthenticationUserView extends React.Component {
 }
 
 AuthenticationUserView.propTypes = {
+
 };
-/*
-AuthenticationUserView = connectToStores(AuthenticationUserView, [AuthenticationStore], function (context, props) {
-    return context.getStore(AuthenticationStore).getState()
-});
-*/
+
 export default AuthenticationUserView;
