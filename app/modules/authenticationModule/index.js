@@ -17,3 +17,6 @@ export {_AuthenticationMainStore as AuthenticationMainStore};
 
 import _EmailVerificationPage from  "./pages/emailVerification";
 export {_EmailVerificationPage as EmailVerificationPage};
+
+import _CreateUserPage from  "./pages/createUser";
+export {_CreateUserPage as CreateUserPage};

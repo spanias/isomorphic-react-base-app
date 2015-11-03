@@ -7,9 +7,9 @@ import React from 'react';
 //import {connectToStores} from 'fluxible-addons-react';
 import {Modal, Button, Input, Alert, ModalTrigger} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
-//import AuthenticationMainStore from '../stores/authenticationMainStore';
 import AuthenticationUserView from './authenticationUserView';
 import AuthenticationLoginView from './authenticationLoginView';
+import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 var debug = require('debug')('AuthenticationModalView');
 
@@ -18,43 +18,11 @@ class AuthenticationModalView extends React.Component {
     constructor(props, context) {
         super();
         this.state = {
-            show: props.show,
-            message: "",
-            messageClass: "info"
+            show: props.show
         };
-
-        this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
         this._login = this._login.bind(this);
     }
 
-    componentWillReceiveProps(nextProps) {
-        debug("Receiving new props ->", nextProps);
-        this._refreshStateWithProps(nextProps);
-    }
-
-    _refreshStateWithProps(nextProps) {
-        if (nextProps.loggedIn) {
-            this.setState({
-                message : "",
-                messageClass : "info"
-            });
-        }
-        else {
-            if (nextProps.attempts > 0 && nextProps.errorMessage == null ) {
-                this.setState({
-                    message:"Username and password combination invalid!",
-                    messageClass : "danger"
-                });
-
-            }
-            if (nextProps.errorMessage != null) {
-                this.setState({
-                    message:nextProps.errorMessage,
-                    messageClass : "danger"
-                });
-            }
-        }
-    }
 
     _login(event) {
 
@@ -62,14 +30,12 @@ class AuthenticationModalView extends React.Component {
             event.preventDefault();
         }
         if (!this.props.loggedIn) {
-            debug(this.refs.loginView);
-            this.setState({
-                message: "Attempting login with Username " + this.refs.loginView.getUsernameValue(),
-                messageClass: "info"
-            });
-
             if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
                 //Authentication Service called here.
+
+                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
+                    {style: "info", message: "Attempting login...", appearFor: 10}
+                ]);
                 context.executeAction(AuthenticationActions, ["Login", {
                     username: this.refs.loginView.getUsernameValue(),
                     password: this.refs.loginView.getPasswordValue(),
@@ -77,10 +43,9 @@ class AuthenticationModalView extends React.Component {
                 }]);
             }
             else {
-                this.setState({
-                    message: "Username or password cannot be empty!",
-                    messageClass: "danger"
-                });
+                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
+                    {style: "danger", message: "Username and Password cannot be empty!", appearFor: 10}
+                ]);
             }
         }
         else
@@ -106,9 +71,9 @@ class AuthenticationModalView extends React.Component {
         var form = '';
         var alert ='';
         var rememberMeCheckbox = '';
-        if (this.state.message !== "")
+        if (this.props.loginMessage)
         {
-            alert= <Alert bsSize="medium" bsStyle={this.state.messageClass}>{this.state.message}</Alert>
+            alert= <TimedAlertBox style={this.props.loginMessageStyle} message={this.props.loginMessage} appearsUntil={this.props.loginMessageValidUntil}/>;
         }
 
         //if there is no user logged in show the input form and change the main page buttons
@@ -144,10 +109,7 @@ class AuthenticationModalView extends React.Component {
 }
 
 AuthenticationModalView.propTypes = {
+
 };
-/*
-AuthenticationModalView = connectToStores(AuthenticationModalView, [AuthenticationMainStore], function (context, props) {
-    return context.getStore(AuthenticationMainStore).getState()
-});*/
 
 export default AuthenticationModalView;

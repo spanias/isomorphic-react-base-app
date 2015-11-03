@@ -7,7 +7,7 @@ import NavBar from './NavBar';
 import ApplicationStore from '../stores/ApplicationStore';
 import {connectToStores, provideContext} from 'fluxible-addons-react';
 
-import {AuthenticationTokenLogin, AuthenticationActions, AuthenticationMainStore} from '../modules/authenticationModule/index';
+import  { AuthenticationActions, AuthenticationMainStore} from '../modules/authenticationModule/index';
 
 var RouteHandler = require('react-router').RouteHandler;
 var refreshUserTimer = null;

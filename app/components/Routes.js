@@ -9,10 +9,11 @@ var Application = require('./Application.js');
 var Home = require('./pages/Home.js');
 var About = require('./pages/About.js');
 var EmailVerificationPage = require('../modules/authenticationModule/index').EmailVerificationPage;
-
+var CreateUserPage = require('../modules/authenticationModule/index').CreateUserPage;
 var routes = (
     <Route name="app" path="/" handler={Application}>
         <Route name="/about" handler={About}/>
+        <Route path="/createUser" handler={CreateUserPage} />
         <Route path="/verifyEmail" handler={EmailVerificationPage} />
         <Route path="/verifyEmail/:token" handler={EmailVerificationPage} />
         <DefaultRoute name="/" handler={Home}/>

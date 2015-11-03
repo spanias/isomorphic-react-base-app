@@ -14,65 +14,17 @@ var debug = require('debug')('CreateUserPage');
 class CreateUserPage extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {
-            message: "",
-            messageClass: "danger",
-            tokenSubmitted: false
-        };
-        this._login=this._login.bind(this);
-        this._submitToken = this._submitToken.bind(this);
     }
 
-    _submitToken()
-    {
-        if (this.props.loggedIn && this.props.params.token) {
-            this.setState({tokenSubmitted: true});
-            context.executeAction(AuthenticationActions, ["VerifyEmail", {
-                jwt: this.props.jwt,
-                token: this.props.params.token
-            }]);
-        }
-    }
-
-    _login(event) {
-
-        if (event) {
-            event.preventDefault();
-        }
-        if (!this.props.loggedIn) {
-            this.setState({
-                message: "Attempting login with Username " + this.refs.loginView.getUsernameValue(),
-                messageClass: "info"
-            });
-
-            if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
-                //Authentication Service called here.
-                context.executeAction(AuthenticationActions, ["Login", {
-                    username: this.refs.loginView.getUsernameValue(),
-                    password: this.refs.loginView.getPasswordValue(),
-                    rememberMe: false
-                }]);
-            }
-            else {
-                this.setState({
-                    message: "Username or password cannot be empty!",
-                    messageClass: "danger"
-                });
-            }
-        }
-    }
-
-    render(){
-
-
+    render() {
         return (
             <div className="container">
                 <h1> Create User Page! </h1>
-
             </div>
         );
     }
 }
+
 CreateUserPage.propTypes = {
 
 };

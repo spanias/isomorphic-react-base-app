@@ -8,6 +8,8 @@ import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
+import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+
 var debug = require('debug')('AuthenticationUserSecurityView');
 class AuthenticationUserSecurityView extends React.Component {
 
@@ -74,12 +76,20 @@ class AuthenticationUserSecurityView extends React.Component {
     _changePassword() {
         if(this._validateCurrentPassword() == 'success' && this._validateNewPasswords() == 'success')
         {
+            context.executeAction(AuthenticationAction, ["UpdateChangePasswordMessage",
+                {style: "info", message: "Verification email requested.", appearFor: 10}
+            ]);
             context.executeAction(AuthenticationActions, ["ChangePassword", {
                 jwt: this.props.jwt,
                 username: this.props.user,
                 password: this.state.currentPassword,
                 newPassword: this.state.newPassword
             }]);
+        }
+        else{
+            context.executeAction(AuthenticationAction, ["UpdateChangePasswordMessage",
+                {style: "danger", message: "Cannot validate form. Please re-check details.", appearFor: 10}
+            ]);
         }
     }
     _handleCurrentPasswordInput() {
@@ -107,14 +117,11 @@ class AuthenticationUserSecurityView extends React.Component {
         }
 
         var errorLabel =  '';
-        if (this.props.changePasswordErrorMessage != null && this.props.changePasswordFailed)
+        if (this.props.changePasswordMessage)
         {
-            errorLabel =  <Alert bsStyle="danger">{this.props.changePasswordErrorMessage}</Alert>;
+            errorLabel =  <TimedAlertBox style={this.props.changePasswordMessageStyle} message={this.props.changePasswordMessage} appearsUntil={this.props.changePasswordMessageValidUntil}/>;
         }
-        else if (this.props.changePasswordErrorMessage != null && !this.props.changePasswordFailed)
-        {
-            errorLabel =  <Alert bsStyle="success">{this.props.changePasswordErrorMessage}</Alert>;
-        }
+
         var userSecurityView =
             <div className="authentication-userSecurityView-group">
             </div>;

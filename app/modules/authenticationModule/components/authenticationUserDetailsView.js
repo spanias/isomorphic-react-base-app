@@ -11,8 +11,10 @@ import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationFirstNameInput from "./authenticationFirstNameInput";
 import AuthenticationLastNameInput from "./authenticationLastNameInput";
 import AuthenticationEmailInput from "./authenticationEmailInput";
-var debug = require('debug')('AuthenticationUserDetailsView');
+import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
+var debug = require('debug')('AuthenticationUserDetailsView');
+//todo: Higher Order Components
 class AuthenticationUserDetailsView extends React.Component {
 
     constructor(props, context) {
@@ -73,6 +75,7 @@ class AuthenticationUserDetailsView extends React.Component {
 
     _requestValidationEmail(){
         debug("Calling request verification email!");
+        context.executeAction(AuthenticationActions, ["UpdateUserDetailsMessage", {style: "info", message: "Verification email requested.", appearFor: 10}]);
         context.executeAction(AuthenticationActions, ["RequestVerificationEmail", {jwt: this.props.jwt}]);
     }
 
@@ -87,10 +90,7 @@ class AuthenticationUserDetailsView extends React.Component {
         if(this._hasChanges())
         {
             var myUser = {};
-            //individually check parameters to avoid injection
-            //parameters checked one by one server side as well
             myUser.username = this.props.user;
-
             if (this.refs.AuthenticationFirstNameInput.hasChanges())
             {
                 myUser.firstName = this.refs.AuthenticationFirstNameInput.getValue();
@@ -103,6 +103,7 @@ class AuthenticationUserDetailsView extends React.Component {
             {
                 myUser.email = this.refs.AuthenticationEmailInput.getValue();
             }
+            context.executeAction(AuthenticationActions,["UpdateUserDetailsMessage", {style: "info", message: "Updating user details.", appearFor: 10}]);
             context.executeAction(AuthenticationActions, ["ChangeUserDetails", {jwt: this.props.jwt, myUser: myUser}]);
         }
     }
@@ -129,20 +130,15 @@ class AuthenticationUserDetailsView extends React.Component {
     render() {
         debug("Rendering");
         var userDetailsView = "";
-
         var saveButton = <Button disabled>Save changes</Button>;
         if (this._hasChanges() && this.state.emailValid){
             saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
         }
 
         var errorAlert =  '';
-        if (this.props.changeUserDetailsMessage != null && this.props.changeUserDetailsFailed)
+        if (this.props.changeUserDetailsMessage)
         {
-            errorAlert =  <Alert bsStyle="danger">{this.props.changeUserDetailsMessage}</Alert>;
-        }
-        else if (this.props.changeUserDetailsMessage != null && !this.props.changeUserDetailsFailed)
-        {
-            errorAlert =  <Alert bsStyle="success">{this.props.changeUserDetailsMessage}</Alert>;
+            errorAlert =  <TimedAlertBox style={this.props.changeUserDetailsMessageStyle} message={this.props.changeUserDetailsMessage} appearsUntil={this.props.changeUserDetailsMessageValidUntil}/>;
         }
         var avatarStyle = {
             "borderRadius": '50px',

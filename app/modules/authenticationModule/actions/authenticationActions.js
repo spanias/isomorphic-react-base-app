@@ -51,6 +51,43 @@ export default function (context, payload, done) {
             }
             done();
             break;
+
+        case "UpdateLoginMessage":
+            var parameters = {
+                message: payload[1].message,
+                appearFor: payload[1].appearFor,
+                style: payload[1].style
+            };
+            context.dispatch(Actions.UPDATE_LOGIN_MESSAGE_ACTION, parameters);
+            break;
+
+        case "UpdateSecurityMessage":
+            var parameters = {
+                message: payload[1].message,
+                appearFor: payload[1].appearFor,
+                style: payload[1].style
+            };
+            context.dispatch(Actions.UPDATE_SECURITY_MESSAGE_ACTION, parameters);
+            break;
+
+        case "UpdateUserDetailsMessage":
+            var parameters = {
+                message: payload[1].message,
+                appearFor: payload[1].appearFor,
+                style: payload[1].style
+            };
+            context.dispatch(Actions.UPDATE_USER_DETAILS_MESSAGE_ACTION, parameters);
+            break;
+
+        case "UpdateVerifyEmailMessage":
+            var parameters = {
+                message: payload[1].message,
+                appearFor: payload[1].appearFor,
+                style: payload[1].style
+            };
+            context.dispatch(Actions.UPDATE_VERIFY_EMAIL_MESSAGE_ACTION, parameters);
+            break;
+
         case "ResetMessages":
             var store = context.getStore(AuthenticationMainStore).getState();
                 context.dispatch(Actions.RESET_MESSAGES_ACTION, null);

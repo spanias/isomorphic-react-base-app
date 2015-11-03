@@ -215,22 +215,29 @@ module.exports = {
                             if (new Date(decoded.expiry) >= new Date()) {
                                 if (currentReadOnlyDataConnection) {
                                     currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
-                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-                                        if (data.length == 1) {
-                                            var myUser = {
-                                                username: data[0].username,
-                                                email: data[0].email,
-                                                firstName: data[0].firstName,
-                                                lastName:data[0].lastName,
-                                                imageURL: data[0].imageURL,
-                                                verified : data[0].verified
+                                        if (!err && data) {
 
-                                        };
-                                            callback(null, myUser);
+                                            debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                            if (data.length == 1) {
+                                                var myUser = {
+                                                    username: data[0].username,
+                                                    email: data[0].email,
+                                                    firstName: data[0].firstName,
+                                                    lastName: data[0].lastName,
+                                                    imageURL: data[0].imageURL,
+                                                    verified: data[0].verified
+
+                                                };
+                                                callback(null, myUser);
+                                            }
+                                            else {
+                                                debug("User not found!");
+                                                callback(new Error("User not found!"), null);
+                                            }
                                         }
-                                        else {
-                                            debug("User not found!");
-                                            callback(new Error("User not found!"), null);
+                                        else{
+                                            debug("Error returned from dataconnection:", err);
+                                            callback(err, null);
                                         }
                                     });
                                 }
@@ -374,7 +381,7 @@ module.exports = {
             }
         }
         else {
-            debug("DataConnection not initialized: ", err);
+            debug("DataConnection not initialized.");
             callback(new Error('Data connection is not initialized!'))
         }
     },
@@ -396,153 +403,163 @@ module.exports = {
         var currentReadOnlyDataConnection = this.readOnlyDataConnection;
         var key = this.key;
         var prefix = this.prefix;
-        //var tokenExpiryDays = this.tokenExpiryDays;
+
+        var verifyEmailFunction = function (params, decoded,myUser, callback){
+            if (currentDataConnection) {
+                if (params.emailToken) {
+                    jwt.verify(params.emailToken, key, function (error, dec) {
+                        if (!error && dec) {
+                            if (new Date(dec.expiry) >= new Date()) {
+                                if (dec.email == decoded.email) {
+                                    myUser.verified = true;
+                                    currentDataConnection.updateUser(prefix, myUser, function (err, data) {
+                                        if (!err) {
+                                            debug("Verified email address successfully! ", data);
+                                            callback(null, data);
+                                        }
+                                        else {
+                                            debug("Could not verify email address! ", err);
+                                            callback(err, null);
+                                        }
+                                    });
+                                }
+                                else {
+                                    debug('Invalid email verification token. Email does not match the account email');
+                                    callback(new Error('Invalid verification token!'), null);
+                                }
+                            }
+                            else {
+                                debug('Invalid email verification token. Token expired');
+                                callback(new Error('Invalid verification token! Token expired!'), null);
+                            }
+                        }
+                        else{
+                            debug('Invalid email verification token.');
+                            callback(new Error('Invalid verification token!!'), null);
+                        }
+
+                    });
+                }
+                else{
+                    debug("Token not set!");
+                    callback(new Error('Token not set!'), null);
+                }
+            }
+            else {
+                debug("Data connection not set!");
+                callback(new Error('Data Retrieval failed from dataconnection!'), null);
+            }
+        }
+        var updateUserFunction = function (params, decoded, myUser, callback){
+            debug("Updating user details: " + JSON.stringify(params, null, 4));
+
+            if (params.myUser.firstName) {
+                myUser.firstName = params.myUser.firstName;
+            }
+            if (params.myUser.lastName) {
+                myUser.lastName = params.myUser.lastName;
+            }
+            if (params.myUser.email) {
+                myUser.email = params.myUser.email;
+                myUser.verified = false;
+            }
+
+            if (params.myUser.imageURL) {
+                myUser.imageURL = params.myUser.imageURL;
+            }
+
+            if (Object.keys(myUser).length > 1) {
+                if (currentDataConnection) {
+                    currentDataConnection.updateUser(prefix, myUser, function (err, data) {
+                        if (!err) {
+                            debug("Updated user successfully! ", data);
+                            callback(null, data);
+                        }
+                        else {
+                            debug("Couldn't update user! ", err);
+                            callback(err, null);
+                        }
+                    });
+                }
+                else {
+                    debug("Data connection not set!");
+                    callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                }
+            }
+            else {
+                debug("No data to change!");
+                callback(new Error('No changes requested!'), null);
+            }
+        }
+        var changePasswordFunction = function (params, decoded, myUser, callback) {
+            //first confirm current password
+            debug("Changing password: " + JSON.stringify(params, null, 4));
+            if (currentReadOnlyDataConnection) {
+                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                    if (!err) {
+                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+
+                        if (data.length === 1) {
+                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
+                                if (error)
+                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
+                                if (!verified || !data[0].active) {
+                                    debug("Password hash failed to verify!");
+                                    callback(new Error('Current password cannot be verified!'), null)
+                                }
+                                else {
+                                    debug("Current password hash verified! Proceeding with password change.");
+                                    password(params.newPassword).hash(function (error, newHash) {
+                                        if (error)
+                                            throw new Error('AuthenticationService: Hash generation failed!');
+
+                                        debug("Generated new hash for password: " + newHash);
+                                        currentDataConnection.updatePassword(prefix, newHash, data[0].username, function (error, data) {
+                                            if (error) {
+                                                debug('Could not update hash: ' + JSON.stringify(error));
+                                                callback(error, null);
+                                            }
+                                            else {
+                                                debug('Password hash updated: ' + JSON.stringify(data));
+                                                callback(null, data);
+                                            }
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            debug("Username not found!");
+                            callback(new Error('Current password cannot be verified!'), null);
+                        }
+                    }
+                    else {
+                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                        callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                    }
+                });
+            }
+            else {
+                debug("Readonly data connection not set!");
+                callback(new Error('Data Retrieval failed from dataconnection!'), null);
+            }
+        }
+
         if (params.jwt) {
             jwt.verify(params.jwt, key, function (err, decoded) {
                 if (!err) {
                     myUser.username = decoded.user;
                     debug("Decrypted token: ", decoded);
                     if (new Date(decoded.expiry) >= new Date()) {
+
                         if (params.changePassword) {
-                            //first confirm current password
-                            debug("Changing password: " + JSON.stringify(params, null, 4));
-                            if (currentReadOnlyDataConnection) {
-                                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
-                                    if (!err) {
-                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-
-                                        if (data.length === 1) {
-                                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
-                                                if (error)
-                                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
-                                                if (!verified || !data[0].active) {
-                                                    debug("Password hash failed to verify!");
-                                                    callback(new Error('Current password cannot be verified!'), null)
-                                                }
-                                                else {
-                                                    debug("Current password hash verified! Proceeding with password change.");
-                                                    password(params.newPassword).hash(function (error, newHash) {
-                                                        if (error)
-                                                            throw new Error('AuthenticationService: Hash generation failed!');
-
-                                                        debug("Generated new hash for password: " + newHash);
-                                                        currentDataConnection.updatePassword(prefix, newHash, data[0].username, function (error, data) {
-                                                            if (error) {
-                                                                debug('Could not update hash: ' + JSON.stringify(error));
-                                                                callback(error, null);
-                                                            }
-                                                            else {
-                                                                debug('Password hash updated: ' + JSON.stringify(data));
-                                                                callback(null, data);
-                                                            }
-                                                        });
-                                                    });
-                                                }
-                                            });
-                                        }
-                                        else {
-                                            debug("Username not found!");
-                                            callback(new Error('Current password cannot be verified!'), null);
-                                        }
-                                    }
-                                    else {
-                                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
-                                        callback(new Error('Data Retrieval failed from dataconnection!'), null);
-                                    }
-                                });
-                            }
-                            else {
-                                debug("Readonly data connection not set!");
-                                callback(new Error('Data Retrieval failed from dataconnection!'), null);
-                            }
-
+                            changePasswordFunction(params, decoded, myUser, callback);
                         }
                         else if (params.updateUserDetails) {
-                            debug("Updating user details: " + JSON.stringify(params, null, 4));
-
-                            if (params.myUser.firstName) {
-                                myUser.firstName = params.myUser.firstName;
-                            }
-                            if (params.myUser.lastName) {
-                                myUser.lastName = params.myUser.lastName;
-                            }
-                            if (params.myUser.email) {
-                                myUser.email = params.myUser.email;
-                                myUser.verified = false;
-                            }
-
-                            if (params.myUser.imageURL) {
-                                myUser.imageURL = params.myUser.imageURL;
-                            }
-
-                            if (Object.keys(myUser).length > 1) {
-                                if (currentDataConnection) {
-                                    currentDataConnection.updateUser(prefix, myUser, function (err, data) {
-                                        if (!err) {
-                                            debug("Updated user successfully! ", data);
-                                            callback(null, data);
-                                        }
-                                        else {
-                                            debug("Couldn't update user! ", err);
-                                            callback(err, null);
-                                        }
-                                    });
-                                }
-                                else {
-                                    debug("Data connection not set!");
-                                    callback(new Error('Data Retrieval failed from dataconnection!'), null);
-                                }
-                            }
-                            else {
-                                debug("No data to change!");
-                                callback(new Error('No changes requested!'), null);
-                            }
+                            updateUserFunction(params, decoded, myUser,callback);
                         }
                         else if (params.verifyEmail){
-                            if (currentDataConnection) {
-                                if (params.emailToken) {
-                                    jwt.verify(params.emailToken, key, function (error, dec) {
-                                        if (!error && dec) {
-                                            if (new Date(dec.expiry) >= new Date()) {
-                                                if (dec.email == decoded.email) {
-                                                    myUser.verified = true;
-                                                    currentDataConnection.updateUser(prefix, myUser, function (err, data) {
-                                                        if (!err) {
-                                                            debug("Verified email address successfully! ", data);
-                                                            callback(null, data);
-                                                        }
-                                                        else {
-                                                            debug("Could not verify email address! ", err);
-                                                            callback(err, null);
-                                                        }
-                                                    });
-                                                }
-                                                else {
-                                                    debug('Invalid email verification token. Email does not match the account email');
-                                                    callback(new Error('Invalid verification token!'), null);
-                                                }
-                                            }
-                                            else {
-                                                debug('Invalid email verification token. Token expired');
-                                                callback(new Error('Invalid verification token! Token expired!'), null);
-                                            }
-                                        }
-                                        else{
-                                            debug('Invalid email verification token.');
-                                            callback(new Error('Invalid verification token!!'), null);
-                                        }
-
-                                    });
-                                }
-                                else{
-                                    debug("Token not set!");
-                                    callback(new Error('Token not set!'), null);
-                                }
-                            }
-                            else {
-                                debug("Data connection not set!");
-                                callback(new Error('Data Retrieval failed from dataconnection!'), null);
-                            }
+                            verifyEmailFunction(params, decoded, myUser, callback);
                         }
                         else {
                             debug("Update action not defined!");
@@ -570,9 +587,5 @@ module.exports = {
 
     }
 };
-    /*
-     // create: function(req, resource, params, body, config, callback) {},
-     //
-     // delete: function(req, resource, params, config, callback) {}
-    */
+
 

@@ -17,20 +17,25 @@ class EmailVerificationPage extends React.Component {
         this.state = {
             message: "",
             messageClass: "danger",
+            tokenToSubmit: "",
             tokenSubmitted: false
         };
         this._login=this._login.bind(this);
         this._submitToken = this._submitToken.bind(this);
     }
-
+    componentDidMount(){
+        if (this.props.params.token){
+            this.setState({tokenToSubmit: this.props.params.token});
+        }
+    }
     _submitToken()
     {
-        if (this.props.loggedIn && this.props.params.token) {
-            this.setState({tokenSubmitted: true});
+        if (this.props.loggedIn && this.state.tokenToSubmit) {
             context.executeAction(AuthenticationActions, ["VerifyEmail", {
                 jwt: this.props.jwt,
-                token: this.props.params.token
+                token: this.state.tokenToSubmit
             }]);
+            this.setState({tokenSubmitted: true});
         }
     }
 
@@ -61,7 +66,9 @@ class EmailVerificationPage extends React.Component {
             }
         }
     }
-
+    _handleTokenInputChange(){
+        this.setState({tokenToSubmit: this.refs.tokenInput.getValue()});
+    }
     render(){
         var loginForm = '';
         var loginAlert ='';
@@ -91,14 +98,14 @@ class EmailVerificationPage extends React.Component {
         else {
             tokenForm=
                 <div>
-                    <Input type='text' value={this.props.params.token} />
+                    <Input type='text' ref="tokenInput" value={this.state.tokenToSubmit} onChange={this._handleTokenInputChange}/>
                     {verificationAlert}
                     <Button onClick={this._submitToken} bsStyle='primary' disabled>Verify</Button>
                 </div>;
-            if(!this.state.tokenSubmitted){
+            if(!this.state.tokenSubmitted && this.state.tokenToSubmit != ""){
                 tokenForm=
                     <div>
-                        <Input type='text' value={this.props.params.token} />
+                        <Input type='text' ref="tokenInput" value={this.state.tokenToSubmit} onChange={this._handleTokenInputChange}/>
                         {verificationAlert}
                         <Button onClick={this._submitToken} bsStyle='primary'>Verify</Button>
                     </div>;

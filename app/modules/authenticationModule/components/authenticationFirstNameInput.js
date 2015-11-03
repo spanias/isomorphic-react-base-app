@@ -8,6 +8,7 @@ import {connectToStores} from 'fluxible-addons-react';
 import {Button, Input} from 'react-bootstrap';
 import {Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
+
 var debug = require('debug')('AuthenticationFirstNameInput');
 
 class AuthenticationFirstNameInput extends React.Component {
