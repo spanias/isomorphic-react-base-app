@@ -119,8 +119,250 @@ module.exports = {
             });
             //}
         };
+        var loginWithToken = function (req,params, callback){
+            debug("Attempting to login with token!");
+            if (req.cookies['authentoken'] || req.cookies['sessiontoken']) {
 
-        //params contains username, password
+                var token = '';
+                var refreshAuthenToken = false;
+                if (req.cookies['authentoken']) {
+                    debug('Logging in with long term cookie!');
+                    refreshAuthenToken = true;
+                    token = req.cookies['authentoken'];
+                }
+                else {
+                    debug('Logging in with session cookie!');
+                    refreshAuthenToken = false;
+                    token = req.cookies['sessiontoken'];
+                }
+
+                jwt.verify(token, key, function (err, decoded) {
+                    if (!err) {
+                        myUser.username = decoded.user;
+                        debug("Decrypted token: ", decoded);
+                        if (new Date(decoded.expiry) >= new Date()) {
+                            if (currentReadOnlyDataConnection) {
+                                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                                    debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                    if (data.length === 1) {
+                                        password(token).verifyAgainst(data[0].activeToken, function (error, verified) {
+                                            if (!verified || !data[0].active) {
+                                                debug("Token hash failed to verify! ", verified, data[0].active);
+                                                req.res.clearCookie('authentoken');
+                                                req.res.clearCookie('sessiontoken');
+                                                callback(new Error('Token Authentication Failed'), null)
+                                            }
+                                            else {
+                                                debug("Token hash verified!");
+                                                var forwardParameters = {
+                                                    data: data,
+                                                    rememberMe: params.rememberMe,
+                                                    refreshToken: refreshAuthenToken,
+                                                    currentDataConnection: currentDataConnection,
+                                                    prefix: prefix
+                                                };
+                                                successfulLogin(req, forwardParameters, function (err, result) {
+                                                    callback(err, result);
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            debug("Token expired!");
+                            req.res.clearCookie('authentoken');
+                            req.res.clearCookie('sessiontoken');
+                            callback(new Error("Token is expired!"), null);
+                        }
+                    }
+                    else {
+                        debug("Token cannot be verified!");
+                        req.res.clearCookie('authentoken');
+                        req.res.clearCookie('sessiontoken');
+                        callback(new Error("Token cannot be verified!"), null);
+                    }
+                });
+            }
+            else {
+                debug("Token not set in cookies! Aborting login procedure.");
+                callback(new Error("Token cannot be found!"), null);
+            }
+        };
+        var refreshUser = function (req,params,callback){
+            if (params.jwt) {
+                debug("Attempting to login with token!");
+                jwt.verify(params.jwt, key, function (err, decoded) {
+                    if (!err) {
+                        myUser.username = decoded.user;
+                        debug("Decrypted token: ", decoded);
+                        if (new Date(decoded.expiry) >= new Date()) {
+                            if (currentReadOnlyDataConnection) {
+                                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                                    if (!err && data) {
+
+                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                        if (data.length == 1) {
+                                            var myUser = {
+                                                username: data[0].username,
+                                                email: data[0].email,
+                                                firstName: data[0].firstName,
+                                                lastName: data[0].lastName,
+                                                imageURL: data[0].imageURL,
+                                                verified: data[0].verified
+
+                                            };
+                                            callback(null, myUser);
+                                        }
+                                        else {
+                                            debug("User not found!");
+                                            callback(new Error("User not found!"), null);
+                                        }
+                                    }
+                                    else{
+                                        debug("Error returned from dataconnection:", err);
+                                        callback(err, null);
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            debug("Token expired!");
+                            callback(new Error("Token is expired!"), null);
+                        }
+                    }
+                    else {
+                        debug("Token cannot be verified!");
+                        callback(new Error("Session token cannot be verified!"), null);
+                    }
+                });
+            }
+            else {
+                debug("Session token not set! Aborting login procedure.");
+                callback(new Error("Session token not set!"), null);
+            }
+        };
+        var logout = function (req,params,callback){
+            debug("Invoking logout procedure!");
+            debug("Removing cookie token!");
+            req.res.clearCookie('authentoken');
+            req.res.clearCookie('sessiontoken');
+            debug("Removing token from dataconnection!");
+            //TODO: Remove tokens from dataconnection
+            callback(null, true);
+        };
+        var requestEmailToken = function (req,params,callback){
+            debug("Requested eMail verification token.");
+            if (params.jwt) {
+                jwt.verify(params.jwt, key, function (err, decoded) {
+                    if (!err){
+                        var user = {username: decoded.user}
+                        if (currentReadOnlyDataConnection) {
+                            currentReadOnlyDataConnection.readUser(prefix, user, function (error, data) {
+                                if (!error) {
+                                    debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+                                    if (data.length === 1) {
+                                        var expiryDate = dateAdd(new Date(), 'minute', 10);
+                                        token = jwt.sign({
+                                            user: data[0].username,
+                                            email: data[0].email,
+                                            expiry: expiryDate
+                                        }, key);
+                                        debug('Created token: '+token+' for user: ' + data[0].username + ' and email ' + data[0].email);
+
+                                        if (currentDataConnection) {
+                                            debug('Updating email verification token in datastore');
+                                            currentDataConnection.updateEmailVerificationToken(prefix,token,data[0].username,function(errorneus, success){
+                                                if (!errorneus) {
+                                                    debug('Sending token email with link: http://localhost:3000/verifyEmail/' + token);
+
+                                                    //TODO: Implement SMTP Sending of emails
+                                                }
+                                                else{
+                                                    callback(new Error('Cound not update email verification token on dataconnection!'));
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            callback(new Error('Dataconnection not defined!'))
+                                        }
+                                    }
+                                    else{
+                                        callback(new Error('User not found or multiple users found!'))
+                                    }
+                                }
+                                else
+                                {
+                                    callback(new Error('Unable to retrieve user from dataconnection!'))
+                                }
+                            });
+                        }
+                        else
+                        {
+                            callback(new Error('Readonly dataconnection not defined!'))
+                        }
+                    }
+                    else{
+                        debug('JWT Token not verified.');
+                        callback (new Error('JWT Token cannot be verified.'), null);
+                    }
+                });
+            }
+            else {
+                debug('JWT Token not provided.');
+                callback (new Error('JWT Token is required to verify user.'), null);
+            }
+        };
+        var login = function (req,params, callback) {
+            //Username and password authentication
+            debug("Attempting to login with username and password!");
+            myUser.username = params.username;
+
+            if (currentReadOnlyDataConnection) {
+                currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
+                    if (!err) {
+                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
+
+                        if (data.length === 1) {
+                            password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
+                                if (error)
+                                    throw new Error('AuthenticationService: Hash verification failed by unknown error!');
+                                if (!verified || !data[0].active) {
+                                    debug("Password hash failed to verify!");
+                                    callback(new Error('Authentication Failed'), null)
+                                } else {
+                                    debug("Password hash verified!");
+                                    var forwardParameters = {
+                                        data: data,
+                                        rememberMe: params.rememberMe,
+                                        refreshToken: false,
+                                        currentDataConnection: currentDataConnection,
+                                        prefix: prefix
+                                    };
+                                    successfulLogin(req, forwardParameters, function (err, result) {
+                                        callback(err, result);
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            debug("Username not found!");
+                            callback(new Error('Authentication Failed'), null)
+                        }
+                    }
+                    else {
+                        debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
+                        callback(new Error('Data Retrieval failed from dataconnection!'), null);
+                    }
+                });
+            }
+            else {
+                debug("Readonly data connection not set!");
+                callback(new Error('Readonly data connection not set!'));
+            }
+        };
+
         debug("Reading -> ", params);
         if (this.checkedForInitialization) {
             var myUser = new UserModel();
@@ -130,258 +372,30 @@ module.exports = {
             var prefix = this.prefix;
             var tokenExpiryDays = this.tokenExpiryDays;
 
-            //This function gets executed when credentials are validated.
             if (params.accessToken && params.username == undefined) {
-                //Token authentication
-                debug("Attempting to login with token!");
-                if (req.cookies['authentoken'] || req.cookies['sessiontoken']) {
-
-                    var token = '';
-                    var refreshAuthenToken = false;
-                    if (req.cookies['authentoken']) {
-                        debug('Logging in with long term cookie!');
-                        refreshAuthenToken = true;
-                        token = req.cookies['authentoken'];
-                    }
-                    else {
-                        debug('Logging in with session cookie!');
-                        refreshAuthenToken = false;
-                        token = req.cookies['sessiontoken'];
-                    }
-
-                    jwt.verify(token, key, function (err, decoded) {
-                        if (!err) {
-                            myUser.username = decoded.user;
-                            debug("Decrypted token: ", decoded);
-                            if (new Date(decoded.expiry) >= new Date()) {
-                                if (currentReadOnlyDataConnection) {
-                                    currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
-                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-                                        if (data.length === 1) {
-                                            password(token).verifyAgainst(data[0].activeToken, function (error, verified) {
-                                                if (!verified || !data[0].active) {
-                                                    debug("Token hash failed to verify! ", verified, data[0].active);
-                                                    req.res.clearCookie('authentoken');
-                                                    req.res.clearCookie('sessiontoken');
-                                                    callback(new Error('Token Authentication Failed'), null)
-                                                }
-                                                else {
-                                                    debug("Token hash verified!");
-                                                    var forwardParameters = {
-                                                        data: data,
-                                                        rememberMe: params.rememberMe,
-                                                        refreshToken: refreshAuthenToken,
-                                                        currentDataConnection: currentDataConnection,
-                                                        prefix: prefix
-                                                    };
-                                                    successfulLogin(req, forwardParameters, function (err, result) {
-                                                        callback(err, result);
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            }
-                            else {
-                                debug("Token expired!");
-                                req.res.clearCookie('authentoken');
-                                req.res.clearCookie('sessiontoken');
-                                callback(new Error("Token is expired!"), null);
-                            }
-                        }
-                        else {
-                            debug("Token cannot be verified!");
-                            req.res.clearCookie('authentoken');
-                            req.res.clearCookie('sessiontoken');
-                            callback(new Error("Token cannot be verified!"), null);
-                        }
-                    });
-                }
-                else {
-                    debug("Token not set in cookies! Aborting login procedure.");
-                    callback(new Error("Token cannot be found!"), null);
-                }
+                loginWithToken(req,params,callback);
             }
             else  if (params.refreshUser) {
-                //Token authentication
-                if (params.jwt) {
-                    debug("Attempting to login with token!");
-                    jwt.verify(params.jwt, key, function (err, decoded) {
-                        if (!err) {
-                            myUser.username = decoded.user;
-                            debug("Decrypted token: ", decoded);
-                            if (new Date(decoded.expiry) >= new Date()) {
-                                if (currentReadOnlyDataConnection) {
-                                    currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
-                                        if (!err && data) {
-
-                                            debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-                                            if (data.length == 1) {
-                                                var myUser = {
-                                                    username: data[0].username,
-                                                    email: data[0].email,
-                                                    firstName: data[0].firstName,
-                                                    lastName: data[0].lastName,
-                                                    imageURL: data[0].imageURL,
-                                                    verified: data[0].verified
-
-                                                };
-                                                callback(null, myUser);
-                                            }
-                                            else {
-                                                debug("User not found!");
-                                                callback(new Error("User not found!"), null);
-                                            }
-                                        }
-                                        else{
-                                            debug("Error returned from dataconnection:", err);
-                                            callback(err, null);
-                                        }
-                                    });
-                                }
-                            }
-                            else {
-                                debug("Token expired!");
-                                callback(new Error("Token is expired!"), null);
-                            }
-                        }
-                        else {
-                            debug("Token cannot be verified!");
-                            callback(new Error("Session token cannot be verified!"), null);
-                        }
-                    });
-                }
-                else {
-                    debug("Session token not set! Aborting login procedure.");
-                    callback(new Error("Session token not set!"), null);
-                }
+                refreshUser(req,params,callback);
             }
             else if (params.logout) {
-                debug("Invoking logout procedure!");
-
-                debug("Removing cookie token!");
-                req.res.clearCookie('authentoken');
-                req.res.clearCookie('sessiontoken');
-
-                debug("Removing token from dataconnection!");
-                //TODO: Remove tokens from dataconnection
-
-                callback(null, true);
+                logout(req,params,callback);
             }
             else if (params.requestEmailVerificationToken) {
-                debug("Requested eMail verification token.");
-                if (params.jwt) {
-                    jwt.verify(params.jwt, key, function (err, decoded) {
-                        if (!err){
-                            var user = {username: decoded.user}
-                            if (currentReadOnlyDataConnection) {
-                                currentReadOnlyDataConnection.readUser(prefix, user, function (error, data) {
-                                    if (!error) {
-                                        debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-                                        if (data.length === 1) {
-                                            var expiryDate = dateAdd(new Date(), 'minute', 10);
-                                            token = jwt.sign({
-                                                user: data[0].username,
-                                                email: data[0].email,
-                                                expiry: expiryDate
-                                            }, key);
-                                            debug('Created token: '+token+' for user: ' + data[0].username + ' and email ' + data[0].email);
-
-                                            if (currentDataConnection) {
-                                                debug('Updating email verification token in datastore');
-                                                currentDataConnection.updateEmailVerificationToken(prefix,token,data[0].username,function(errorneus, success){
-                                                   if (!errorneus) {
-                                                       debug('Sending token email with link: http://localhost:3000/verifyEmail/' + token);
-
-                                                       //TODO: Implement SMTP Sending of emails
-                                                   }
-                                                    else{
-                                                       callback(new Error('Cound not update email verification token on dataconnection!'));
-                                                   }
-                                                });
-                                            }
-                                            else {
-                                                callback(new Error('Dataconnection not defined!'))
-                                            }
-                                        }
-                                        else{
-                                            callback(new Error('User not found or multiple users found!'))
-                                        }
-                                    }
-                                    else
-                                    {
-                                        callback(new Error('Unable to retrieve user from dataconnection!'))
-                                    }
-                                });
-                            }
-                            else
-                            {
-                                callback(new Error('Readonly dataconnection not defined!'))
-                            }
-                        }
-                        else{
-                            debug('JWT Token not verified.');
-                            callback (new Error('JWT Token cannot be verified.'), null);
-                        }
-                    });
-                }
-                else {
-                    debug('JWT Token not provided.');
-                    callback (new Error('JWT Token is required to verify user.'), null);
-                }
+                requestEmailToken(req,params,callback);
             }
             else if (params.login){
-                //Username and password authentication
-                debug("Attempting to login with username and password!");
-                myUser.username = params.username;
-
-                if (currentReadOnlyDataConnection) {
-                    currentReadOnlyDataConnection.readUser(prefix, myUser, function (err, data) {
-                        if (!err) {
-                            debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
-
-                            if (data.length === 1) {
-                                password(params.password).verifyAgainst(data[0].hash, function (error, verified) {
-                                    if (error)
-                                        throw new Error('AuthenticationService: Hash verification failed by unknown error!');
-                                    if (!verified || !data[0].active) {
-                                        debug("Password hash failed to verify!");
-                                        callback(new Error('Authentication Failed'), null)
-                                    } else {
-                                        debug("Password hash verified!");
-                                        var forwardParameters = {
-                                            data: data,
-                                            rememberMe: params.rememberMe,
-                                            refreshToken: false,
-                                            currentDataConnection: currentDataConnection,
-                                            prefix: prefix
-                                        };
-                                        successfulLogin(req, forwardParameters, function (err, result) {
-                                            callback(err, result);
-                                        });
-                                    }
-                                });
-                            }
-                            else {
-                                debug("Username not found!");
-                                callback(new Error('Authentication Failed'), null)
-                            }
-                        }
-                        else {
-                            debug("Data Retrieval failed from dataconnection: " + JSON.stringify(err));
-                            callback(new Error('Data Retrieval failed from dataconnection!'), null)
-                        }
-                    });
-                }
-                else {
-                    debug("Readonly data connection not set!")
-                }
+                login(req,params,callback);
+            }
+            else
+            {
+                debug("No Action provided!");
+                callback(new Error('No Action provided!'));
             }
         }
         else {
             debug("DataConnection not initialized.");
-            callback(new Error('Data connection is not initialized!'))
+            callback(new Error('Data connection is not initialized!'));
         }
     },
     create: function(req, resource, params, body, config, callback) {
