@@ -56,10 +56,21 @@ class AuthenticationUserDetailsView extends React.Component {
         }
     }
 
-    _requestValidationEmail(){
+    _requestValidationEmail() {
         debug("Calling request verification email!");
-        context.executeAction(AuthenticationActions, ["UpdateUserDetailsMessage", {style: "info", message: "Verification email requested.", appearFor: 10}]);
-        context.executeAction(AuthenticationActions, ["RequestVerificationEmail", {jwt: this.props.jwt}]);
+        context.executeAction(
+            AuthenticationActions.updateUserDetailsMessage,
+            {
+                message: "Verification email requested.",
+                appearFor: 10,
+                style: "info"
+            }
+        );
+
+        context.executeAction(
+            AuthenticationActions.requestVerificationEmail,
+            {jwt: this.props.jwt}
+        );
     }
 
     _hasChanges()
@@ -86,8 +97,23 @@ class AuthenticationUserDetailsView extends React.Component {
             {
                 myUser.email = this.refs.AuthenticationEmailInput.getValue();
             }
-            context.executeAction(AuthenticationActions,["UpdateUserDetailsMessage", {style: "info", message: "Updating user details.", appearFor: 10}]);
-            context.executeAction(AuthenticationActions, ["ChangeUserDetails", {jwt: this.props.jwt, myUser: myUser}]);
+            context.executeAction(
+                AuthenticationActions.updateUserDetailsMessage,
+                {
+                    message: "Updating user details.",
+                    appearFor: 10,
+                    style: "info"
+                }
+            );
+
+
+            context.executeAction(
+                AuthenticationActions.changeUserDetails,
+                {
+                    jwt: this.props.jwt,
+                    myUser: myUser
+                }
+            );
         }
     }
 

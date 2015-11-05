@@ -31,38 +31,58 @@ class EmailVerificationPage extends React.Component {
     _submitToken()
     {
         if (this.props.loggedIn && this.state.tokenToSubmit) {
-            context.executeAction(AuthenticationActions, ["UpdateVerifyEmailMessage",
-                {style: "info", message: "Verifying email " + this.props.email + "...", appearFor: 10}
-            ]);
-            context.executeAction(AuthenticationActions, ["VerifyEmail", {
-                jwt: this.props.jwt,
-                token: this.state.tokenToSubmit
-            }]);
+            context.executeAction(
+                AuthenticationActions.updateVerifyEmailMessage,
+                {
+                    message: "Verifying email " + this.props.email + "...",
+                    appearFor: 10,
+                    style: "info"
+                }
+            );
+            context.executeAction(
+                AuthenticationActions.verifyEmail,
+                {
+                    jwt: this.props.jwt,
+                    token: this.state.tokenToSubmit
+                }
+            );
+
             this.setState({tokenSubmitted: true});
         }
     }
 
     _login(event) {
-
         if (event) {
             event.preventDefault();
         }
         if (!this.props.loggedIn) {
-
             if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
-                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
-                    {style: "info", message: "Attempting login...", appearFor: 10}
-                ]);
-                context.executeAction(AuthenticationActions, ["Login", {
-                    username: this.refs.loginView.getUsernameValue(),
-                    password: this.refs.loginView.getPasswordValue(),
-                    rememberMe: false
-                }]);
+                //Authentication Service called here.
+
+                context.executeAction(
+                    AuthenticationActions.updateLoginMessage,
+                    {
+                        message: "Attempting login...",
+                        appearFor: 10,
+                        style: "info"
+                    }
+                );
+                context.executeAction(
+                    AuthenticationActions.login, {
+                        username: this.refs.loginView.getUsernameValue(),
+                        password: this.refs.loginView.getPasswordValue(),
+                        rememberMe: this.refs.rememberMeInput.getChecked()
+                    }
+                );
             }
             else {
-                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
-                    {style: "danger", message: "Username and Password cannot be empty!", appearFor: 10}
-                ]);
+                context.executeAction(
+                    AuthenticationActions.updateLoginMessage, {
+                        message: "Username and Password cannot be empty!",
+                        appearFor: 10,
+                        style: "danger"
+                    }
+                );
             }
         }
     }

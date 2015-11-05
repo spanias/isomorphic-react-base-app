@@ -32,10 +32,6 @@ class AuthenticationEmailInput extends React.Component {
             this._refreshStateWithProps(this.props);
         }
     }
-    componentWillReceiveProps(nextProps) {
-        //debug("willReceiveProps ->", nextProps);
-        //this._refreshStateWithProps(nextProps);
-    }
 
     _refreshStateWithProps(nextProps) {
         if (typeof nextProps !== "undefined") {

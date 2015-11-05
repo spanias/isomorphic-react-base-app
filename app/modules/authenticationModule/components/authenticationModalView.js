@@ -33,24 +33,35 @@ class AuthenticationModalView extends React.Component {
             if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
                 //Authentication Service called here.
 
-                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
-                    {style: "info", message: "Attempting login...", appearFor: 10}
-                ]);
-                context.executeAction(AuthenticationActions, ["Login", {
-                    username: this.refs.loginView.getUsernameValue(),
-                    password: this.refs.loginView.getPasswordValue(),
-                    rememberMe: this.refs.rememberMeInput.getChecked()
-                }]);
+                context.executeAction(
+                    AuthenticationActions.updateLoginMessage,
+                    {
+                        message: "Attempting login...",
+                        appearFor: 10,
+                        style: "info"
+                    }
+                );
+                context.executeAction(
+                    AuthenticationActions.login, {
+                        username: this.refs.loginView.getUsernameValue(),
+                        password: this.refs.loginView.getPasswordValue(),
+                        rememberMe: this.refs.rememberMeInput.getChecked()
+                    }
+                );
             }
             else {
-                context.executeAction(AuthenticationActions, ["UpdateLoginMessage",
-                    {style: "danger", message: "Username and Password cannot be empty!", appearFor: 10}
-                ]);
+                context.executeAction(
+                    AuthenticationActions.updateLoginMessage, {
+                        message: "Username and Password cannot be empty!",
+                        appearFor: 10,
+                        style: "danger"
+                    }
+                );
             }
         }
         else
         {
-            context.executeAction(AuthenticationActions, ["Logout", null]);
+            context.executeAction(AuthenticationActions.logout, {});
         }
     }
 

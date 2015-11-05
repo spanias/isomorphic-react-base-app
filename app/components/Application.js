@@ -38,12 +38,12 @@ class Application extends React.Component {
         */
 
         //attempts to login using token as soon as it loads
-        context.executeAction(AuthenticationActions, ["LoginWithToken", {}]);
+        context.executeAction(AuthenticationActions.loginWithToken);
 
 
     }
     componentDidUnmount() {
-        clearInterval(refreshUserTimer);
+        //clearInterval(refreshUserTimer);
     }
     componentDidUpdate(prevProps) {
         let newProps = this.props;

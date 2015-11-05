@@ -129,9 +129,8 @@ module.exports = {
             var key = this.key;
             var prefix = this.prefix;
             var tokenExpiryDays = this.tokenExpiryDays;
+
             //This function gets executed when credentials are validated.
-
-
             if (params.accessToken && params.username == undefined) {
                 //Token authentication
                 debug("Attempting to login with token!");
@@ -332,7 +331,7 @@ module.exports = {
                     callback (new Error('JWT Token is required to verify user.'), null);
                 }
             }
-            else {
+            else if (params.login){
                 //Username and password authentication
                 debug("Attempting to login with username and password!");
                 myUser.username = params.username;

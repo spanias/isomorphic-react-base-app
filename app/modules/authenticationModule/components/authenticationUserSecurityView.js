@@ -44,20 +44,34 @@ class AuthenticationUserSecurityView extends React.Component {
     _changePassword() {
         if(this._validateCurrentPassword() == 'success' && this.state.newPasswordInputValid)
         {
-            context.executeAction(AuthenticationActions, ["UpdateSecurityMessage",
-                {style: "info", message: "Changing password...", appearFor: 10}
-            ]);
-            context.executeAction(AuthenticationActions, ["ChangePassword", {
-                jwt: this.props.jwt,
-                username: this.props.user,
-                password: this.state.currentPassword,
-                newPassword: this.state.newPassword
-            }]);
+            context.executeAction(
+                AuthenticationActions.updateSecurityMessage,
+                {
+                    message: "Changing password...",
+                    appearFor: 10,
+                    style: "info"
+                }
+            );
+
+            context.executeAction(
+                AuthenticationActions.changePassword,
+                {
+                    jwt: this.props.jwt,
+                    user: this.props.user,
+                    currentPassword: this.state.currentPassword,
+                    newPassword: this.state.newPassword
+                }
+            );
         }
         else{
-            context.executeAction(AuthenticationActions, ["UpdateSecurityMessage",
-                {style: "danger", message: "Cannot validate form. Please re-check details.", appearFor: 10}
-            ]);
+            context.executeAction(
+                AuthenticationActions.updateSecurityMessage,
+                {
+                    message: "Cannot validate form. Please re-check details.",
+                    appearFor: 10,
+                    style: "danger"
+                }
+            );
         }
     }
     _handleCurrentPasswordInput() {

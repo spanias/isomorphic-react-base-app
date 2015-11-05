@@ -47,7 +47,7 @@ class CreateUserPage extends React.Component {
         if (!this.props.loggedIn)
         {
             createUserForm=  <div className="authentication-createUser-group">
-                <Panel header="User Information" bsStyle="primary">
+                <Panel header="New User Information" bsStyle="primary">
                     <Row>
                         <Col xs={6}>
                             <AuthenticationUsernameInput
@@ -89,15 +89,12 @@ class CreateUserPage extends React.Component {
                     </Row>
                 </Panel>
             </div>;
-
         }
 
         return (
             <div className="container">
-                <h1> Create User Page! </h1>
                 {createUserForm}
             </div>
-
         );
     }
 }
