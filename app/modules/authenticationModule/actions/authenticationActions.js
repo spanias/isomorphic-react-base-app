@@ -35,7 +35,7 @@ module.exports = {
     },
     refreshUser: function (context,payload, done){
         if (payload.jwt) {
-            parameters = {
+            var parameters = {
                 refreshUser: true,
                 jwt: payload.jwt
             };

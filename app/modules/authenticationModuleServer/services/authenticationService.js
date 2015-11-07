@@ -70,55 +70,7 @@ module.exports = {
     },
 
     read: function (req, resource, params, config, callback) {
-        var successfulLogin = function (request, parameters, callback) {
-            debug("Successful login procedure: ", parameters);
-            var token = null;
-            //refresh session token
-            var expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + tokenExpiryDays);
-            token = jwt.sign({
-                user: parameters.data[0].username,
-                email: parameters.data[0].email,
-                expiry: expiryDate
-            }, key);
 
-            if (parameters.rememberMe || parameters.refreshToken) {
-                request.res.cookie('authentoken', token, {expires: expiryDate, httpOnly: true /*, secure: true */});
-            }
-            request.res.cookie('sessiontoken', token, {httpOnly: true /*, secure: true */});
-
-            var result = {
-                user: parameters.data[0].username,
-                group: parameters.data[0].group,
-                email: parameters.data[0].email,
-                imageURL: parameters.data[0].imageURL,
-                firstName: parameters.data[0].firstName,
-                lastName: parameters.data[0].lastName,
-                verified: parameters.data[0].verified,
-                active: parameters.data[0].active,
-                token: token
-            };
-            callback(null, result);
-
-            //if (parameters.rememberMe || parameters.refreshToken) {
-            debug("Saving new token to database...");
-            password(token).hash(function (error, hashedToken) {
-                if (!error) {
-                    // pbkdf2  10000 iterations
-                    // Store hash (incl. algorithm, iterations, and salt)
-
-                    parameters.currentDataConnection.updateAccessToken(parameters.prefix, hashedToken, parameters.data[0].username, function (err, retrievedData) {
-                        if (err) {
-                            debug("Token not saved.", err)
-                        }
-                        else {
-                            debug("Token saved.", retrievedData)
-                        }
-                    });
-                }
-            });
-            //}
-        };
         var loginWithToken = function (req,params, callback){
             debug("Attempting to login with token!");
             if (req.cookies['authentoken'] || req.cookies['sessiontoken']) {
@@ -264,7 +216,7 @@ module.exports = {
                                     debug("Data Retrieved from dataconnection: " + JSON.stringify(data, null, 4));
                                     if (data.length === 1) {
                                         var expiryDate = dateAdd(new Date(), 'minute', 10);
-                                        token = jwt.sign({
+                                        var token = jwt.sign({
                                             user: data[0].username,
                                             email: data[0].email,
                                             expiry: expiryDate
@@ -362,7 +314,55 @@ module.exports = {
                 callback(new Error('Readonly data connection not set!'));
             }
         };
+        var successfulLogin = function (request, parameters, callback) {
+            debug("Successful login procedure: ", parameters);
+            var token = null;
+            //refresh session token
+            var expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + tokenExpiryDays);
+            token = jwt.sign({
+                user: parameters.data[0].username,
+                email: parameters.data[0].email,
+                expiry: expiryDate
+            }, key);
 
+            if (parameters.rememberMe || parameters.refreshToken) {
+                request.res.cookie('authentoken', token, {expires: expiryDate, httpOnly: true /*, secure: true */});
+            }
+            request.res.cookie('sessiontoken', token, {httpOnly: true /*, secure: true */});
+
+            var result = {
+                user: parameters.data[0].username,
+                group: parameters.data[0].group,
+                email: parameters.data[0].email,
+                imageURL: parameters.data[0].imageURL,
+                firstName: parameters.data[0].firstName,
+                lastName: parameters.data[0].lastName,
+                verified: parameters.data[0].verified,
+                active: parameters.data[0].active,
+                token: token
+            };
+            callback(null, result);
+
+            //if (parameters.rememberMe || parameters.refreshToken) {
+            debug("Saving new token to database...");
+            password(token).hash(function (error, hashedToken) {
+                if (!error) {
+                    // pbkdf2  10000 iterations
+                    // Store hash (incl. algorithm, iterations, and salt)
+
+                    parameters.currentDataConnection.updateAccessToken(parameters.prefix, hashedToken, parameters.data[0].username, function (err, retrievedData) {
+                        if (err) {
+                            debug("Token not saved.", err)
+                        }
+                        else {
+                            debug("Token saved.", retrievedData)
+                        }
+                    });
+                }
+            });
+            //}
+        };
         debug("Reading -> ", params);
         if (this.checkedForInitialization) {
             var myUser = new UserModel();
