@@ -8,7 +8,7 @@ import {connectToStores} from 'fluxible-addons-react';
 import {Button} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
-import AuthenticationModalView from './authenticationModalView';
+import AuthenticationModalView from './ModalAuthenticationView';
 
 var debug = require('debug')('AuthenticationPageButtons');
 

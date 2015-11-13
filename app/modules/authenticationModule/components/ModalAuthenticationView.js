@@ -7,8 +7,8 @@ import React from 'react';
 //import {connectToStores} from 'fluxible-addons-react';
 import {Modal, Button, Input, Alert, ModalTrigger} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
-import AuthenticationUserView from './authenticationUserView';
-import AuthenticationLoginView from './authenticationLoginView';
+import AuthenticationUserView from './UserView';
+import AuthenticationLoginView from './LoginForm';
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 var debug = require('debug')('AuthenticationModalView');
@@ -25,39 +25,17 @@ class AuthenticationModalView extends React.Component {
 
 
     _login(event) {
-
         if (event) {
             event.preventDefault();
         }
         if (!this.props.loggedIn) {
-            if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
-                //Authentication Service called here.
-
-                context.executeAction(
-                    AuthenticationActions.updateLoginMessage,
-                    {
-                        message: "Attempting login...",
-                        appearFor: 10,
-                        style: "info"
-                    }
-                );
-                context.executeAction(
-                    AuthenticationActions.login, {
-                        username: this.refs.loginView.getUsernameValue(),
-                        password: this.refs.loginView.getPasswordValue(),
-                        rememberMe: this.refs.rememberMeInput.getChecked()
-                    }
-                );
-            }
-            else {
-                context.executeAction(
-                    AuthenticationActions.updateLoginMessage, {
-                        message: "Username and Password cannot be empty!",
-                        appearFor: 10,
-                        style: "danger"
-                    }
-                );
-            }
+            context.executeAction(
+                AuthenticationActions.login, {
+                    username: this.refs.loginView.getUsernameValue(),
+                    password: this.refs.loginView.getPasswordValue(),
+                    rememberMe: this.refs.rememberMeInput.getChecked()
+                }
+            );
         }
         else
         {

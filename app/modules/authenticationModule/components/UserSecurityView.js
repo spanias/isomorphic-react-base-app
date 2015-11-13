@@ -8,7 +8,7 @@ import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
-import AuthenticationNewPasswordInput from './authenticationNewPasswordInput';
+import NewPasswordInput from './FieldInputs/NewPasswordInput';
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 var debug = require('debug')('AuthenticationUserSecurityView');
@@ -123,7 +123,7 @@ class AuthenticationUserSecurityView extends React.Component {
                                     value={this.state.currentPassword}/>
                             </Col>
                         </Row>
-                        <AuthenticationNewPasswordInput ref='newPasswordInput'
+                        <NewPasswordInput ref='newPasswordInput'
                             onNewPasswordChange = {this._handleNewPasswordInput}
                             onConfirmPasswordChange = {this._handleConfirmPasswordInput}
                             />

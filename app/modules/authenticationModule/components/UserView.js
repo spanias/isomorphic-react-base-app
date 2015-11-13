@@ -6,8 +6,8 @@
 import React from 'react';
 import {Tabs, Tab} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
-import AuthenticationUserDetailsView from './authenticationUserDetailsView';
-import AuthenticationUserSecurityView from './authenticationUserSecurityView';
+import AuthenticationUserDetailsView from './UserDetailsView';
+import AuthenticationUserSecurityView from './UserSecurityView';
 
 var debug = require('debug')('AuthenticationUserView');
 class AuthenticationUserView extends React.Component {

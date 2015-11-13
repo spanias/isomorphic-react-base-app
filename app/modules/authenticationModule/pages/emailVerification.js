@@ -8,7 +8,7 @@ import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
-import AuthenticationLoginView from '../components/authenticationLoginView';
+import AuthenticationLoginView from '../components/LoginForm';
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 var debug = require('debug')('EmailVerificationPage');
@@ -56,34 +56,16 @@ class EmailVerificationPage extends React.Component {
             event.preventDefault();
         }
         if (!this.props.loggedIn) {
-            if (this.refs.loginView.getUsernameValue() != "" && this.refs.loginView.getPasswordValue() != "") {
-                //Authentication Service called here.
-
-                context.executeAction(
-                    AuthenticationActions.updateLoginMessage,
-                    {
-                        message: "Attempting login...",
-                        appearFor: 10,
-                        style: "info"
-                    }
-                );
-                context.executeAction(
-                    AuthenticationActions.login, {
-                        username: this.refs.loginView.getUsernameValue(),
-                        password: this.refs.loginView.getPasswordValue(),
-                        rememberMe: this.refs.rememberMeInput.getChecked()
-                    }
-                );
-            }
-            else {
-                context.executeAction(
-                    AuthenticationActions.updateLoginMessage, {
-                        message: "Username and Password cannot be empty!",
-                        appearFor: 10,
-                        style: "danger"
-                    }
-                );
-            }
+            context.executeAction(
+                AuthenticationActions.login, {
+                    username: this.refs.loginView.getUsernameValue(),
+                    password: this.refs.loginView.getPasswordValue(),
+                    rememberMe: this.refs.rememberMeInput.getChecked()
+                }
+            );
+        }
+        else {
+            context.executeAction(AuthenticationActions.logout, {});
         }
     }
     _handleTokenInputChange(){

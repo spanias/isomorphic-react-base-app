@@ -9,11 +9,11 @@ import { Panel, Button, Input, Row, Col} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 
-import AuthenticationFirstNameInput from "../components/authenticationFirstNameInput";
-import AuthenticationUsernameInput from "../components/authenticationUsernameInput";
-import AuthenticationLastNameInput from "../components/authenticationLastNameInput";
-import AuthenticationEmailInput from "../components/authenticationEmailInput";
-import AuthenticationNewPasswordInput from '../components/authenticationNewPasswordInput';
+import AuthenticationFirstNameInput from "../components/FieldInputs/FirstNameInput";
+import AuthenticationUsernameInput from "../components/FieldInputs/UsernameInput";
+import AuthenticationLastNameInput from "../components/FieldInputs/LastNameInput";
+import AuthenticationEmailInput from "../components/FieldInputs/EmailInput";
+import AuthenticationNewPasswordInput from '../components/FieldInputs/NewPasswordInput';
 
 var debug = require('debug')('CreateUserPage');
 

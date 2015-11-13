@@ -7,20 +7,19 @@ import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
 import {Button, Input} from 'react-bootstrap';
 import {Label} from 'react-bootstrap';
-import AuthenticationActions  from '../actions/authenticationActions';
+import AuthenticationActions  from '../../actions/authenticationActions';
+var debug = require('debug')('AuthenticationLastNameInput');
 
-var debug = require('debug')('AuthenticationFirstNameInput');
-
-class AuthenticationFirstNameInput extends React.Component {
+class AuthenticationLastNameInput extends React.Component {
 
     constructor(props, context) {
         super(props,context);
         this.state = {
-            firstName: ""
+            lastName: ""
         };
 
         this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
-        this._handleFirstNameInput = this._handleFirstNameInput.bind(this);
+        this._handleLastNameInput = this._handleLastNameInput.bind(this);
         this.hasChanges = this.hasChanges.bind(this);
         this.isValid = this.isValid.bind(this);
         this.getValue = this.getValue.bind(this);
@@ -35,21 +34,20 @@ class AuthenticationFirstNameInput extends React.Component {
     _refreshStateWithProps(nextProps) {
         if (typeof nextProps !== "undefined") {
             this.setState({
-                firstName: nextProps.firstName
+                lastName: nextProps.lastName
             });
         }
         else {
             this.setState({
-                firstName:""
+                lastName:""
             });
         }
     }
 
-    _handleFirstNameInput() {
+    _handleLastNameInput() {
         this.setState({
-            firstName: this.refs.firstName.getValue()
+            lastName: this.refs.lastName.getValue()
         });
-
         if (this.props.onChange) {
             this.props.onChange();
         }
@@ -57,38 +55,39 @@ class AuthenticationFirstNameInput extends React.Component {
 
 
     hasChanges() {
-        return (this.state.firstName != this.props.firstName);
+        return (this.state.lastName != this.props.lastName);
     }
 
     isValid(){
-        return (this.state.firstName != "");
+        return (this.state.lastName != "");
     }
     getValue(){
-        return this.refs.firstName.getValue();
+        return this.refs.lastName.getValue();
     }
 
 
     render() {
         debug("Rendering");
+
         return (
             <div>
                 <Input
                     type="text"
                     placeholder="Enter text"
-                    label="First Name"
-                    ref="firstName"
-                    value={this.state.firstName}
-                    defaultValue={this.props.firstName}
-                    onChange={this._handleFirstNameInput}/>
+                    label="Last Name"
+                    ref="lastName"
+                    value={this.state.lastName}
+                    defaultValue={this.props.lastName}
+                    onChange={this._handleLastNameInput}/>
             </div>
         );
     }
 }
 
-AuthenticationFirstNameInput.propTypes = {
-    firstName: React.PropTypes.string,
+AuthenticationLastNameInput.propTypes = {
+    lastName: React.PropTypes.string,
     onChange: React.PropTypes.func
 
 };
 
-export default AuthenticationFirstNameInput;
+export default AuthenticationLastNameInput;

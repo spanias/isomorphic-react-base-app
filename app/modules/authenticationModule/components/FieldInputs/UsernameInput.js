@@ -7,7 +7,7 @@ import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
 import {Button, Input} from 'react-bootstrap';
 import {Label} from 'react-bootstrap';
-import AuthenticationActions  from '../actions/authenticationActions';
+import AuthenticationActions  from '../../actions/authenticationActions';
 
 var debug = require('debug')('AuthenticationUsernameInput');
 

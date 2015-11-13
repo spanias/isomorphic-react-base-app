@@ -13,26 +13,47 @@ var serviceTimeOut = 20000;
  could get the whole store here like this if you wanted to save it to the server:
  var store = context.getStore(exampleStore).getState()
  */
-module.exports = {
+var AuthenticationActions = module.exports = {
     login: function (context, payload, done){
-        var parameters = {
-            login: true,
-            username: payload.username,
-            password: payload.password,
-            rememberMe: payload.rememberMe
-        };
-        debug("Reading AuthenticationService ->", parameters);
-        context.service.read('AuthenticationService', parameters, {timeout: serviceTimeOut}, function (err, data) {
-            if (err || !data) {
-                debug("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
-                context.dispatch(Actions.LOGINFAILED_ACTION, err);
-            }
-            else {
-                context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
-            }
-        });
+        if (payload.username != "" && payload.password != "") {
+            context.executeAction(
+                AuthenticationActions.updateLoginMessage,
+                {
+                    message: "Attempting login...",
+                    appearFor: 10,
+                    style: "info"
+                }
+            );
+            var parameters = {
+                login: true,
+                username: payload.username,
+                password: payload.password,
+                rememberMe: payload.rememberMe
+            };
+            debug("Reading AuthenticationService ->", parameters);
+            context.service.read('AuthenticationService', parameters, {timeout: serviceTimeOut}, function (err, data) {
+                if (err || !data) {
+                    debug("Calling LOGINFAILED_ACTION, Err: ", err, " data:", data);
+                    context.dispatch(Actions.LOGINFAILED_ACTION, err);
+                }
+                else {
+                    context.dispatch(Actions.LOGINSUCCESS_ACTION, data);
+                }
+            });
+        }
+        else
+        {
+            context.executeAction(
+                AuthenticationActions.updateLoginMessage, {
+                    message: "Username and Password cannot be empty!",
+                    appearFor: 10,
+                    style: "danger"
+                }
+            );
+        }
         done();
     },
+
     refreshUser: function (context,payload, done){
         if (payload.jwt) {
             var parameters = {
@@ -116,7 +137,7 @@ module.exports = {
         });
         done();
     },
-    changePassword: function (context,payload, done){
+    changePassword: function (context, payload, done){
         var parameters = {
             changePassword: true ,
             jwt: payload.jwt,
@@ -157,6 +178,14 @@ module.exports = {
         done();
     },
     requestVerificationEmail: function (context,payload, done){
+        context.executeAction(
+            AuthenticationActions.updateUserDetailsMessage,
+            {
+                message: "Verification email requested.",
+                appearFor: 10,
+                style: "info"
+            }
+        );
         var parameters = {
             requestEmailVerificationToken: true ,
             jwt: payload.jwt};
