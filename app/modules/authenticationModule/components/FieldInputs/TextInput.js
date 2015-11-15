@@ -25,17 +25,34 @@ class AuthenticationTextInput extends React.Component {
         this._onChangeInput = this._onChangeInput.bind(this);
         this._onBlurInput = this._onBlurInput.bind(this);
         this._onFocusInput = this._onFocusInput.bind(this);
+        this._initializeWithProps = this._initializeWithProps.bind(this);
     }
 
     componentWillMount (){
-        if (this.props.initialValue) {
+        this._initializeWithProps(this.props)
+    }
+
+    componentWillReceiveProps(nextProps) {
+        //Check if any of the following fields change and reinitialize
+        if (nextProps.initialValue != this.props.initialValue ||
+             nextProps.fieldName != this.props.fieldName ||
+             nextProps.fieldType != this.props.fieldType ||
+             nextProps.validationFunction != this.props.validationFunction) {
+
+            this._initializeWithProps(nextProps)
+
+        }
+    }
+
+    _initializeWithProps(inProps){
+        if (inProps.initialValue) {
             context.executeAction(
                 TextInputActions.updateFieldValue,
                 {
-                    fieldType: this.props.fieldType,
-                    fieldName: this.props.fieldName,
+                    fieldType: inProps.fieldType,
+                    fieldName: inProps.fieldName,
                     values: {
-                        fieldValue: this.props.initialValue,
+                        fieldValue: inProps.initialValue,
                         hasChanges: false
                     }
                 }
@@ -45,27 +62,26 @@ class AuthenticationTextInput extends React.Component {
                 context.executeAction(
                     TextInputActions.validateFieldValue,
                     {
-                        fieldType: this.props.fieldType,
-                        fieldName: this.props.fieldName,
-                        validationFunction: this.props.validationFunction,
+                        fieldType: inProps.fieldType,
+                        fieldName: inProps.fieldName,
+                        validationFunction: inProps.validationFunction,
                         values: {
-                            fieldValue: this.props.initialValue
+                            fieldValue: inProps.initialValue
                         }
                     }
                 );
             }
         }
 
-        if (this.props.fieldType){
-            if (this.props.fieldType == "emailInput"){
+        if (inProps.fieldType){
+            if (inProps.fieldType == "emailInput"){
                 //initialize the email input
             }
-            else if (this.props.fieldType == "passwordInput"){
+            else if (inProps.fieldType == "passwordInput"){
                 //initialize the password input
             }
         }
     }
-
     _onChangeInput(e) {
         if (this.props.onChange) {
             this.props.onChange(e);

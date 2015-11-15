@@ -16,48 +16,23 @@ import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
 var emailFieldName =  "AuthenticationEmailInput";
+var firstNameFieldName =  "AuthenticationFirstNameInput";
+var lastNameFieldName =  "AuthenticationLastNameInput";
+
 var debug = require('debug')('AuthenticationUserDetailsView');
-//todo: Higher Order Components
+
 class AuthenticationUserDetailsView extends React.Component {
 
     constructor(props, context) {
         super(props,context);
-        this.state = {
-            firstName: "",
-            lastName: ""
-        };
 
-        this._refreshStateWithProps = this._refreshStateWithProps.bind(this);
-        this._handleFirstNameInput = this._handleFirstNameInput.bind(this);
-        this._handleLastNameInput = this._handleLastNameInput.bind(this);
         this._updateUserDetails =this._updateUserDetails.bind(this);
         this._requestValidationEmail = this._requestValidationEmail.bind(this);
         this._hasChanges = this._hasChanges.bind(this);
     }
-    componentDidMount() {
-        if (this.props != null) {
-            debug("didMount ->", this.props);
-            this._refreshStateWithProps(this.props);
-        }
-    }
-    componentWillReceiveProps(nextProps) {
-        debug("willReceiveProps ->", nextProps);
-        this._refreshStateWithProps(nextProps);
-    }
-
-    _refreshStateWithProps(nextProps) {
-        if (typeof nextProps !== "undefined") {
-            this.setState({
-                firstName: nextProps.firstName,
-                lastName: nextProps.lastName
-            });
-        }
-    }
 
     _requestValidationEmail() {
         debug("Calling request verification email!");
-
-
         context.executeAction(
             AuthenticationActions.requestVerificationEmail,
             {jwt: this.props.jwt}
@@ -66,9 +41,9 @@ class AuthenticationUserDetailsView extends React.Component {
 
     _hasChanges()
     {
-        return (this.props.TextInputStore[emailFieldName].fieldValue != this.props.email ||
-            this.state.firstName != this.props.firstName ||
-            this.state.lastName != this.props.lastName );
+        return ((this.props.TextInputStore[emailFieldName] && this.props.TextInputStore[emailFieldName].hasChanges) ||
+        (this.props.TextInputStore[firstNameFieldName] && this.props.TextInputStore[firstNameFieldName].hasChanges) ||
+        (this.props.TextInputStore[lastNameFieldName] && this.props.TextInputStore[lastNameFieldName].hasChanges) );
     }
 
     _updateUserDetails() {
@@ -76,13 +51,13 @@ class AuthenticationUserDetailsView extends React.Component {
         {
             var myUser = {};
             myUser.username = this.props.user;
-            if (this.refs.AuthenticationFirstNameInput.hasChanges())
+            if (this.props.TextInputStore[firstNameFieldName] && this.props.TextInputStore[firstNameFieldName].hasChanges && this.props.TextInputStore[firstNameFieldName].isValid)
             {
-                myUser.firstName = this.refs.AuthenticationFirstNameInput.getValue();
+                myUser.firstName = this.props.TextInputStore[firstNameFieldName].fieldValue;
             }
-            if (this.refs.AuthenticationLastNameInput.hasChanges())
+            if (this.props.TextInputStore[lastNameFieldName] &&  this.props.TextInputStore[lastNameFieldName].hasChanges && this.props.TextInputStore[lastNameFieldName].isValid)
             {
-                myUser.lastName = this.refs.AuthenticationLastNameInput.getValue();
+                myUser.lastName = this.props.TextInputStore[lastNameFieldName].fieldValue;
             }
             if (this.props.TextInputStore[emailFieldName] && this.props.TextInputStore[emailFieldName].hasChanges && this.props.TextInputStore[emailFieldName].isValid)
             {
@@ -92,11 +67,10 @@ class AuthenticationUserDetailsView extends React.Component {
                 AuthenticationActions.updateUserDetailsMessage,
                 {
                     message: "Updating user details.",
-                    appearFor: 10,
+                    appearFor: 20,
                     style: "info"
                 }
             );
-
 
             context.executeAction(
                 AuthenticationActions.changeUserDetails,
@@ -106,25 +80,29 @@ class AuthenticationUserDetailsView extends React.Component {
                 }
             );
         }
-    }
-
-    _handleFirstNameInput() {
-        this.setState({
-            firstName: this.refs.AuthenticationFirstNameInput.getValue()
-        });
-    }
-
-    _handleLastNameInput() {
-        this.setState({
-            lastName: this.refs.AuthenticationLastNameInput.getValue()
-        });
+        else {
+            context.executeAction(
+                AuthenticationActions.updateUserDetailsMessage,
+                {
+                    message: "No changes to perform.",
+                    appearFor: 5,
+                    style: "warning"
+                }
+            );
+        }
     }
 
     render() {
         debug("Rendering");
-        debug ("HasChanges: " + this._hasChanges() + " emailValid: " + this.props.TextInputStore[emailFieldName].isValid)
+        //debug ("HasChanges: " + this._hasChanges() + " emailValid: " + this.props.TextInputStore[emailFieldName].isValid)
         var saveButton = <Button disabled>Save changes</Button>;
-        if (this._hasChanges() && this.props.TextInputStore[emailFieldName].isValid) {
+        if (this._hasChanges() &&
+            this.props.TextInputStore[emailFieldName] &&
+            this.props.TextInputStore[emailFieldName].isValid &&
+            this.props.TextInputStore[firstNameFieldName] &&
+            this.props.TextInputStore[firstNameFieldName].isValid &&
+            this.props.TextInputStore[lastNameFieldName] &&
+            this.props.TextInputStore[lastNameFieldName].isValid) {
             saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
         }
 
@@ -175,16 +153,17 @@ class AuthenticationUserDetailsView extends React.Component {
                     <Row>
                         <Col xs={6}>
                             <FirstNameInput
-                                ref="AuthenticationFirstNameInput"
-                                firstName={this.props.firstName}
-                                onChange={this._handleFirstNameInput}
+                                fieldName={firstNameFieldName}
+                                initialValue={this.props.firstName}
+                                validateOnChange = {true}
                                 />
                         </Col>
                         <Col xs={6}>
                             <LastNameInput
-                                ref="AuthenticationLastNameInput"
-                                lastName={this.props.lastName}
-                                onChange={this._handleLastNameInput}/>
+                                fieldName={lastNameFieldName}
+                                initialValue={this.props.lastName}
+                                validateOnChange = {true}
+                                />
                         </Col>
                     </Row>
                     <Row>

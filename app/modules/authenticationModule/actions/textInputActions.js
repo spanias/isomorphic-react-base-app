@@ -25,6 +25,28 @@ var TextInputActions = module.exports = {
         }
     },
 
+    validateFirstName: function (value) {
+        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        var re = /^$|\s/;
+        if (re.test(value)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    },
+
+    validateLastName: function (value) {
+        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        var re = /^$|\s/;
+        if (re.test(value)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    },
+
     validateFieldValue: function (context, payload, done){
         context.dispatch(
             Actions.AUTHENTICATION_UPDATE_TEXTINPUT_STORE,

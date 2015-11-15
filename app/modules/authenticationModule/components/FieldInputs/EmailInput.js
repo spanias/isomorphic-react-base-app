@@ -11,7 +11,6 @@ import {Label} from 'react-bootstrap';
 import TextInputActions  from '../../actions/textInputActions';
 
 import TextInput from './TextInput';
-import AuthenticationMainStore from '../../stores/authenticationMainStore';
 import AuthenticationTextInputStore from '../../stores/authenticationTextInputStore';
 
 var debug = require('debug')('AuthenticationEmailInput');
@@ -33,10 +32,17 @@ class AuthenticationEmailInput extends React.Component {
         }
 
         var verifiedLabel = '';
-
         verifiedLabel = <span><Button bsSize="xsmall" bsStyle="danger" onClick={this.props.requestValidationEmail}>Unverified</Button></span>;
         if (this.props.verified) {
             verifiedLabel = <span><Label bsSize="xs" bsStyle="success">Verified</Label></span>;
+        }
+
+        if (this.props.addonAfter){
+            verifiedLabel = this.props.addonAfter;
+        }
+        var validationFunction = TextInputActions.validateEmail;
+        if (this.props.validationFunction) {
+            validationFunction = this.props.validationFunction;
         }
 
         var emailInput =
@@ -46,7 +52,7 @@ class AuthenticationEmailInput extends React.Component {
                 fieldAfter={verifiedLabel}
                 placeholder = {placeholder}
                 label = {label}
-                validationFunction = {TextInputActions.validateEmail}
+                validationFunction = {validationFunction}
                 />;
         return (
             <div>
