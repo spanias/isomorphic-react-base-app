@@ -12,9 +12,9 @@ import TextInput from './TextInput';
 import TextInputActions  from '../../actions/textInputActions';
 import AuthenticationTextInputStore from '../../stores/authenticationTextInputStore';
 
-var debug = require('debug')('AuthenticationUsernameInput');
+var debug = require('debug')('AuthenticationPasswordInput');
 
-class AuthenticationUsernameInput extends React.Component {
+class AuthenticationPasswordInput extends React.Component {
 
     constructor(props, context) {
         super(props, context);
@@ -22,7 +22,7 @@ class AuthenticationUsernameInput extends React.Component {
     render() {
         debug("Rendering");
 
-        var label = "Username";
+        var label = "Password";
         if (this.props.label){
             label = this.props.label;
         }
@@ -36,38 +36,45 @@ class AuthenticationUsernameInput extends React.Component {
             addonAfter = this.props.addonAfter;
         }
 
-        var validationFunction = TextInputActions.validateUsername;
+        var validationFunction = TextInputActions.validatePassword;
         if (this.props.validationFunction) {
             validationFunction = this.props.validationFunction;
         }
-        var usernameInput =
+
+        var fieldResetOnUnmount = true;
+        if (this.props.fieldResetOnUnmount != undefined){
+            fieldResetOnUnmount = this.props.fieldResetOnUnmount;
+        }
+        var passwordInput =
             <TextInput
                 {...this.props}
-                fieldType="usernameInput"
+                fieldType="passwordInput"
                 fieldAfter={addonAfter}
+                fieldResetOnUnmount= {fieldResetOnUnmount}
                 placeholder = {placeholder}
                 label = {label}
                 validationFunction = {validationFunction}
                 />;
         return (
             <div>
-                {usernameInput}
+                {passwordInput}
             </div>
         );
     }
 }
-AuthenticationUsernameInput = connectToStores(AuthenticationUsernameInput,
+AuthenticationPasswordInput = connectToStores(AuthenticationPasswordInput,
     [AuthenticationTextInputStore],
     function (context, props) {
         return {
             TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
         };
     });
-AuthenticationUsernameInput.propTypes = {
+AuthenticationPasswordInput.propTypes = {
     fieldName: React.PropTypes.string.isRequired,
+    fieldResetOnUnmount: React.PropTypes.bool,
     initialValue: React.PropTypes.string,
     validateOnChange: React.PropTypes.bool,
-    validateOnBlur: React.PropTypes.bool,
+    validateOnBlur: React.PropTypes.bool
 };
 
-export default AuthenticationUsernameInput;
+export default AuthenticationPasswordInput;

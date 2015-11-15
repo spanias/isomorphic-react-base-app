@@ -47,6 +47,27 @@ var TextInputActions = module.exports = {
         }
     },
 
+    validateUsername: function (value) {
+        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        var re = /^$|\s|;/;
+        if (re.test(value)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    },
+    validatePassword: function (value) {
+        // regex from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        var re = /^$|\s/;
+        if (re.test(value)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    },
+
     validateFieldValue: function (context, payload, done){
         context.dispatch(
             Actions.AUTHENTICATION_UPDATE_TEXTINPUT_STORE,
@@ -62,6 +83,11 @@ var TextInputActions = module.exports = {
 
     updateFieldValue: function (context,payload,done) {
         context.dispatch(Actions.AUTHENTICATION_UPDATE_TEXTINPUT_STORE, payload);
+        done();
+    },
+
+    eraseFieldData: function (context, payload, done){
+        context.dispatch(Actions.AUTHENTICATION_RESET_TEXTINPUT_STORE, payload);
         done();
     },
     onChange: function (context, payload, done) {

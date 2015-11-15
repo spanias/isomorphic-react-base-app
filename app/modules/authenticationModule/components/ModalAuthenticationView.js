@@ -4,14 +4,20 @@
  */
 
 import React from 'react';
-//import {connectToStores} from 'fluxible-addons-react';
+import {connectToStores} from 'fluxible-addons-react';
 import {Modal, Button, Input, Alert, ModalTrigger} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserView from './UserView';
-import AuthenticationLoginView from './LoginForm';
+import LoginForm from './LoginForm';
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
+import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
+
+
 var debug = require('debug')('AuthenticationModalView');
+var usernameFieldName = "AuthenticationModalUsernameField";
+var passwordFieldName = "AuthenticationModalPasswordField";
+
 
 class AuthenticationModalView extends React.Component {
 
@@ -31,8 +37,8 @@ class AuthenticationModalView extends React.Component {
         if (!this.props.loggedIn) {
             context.executeAction(
                 AuthenticationActions.login, {
-                    username: this.refs.loginView.getUsernameValue(),
-                    password: this.refs.loginView.getPasswordValue(),
+                    username: this.props.TextInputStore[usernameFieldName].fieldValue,
+                    password: this.props.TextInputStore[passwordFieldName].fieldValue,
                     rememberMe: this.refs.rememberMeInput.getChecked()
                 }
             );
@@ -67,7 +73,7 @@ class AuthenticationModalView extends React.Component {
 
         //if there is no user logged in show the input form and change the main page buttons
         if (!this.props.loggedIn){
-            form = <AuthenticationLoginView ref='loginView' onSubmit={this._login} />;
+            form = <LoginForm usernameFieldName={usernameFieldName} passwordFieldName={passwordFieldName} onSubmit={this._login} />;
             rememberMeCheckbox = <Input type="checkbox" label="Remember me" ref="rememberMeInput" />;
         }
 
@@ -113,7 +119,13 @@ class AuthenticationModalView extends React.Component {
         );
     }
 }
-
+AuthenticationModalView = connectToStores(AuthenticationModalView,
+    [AuthenticationTextInputStore],
+    function (context, props) {
+        return {
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+        };
+    });
 AuthenticationModalView.propTypes = {
     jwt: React.PropTypes.string,
     user:React.PropTypes.string,

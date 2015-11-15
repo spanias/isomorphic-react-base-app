@@ -5,32 +5,16 @@
 
 import React from 'react';
 import {Input, Row, Col, Alert} from 'react-bootstrap';
-import AuthenticationActions  from '../actions/authenticationActions';
+
+import UsernameInput from "./FieldInputs/UsernameInput";
+import PasswordInput from "./FieldInputs/PasswordInput";
 
 var debug = require('debug')('AuthenticationLoginView');
 
 class AuthenticationLoginView extends React.Component {
-
-    getUsernameValue() {
-        return this.state.usernameText;
-    }
-
-    getPasswordValue() {
-        return this.state.passwordText;
-    }
-
     constructor(props, context) {
         super();
-        this.state= {
-            usernameText: props.usernameText,
-            passwordText: props.passwordText
-        };
-        this._handleKeyPress = this._handleKeyPress.bind(this);
-        this._handleUsernameInput = this._handleUsernameInput.bind(this);
-        this._handlePasswordInput = this._handlePasswordInput.bind(this);
-        this.getUsernameValue = this.getUsernameValue.bind(this);
-        this.getPasswordValue = this.getPasswordValue.bind(this);
-    }
+        this._handleKeyPress = this._handleKeyPress.bind(this);}
 
     _handleKeyPress(event) {
         var charCode = event.which || event.charCode || event.keyCode || 0;
@@ -41,34 +25,31 @@ class AuthenticationLoginView extends React.Component {
         }
     }
 
-    _handleUsernameInput()
-    {
-        this.setState({
-            usernameText: this.refs.userInput.getValue()
-        });
-    }
-
-    _handlePasswordInput()
-    {
-        this.setState({
-            passwordText: this.refs.passInput.getValue()
-        });
-    }
-
     render() {
+        var usernameText = "";
+        if (this.props.usernameText) {
+            usernameText = this.props.usernameText;
+        }
+        var passwordText = "";
+        if (this.props.passwordText) {
+            passwordText = this.props.passwordText;
+        }
         var form =
                 <Row>
                     <Col xs={6}>
-                        <Input type="text" ref="userInput" placeholder="Username"
-                               value = {this.state.usernameText}
-                               onChange={this._handleUsernameInput}
-                               onKeyPress={this._handleKeyPress}/>
+                        <UsernameInput
+                            fieldName={this.props.usernameFieldName}
+                            initialValue={usernameText}
+                            validateOnChange = {true}
+                            onKeyPress={this._handleKeyPress}/>
+
                     </Col>
                     <Col xs={6}>
-                        <Input type="password" ref="passInput"  placeholder="Password"
-                               value = {this.state.passwordText}
-                               onChange={this._handlePasswordInput}
-                               onKeyPress={this._handleKeyPress}/>
+                        <PasswordInput
+                            fieldName={this.props.passwordFieldName}
+                            initialValue={passwordText}
+                            validateOnChange = {true}
+                            onKeyPress={this._handleKeyPress}/>
                     </Col>
                 </Row>;
 
@@ -77,7 +58,9 @@ class AuthenticationLoginView extends React.Component {
 }
 
 AuthenticationLoginView.propTypes = {
+    usernameFieldName: React.PropTypes.string.isRequired,
     usernameText: React.PropTypes.string,
+    passwordFieldName: React.PropTypes.string.isRequired,
     passwordText: React.PropTypes.string,
     onSubmit: React.PropTypes.func
 };

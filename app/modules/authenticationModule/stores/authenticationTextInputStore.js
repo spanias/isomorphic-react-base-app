@@ -60,18 +60,12 @@ class AuthenticationTextInputStore extends BaseStore {
     //If field name is defined, reset the particular field name
     resetStore(payload) {
         if (payload.fieldName != undefined) {
-            this.propStore[payload.fieldName].fieldValue = "";
-            this.propStore[payload.fieldName].fieldStyle = null;
-            this.propStore[payload.fieldName].fieldAfter = null;
-            this.propStore[payload.fieldName].isValid = false;
-            this.propStore[payload.fieldName].hasChanges = false;
-
-            if (payload == "emailInput") {
-                this.propStore[payload.fieldName].emailVerified = false;
+            if (this.propStore[payload.fieldName]) {
+                delete this.propStore[payload.fieldName];
             }
         }
         else {
-            this.propStore = [];
+            this.propStore = {};
         }
         this.emitChange();
     }

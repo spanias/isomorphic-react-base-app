@@ -9,7 +9,6 @@ import {Button, Input} from 'react-bootstrap';
 import {Label} from 'react-bootstrap';
 
 import TextInputActions  from '../../actions/textInputActions';
-
 import AuthenticationTextInputStore from '../../stores/authenticationTextInputStore';
 import AuthenticationMainStore from '../../stores/authenticationMainStore';
 
@@ -44,6 +43,16 @@ class AuthenticationTextInput extends React.Component {
         }
     }
 
+    componentWillUnmount(){
+        if (this.props.fieldResetOnUnmount) {
+            context.executeAction(
+                TextInputActions.eraseFieldData,
+                {
+                    fieldName: this.props.fieldName
+                }
+            );
+        }
+    }
     _initializeWithProps(inProps){
         if (inProps.initialValue) {
             context.executeAction(
@@ -171,7 +180,7 @@ class AuthenticationTextInput extends React.Component {
 
         var inputType = "text";
         if (this.props.fieldType == "passwordInput"){
-            inputText = "password";
+            inputType = "password";
         }
 
         var textInput =
@@ -204,6 +213,7 @@ AuthenticationTextInput = connectToStores(AuthenticationTextInput,
 AuthenticationTextInput.propTypes = {
     fieldType: React.PropTypes.string.isRequired,
     fieldName: React.PropTypes.string.isRequired,
+    fieldResetOnUnmount: React.PropTypes.bool,
     initialValue: React.PropTypes.string,
     validateOnChange: React.PropTypes.bool,
     validateOnBlur: React.PropTypes.bool,
