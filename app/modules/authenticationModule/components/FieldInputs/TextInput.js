@@ -36,7 +36,8 @@ class AuthenticationTextInput extends React.Component {
         if (nextProps.initialValue != this.props.initialValue ||
              nextProps.fieldName != this.props.fieldName ||
              nextProps.fieldType != this.props.fieldType ||
-             nextProps.validationFunction != this.props.validationFunction) {
+             nextProps.validationFunction != this.props.validationFunction ||
+             nextProps.isValid != undefined) {
 
             this._initializeWithProps(nextProps)
 
@@ -53,6 +54,7 @@ class AuthenticationTextInput extends React.Component {
             );
         }
     }
+
     _initializeWithProps(inProps){
         if (inProps.initialValue) {
             context.executeAction(
@@ -67,7 +69,7 @@ class AuthenticationTextInput extends React.Component {
                 }
             );
 
-            if (this.props.validationFunction) {
+            if (inProps.validationFunction) {
                 context.executeAction(
                     TextInputActions.validateFieldValue,
                     {
@@ -81,7 +83,19 @@ class AuthenticationTextInput extends React.Component {
                 );
             }
         }
-
+        if (inProps.isValid != undefined && inProps.isValid != this.props.isValid)
+        {
+            context.executeAction(
+                TextInputActions.updateFieldValue,
+                {
+                    fieldType: inProps.fieldType,
+                    fieldName: inProps.fieldName,
+                    values: {
+                        isValid: inProps.isValid
+                    }
+                }
+            );
+        }
         if (inProps.fieldType){
             if (inProps.fieldType == "emailInput"){
                 //initialize the email input

@@ -4,97 +4,69 @@
  */
 
 import React from 'react';
-import {Input, Row, Col} from 'react-bootstrap';
+import {Row, Col} from 'react-bootstrap';
+import {connectToStores} from 'fluxible-addons-react';
+
+import AuthenticationTextInputStore from '../../stores/authenticationTextInputStore';
+
+import PasswordInput from "./PasswordInput";
 
 var debug = require('debug')('AuthenticationNewPasswordInput');
 class AuthenticationNewPasswordInput extends React.Component {
 
     constructor(props, context) {
         super(props,context);
-
-        this.state = {
-            newPassword: "",
-            confirmPassword: ""
-        };
-
-        this._validateNewPasswords = this._validateNewPasswords.bind(this);
-        this._handleNewPasswordInput = this._handleNewPasswordInput.bind(this);
-        this._handleConfirmPasswordInput = this._handleConfirmPasswordInput.bind(this);
-        this.isValid = this.isValid.bind(this);
-        this.getNewPasswordValue= this.getNewPasswordValue.bind(this);
-        this.getConfirmPasswordValue = this.getConfirmPasswordValue.bind(this);
+        this._confirmPasswordFieldValidation  = this._confirmPasswordFieldValidation.bind(this);
     }
-
-    _validateNewPasswords() {
-        if  (this.state.newPassword == this.state.confirmPassword && this.state.newPassword != '')
-        {
-            return 'success';
+    _confirmPasswordFieldValidation(value){
+        if (this.props.TextInputStore[this.props.newPasswordFieldName] &&
+            this.props.TextInputStore[this.props.newPasswordFieldName].fieldValue == value){
+            return true;
         }
         else {
-            return 'error';
+            return false;
         }
     }
-
-    _handleNewPasswordInput() {
-        this.setState({
-            newPassword: this.refs.newPassword.getValue()
-        });
-        if (this.props.onNewPasswordChange){
-            this.props.onNewPasswordChange();
-        }
-    }
-    _handleConfirmPasswordInput() {
-        this.setState({
-            confirmPassword: this.refs.confirmPassword.getValue()
-        });
-        if (this.props.onConfirmPasswordChange){
-            this.props.onConfirmPasswordChange();
-        }
-    }
-
-    isValid(){
-        return (this.refs.newPassword.getValue() == this.refs.confirmPassword.getValue() && this.refs.newPassword.getValue() != '')
-    }
-    getNewPasswordValue(){
-        return this.refs.newPassword.getValue();
-    }
-
-    getConfirmPasswordValue(){
-        return this.refs.confirmPassword.getValue();
-    }
-
     render() {
         debug("Rendering");
         return (
             <Row>
                 <Col xs={6}>
-                    <Input
-                        type="password"
+                    <PasswordInput
+                        fieldName={this.props.newPasswordFieldName}
+                        initialValue=""
                         placeholder="New Password"
                         label="New password"
-                        ref="newPassword"
-                        bsStyle={this._validateNewPasswords()}
-                        onChange={this._handleNewPasswordInput}
-                        />
+                        validateOnChange = {true} />
                 </Col>
                 <Col xs={6}>
-                    <Input
-                        type="password"
+                    <PasswordInput
+                        fieldName={this.props.confirmPasswordFieldName}
+                        initialValue=""
                         placeholder="Confirm password"
                         label="Confirm password"
-                        bsStyle={this._validateNewPasswords()}
-                        onChange={this._handleConfirmPasswordInput}
-                        ref="confirmPassword"
-                        />
+                        isValid={(this.props.TextInputStore[this.props.newPasswordFieldName] &&
+                                    this.props.TextInputStore[this.props.confirmPasswordFieldName] &&
+                                    this.props.TextInputStore[this.props.newPasswordFieldName].fieldValue == this.props.TextInputStore[this.props.confirmPasswordFieldName].fieldValue)}
+                        validationFunction = {this._confirmPasswordFieldValidation}
+                        validateOnChange = {true} />
                 </Col>
             </Row>
         );
     }
 }
+    AuthenticationNewPasswordInput = connectToStores(AuthenticationNewPasswordInput,
+        [AuthenticationTextInputStore],
+        function (context, props) {
+            return {
+                TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            };
+        });
+
 
 AuthenticationNewPasswordInput.propTypes = {
-    onNewPasswordChange: React.PropTypes.func,
-    onConfirmPasswordChange: React.PropTypes.func
+    newPasswordFieldName: React.PropTypes.string.isRequired,
+    confirmPasswordFieldName: React.PropTypes.string.isRequired,
 };
 
 export default AuthenticationNewPasswordInput;

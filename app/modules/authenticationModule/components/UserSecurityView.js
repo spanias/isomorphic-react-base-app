@@ -5,44 +5,35 @@
 
 import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
-import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
+import {Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
+
+import PasswordInput from "./FieldInputs/PasswordInput";
+
 import NewPasswordInput from './FieldInputs/NewPasswordInput';
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
+import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
+
 var debug = require('debug')('AuthenticationUserSecurityView');
+
+var currentPasswordFieldName = "AuthenticationCurrentPasswordField";
+var newPasswordFieldName = "AuthenticationNewPasswordField";
+var confirmPasswordFieldName = "AuthenticationConfirmPasswordField";
+
 class AuthenticationUserSecurityView extends React.Component {
 
     constructor(props, context) {
         super(props,context);
-
-        this.state = {
-            currentPassword: "",
-            newPassword: "",
-            newPasswordInputValid: false,
-            confirmPassword: ""
-        };
-
-        this._validateCurrentPassword = this._validateCurrentPassword.bind(this);
-        this._handleCurrentPasswordInput = this._handleCurrentPasswordInput.bind(this);
-        this._handleNewPasswordInput = this._handleNewPasswordInput.bind(this);
-        this._handleConfirmPasswordInput = this._handleConfirmPasswordInput.bind(this);
         this._changePassword = this._changePassword.bind(this);
     }
 
-    _validateCurrentPassword() {
-        if  (this.state.currentPassword != "")
-        {
-            return 'success';
-        }
-        else {
-            return 'error';
-        }
-    }
-
     _changePassword() {
-        if(this._validateCurrentPassword() == 'success' && this.state.newPasswordInputValid)
+        if(this.props.TextInputStore[currentPasswordFieldName] && this.props.TextInputStore[currentPasswordFieldName].isValid &&
+            this.props.TextInputStore[newPasswordFieldName] && this.props.TextInputStore[newPasswordFieldName].isValid &&
+            this.props.TextInputStore[confirmPasswordFieldName] && this.props.TextInputStore[confirmPasswordFieldName].isValid
+            )
         {
             context.executeAction(
                 AuthenticationActions.updateSecurityMessage,
@@ -58,8 +49,8 @@ class AuthenticationUserSecurityView extends React.Component {
                 {
                     jwt: this.props.jwt,
                     user: this.props.user,
-                    currentPassword: this.state.currentPassword,
-                    newPassword: this.state.newPassword
+                    password: this.props.TextInputStore[currentPasswordFieldName].fieldValue,
+                    newPassword: this.props.TextInputStore[newPasswordFieldName].fieldValue
                 }
             );
         }
@@ -74,29 +65,14 @@ class AuthenticationUserSecurityView extends React.Component {
             );
         }
     }
-    _handleCurrentPasswordInput() {
-        this.setState({
-            currentPassword: this.refs.currentPassword.getValue()
 
-        });
-    }
-    _handleNewPasswordInput() {
-        this.setState({
-            newPassword: this.refs.newPasswordInput.getNewPasswordValue(),
-            newPasswordInputValid: this.refs.newPasswordInput.isValid()
-        });
-    }
-    _handleConfirmPasswordInput() {
-        this.setState({
-            confirmPassword: this.refs.newPasswordInput.getConfirmPasswordValue(),
-            newPasswordInputValid: this.refs.newPasswordInput.isValid()
-        });
-    }
     render() {
 
         debug("Rendering");
         var changePasswordButton = <Button disabled>Change Password</Button>;
-        if (this._validateCurrentPassword() == 'success' && this.state.newPasswordInputValid) {
+        if (this.props.TextInputStore[currentPasswordFieldName] && this.props.TextInputStore[currentPasswordFieldName].isValid &&
+            this.props.TextInputStore[newPasswordFieldName] && this.props.TextInputStore[newPasswordFieldName].isValid &&
+            this.props.TextInputStore[confirmPasswordFieldName] && this.props.TextInputStore[confirmPasswordFieldName].isValid) {
             changePasswordButton = <Button onClick={this._changePassword}>Change Password</Button>;
         }
 
@@ -113,19 +89,18 @@ class AuthenticationUserSecurityView extends React.Component {
                     <Panel header="Security" bsStyle="primary">
                         <Row>
                             <Col xs={12}>
-                                <Input
-                                    type="password"
+
+                                <PasswordInput
+                                    fieldName={currentPasswordFieldName}
+                                    initialValue=""
                                     placeholder="Current password"
                                     label="Current password"
-                                    ref="currentPassword"
-                                    bsStyle={this._validateCurrentPassword()}
-                                    onChange={this._handleCurrentPasswordInput}
-                                    value={this.state.currentPassword}/>
+                                    validateOnChange = {true} />
                             </Col>
                         </Row>
-                        <NewPasswordInput ref='newPasswordInput'
-                            onNewPasswordChange = {this._handleNewPasswordInput}
-                            onConfirmPasswordChange = {this._handleConfirmPasswordInput}
+                        <NewPasswordInput
+                            newPasswordFieldName = {newPasswordFieldName}
+                            confirmPasswordFieldName = {confirmPasswordFieldName}
                             />
 
                         {errorLabel}
@@ -136,6 +111,13 @@ class AuthenticationUserSecurityView extends React.Component {
         );
     }
 }
+AuthenticationUserSecurityView = connectToStores(AuthenticationUserSecurityView,
+    [AuthenticationTextInputStore],
+    function (context, props) {
+        return {
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+        };
+    });
 
 AuthenticationUserSecurityView.propTypes = {
     jwt: React.PropTypes.string.isRequired,
