@@ -6,6 +6,7 @@
 import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from 'react-bootstrap';
+
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 import LoginForm from '../components/LoginForm';
@@ -35,7 +36,7 @@ class EmailVerificationPage extends React.Component {
     }
     _submitToken()
     {
-        if (this.props.ApplicationMainStore.loggedIn && this.state.tokenToSubmit) {
+        if (this.props.AuthenticationMainStore.loggedIn && this.state.tokenToSubmit) {
             context.executeAction(
                 AuthenticationActions.updateVerifyEmailMessage,
                 {
@@ -47,7 +48,7 @@ class EmailVerificationPage extends React.Component {
             context.executeAction(
                 AuthenticationActions.verifyEmail,
                 {
-                    jwt: this.props.ApplicationMainStore.jwt,
+                    jwt: this.props.AuthenticationMainStore.jwt,
                     token: this.state.tokenToSubmit
                 }
             );
@@ -58,7 +59,7 @@ class EmailVerificationPage extends React.Component {
 
     _login(event) {
         debug("Logging in: ", this.props.TextInputStore[usernameFieldName].fieldValue,this.props.TextInputStore[passwordFieldName].fieldValue )
-        if (!this.props.ApplicationMainStore.loggedIn) {
+        if (!this.props.AuthenticationMainStore.loggedIn) {
             context.executeAction(
                 AuthenticationActions.login, {
                     username: this.props.TextInputStore[usernameFieldName].fieldValue,
@@ -82,18 +83,18 @@ class EmailVerificationPage extends React.Component {
         var verificationAlert = '';
 
 
-        if (this.props.ApplicationMainStore.loginMessage) {
-            loginAlert = <TimedAlertBox style={this.props.ApplicationMainStore.loginMessageStyle}
-                                        message={this.props.ApplicationMainStore.loginMessage}
-                                        appearsUntil={this.props.ApplicationMainStore.loginMessageValidUntil}/>;
+        if (this.props.AuthenticationMainStore.loginMessage) {
+            loginAlert = <TimedAlertBox style={this.props.AuthenticationMainStore.loginMessageStyle}
+                                        message={this.props.AuthenticationMainStore.loginMessage}
+                                        appearsUntil={this.props.AuthenticationMainStore.loginMessageValidUntil}/>;
         }
-        if (this.props.ApplicationMainStore.verifyEmailMessage) {
-            verificationAlert =  <TimedAlertBox style={this.props.ApplicationMainStore.verifyEmailMessageStyle}
-                                                message={this.props.ApplicationMainStore.verifyEmailMessage}
-                                                appearsUntil={this.props.ApplicationMainStore.verifyEmailMessageValidUntil}/>;
+        if (this.props.AuthenticationMainStore.verifyEmailMessage) {
+            verificationAlert =  <TimedAlertBox style={this.props.AuthenticationMainStore.verifyEmailMessageStyle}
+                                                message={this.props.AuthenticationMainStore.verifyEmailMessage}
+                                                appearsUntil={this.props.AuthenticationMainStore.verifyEmailMessageValidUntil}/>;
         }
         //if there is no user logged in show the input form and change the main page buttons
-        if (!this.props.ApplicationMainStore.loggedIn){
+        if (!this.props.AuthenticationMainStore.loggedIn){
             loginButton = <Button onClick={this._login} bsStyle="primary">Sign In</Button>;
             loginForm =
                 <div>
@@ -138,7 +139,7 @@ EmailVerificationPage.propTypes = {
 EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore, AuthenticationTextInputStore], function (context, props) {
     return {
         TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
-        ApplicationMainStore: context.getStore(AuthenticationMainStore).getState()
+        AuthenticationMainStore: context.getStore(AuthenticationMainStore).getState()
         };
 });
 export default EmailVerificationPage;

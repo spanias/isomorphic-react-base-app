@@ -23,16 +23,16 @@ class AuthenticationFirstNameInput extends React.Component {
         debug("Rendering");
 
         var label = "First Name";
-        if (this.props.label){
+        if (this.props.label!= undefined){
             label = this.props.label;
         }
         var placeholder = "";
-        if (this.props.placeholder){
+        if (this.props.placeholder!= undefined){
             placeholder = this.props.placeholder;
         }
 
         var addonAfter = '';
-        if (this.props.addonAfter){
+        if (this.props.addonAfter!= undefined){
             addonAfter = this.props.addonAfter;
         }
 
@@ -67,7 +67,7 @@ AuthenticationFirstNameInput.propTypes = {
     fieldName: React.PropTypes.string.isRequired,
     initialValue: React.PropTypes.string,
     validateOnChange: React.PropTypes.bool,
-    validateOnBlur: React.PropTypes.bool,
+    validateOnBlur: React.PropTypes.bool
 };
 
 export default AuthenticationFirstNameInput;

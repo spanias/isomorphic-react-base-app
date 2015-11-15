@@ -228,6 +228,7 @@ AuthenticationTextInput = connectToStores(AuthenticationTextInput,
 AuthenticationTextInput.propTypes = {
     fieldType: React.PropTypes.string.isRequired,
     fieldName: React.PropTypes.string.isRequired,
+    fieldAfter: React.PropTypes.any,
     fieldResetOnUnmount: React.PropTypes.bool,
     initialValue: React.PropTypes.string,
     validateOnChange: React.PropTypes.bool,

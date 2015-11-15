@@ -7,84 +7,78 @@ import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
 import { Panel, Button, Input, Row, Col} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
-import AuthenticationMainStore from '../stores/authenticationMainStore';
 
-import AuthenticationFirstNameInput from "../components/FieldInputs/FirstNameInput";
-import AuthenticationUsernameInput from "../components/FieldInputs/UsernameInput";
-import AuthenticationLastNameInput from "../components/FieldInputs/LastNameInput";
-import AuthenticationEmailInput from "../components/FieldInputs/EmailInput";
-import AuthenticationNewPasswordInput from '../components/FieldInputs/NewPasswordInput';
+import AuthenticationMainStore from '../stores/authenticationMainStore';
+import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
+
+import FirstNameInput from "../components/FieldInputs/FirstNameInput";
+import UsernameInput from "../components/FieldInputs/UsernameInput";
+import LastNameInput from "../components/FieldInputs/LastNameInput";
+
+import EmailInput from "../components/FieldInputs/EmailInput";
+import NewPasswordInput from '../components/FieldInputs/NewPasswordInput';
+
+import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+
 
 var debug = require('debug')('CreateUserPage');
+
+var usernameFieldName = "AuthenticationCreateUsernameField";
+var passwordFieldName = "AuthenticationCreatePasswordField";
+var emailFieldName = "AuthenticationCreateEmailField";
+var newPasswordFieldName = "AuthenticationCreateNewPasswordField";
+var confirmPasswordFieldName = "AuthenticationCreateConfirmPasswordField";
+var firstNameFieldName = "AuthenticationCreateFirstNameField";
+var lastNameFieldName = "AuthenticationCreateLastNameField";
 
 class CreateUserPage extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {
-            newPassword: "",
-            newPasswordInputValid: false,
-            confirmPassword: ""
-        };
-        this._handleNewPasswordInput = this._handleNewPasswordInput.bind(this);
-        this._handleConfirmPasswordInput = this._handleConfirmPasswordInput.bind(this);
-    }
 
-    _handleNewPasswordInput() {
-        this.setState({
-            newPassword: this.refs.newPasswordInput.getNewPasswordValue(),
-            newPasswordInputValid: this.refs.newPasswordInput.isValid()
-        });
-    }
-    _handleConfirmPasswordInput() {
-        this.setState({
-            confirmPassword: this.refs.newPasswordInput.getConfirmPasswordValue(),
-            newPasswordInputValid: this.refs.newPasswordInput.isValid()
-        });
     }
 
     render() {
         var createUserForm = '';
-        if (!this.props.loggedIn)
+        if (!this.props.AuthenticationMainStore.loggedIn)
         {
             createUserForm=  <div className="authentication-createUser-group">
                 <Panel header="New User Information" bsStyle="primary">
                     <Row>
                         <Col xs={6}>
-                            <AuthenticationUsernameInput
-                                ref="AuthenticationUsernameInput"
-                                username={this.props.username}
-                                onChange={this._handleUsernameInput}
+                            <UsernameInput
+                                fieldName={usernameFieldName}
+                                username={this.props.AuthenticationMainStore.username}
                                 />
                         </Col>
                         <Col xs={6}>
-                            <AuthenticationEmailInput
-                                ref="AuthenticationEmailInput"
-                                email={this.props.email}
-                                verified={this.props.verified}
-                                requestValidationEmail={this._requestValidationEmail}
-                                onChange={this._handleEmailChange}
+                            <EmailInput
+                                fieldName={emailFieldName}
+                                addonAfter=""
+                                initialValue={this.props.AuthenticationMainStore.email}
+                                validateOnChange = {true}
                                 />
                         </Col>
                     </Row>
 
-                    <AuthenticationNewPasswordInput ref='newPasswordInput'
-                                                    onNewPasswordChange = {this._handleNewPasswordInput}
-                                                    onConfirmPasswordChange = {this._handleConfirmPasswordInput}
+                    <NewPasswordInput
+                        newPasswordFieldName = {newPasswordFieldName}
+                        confirmPasswordFieldName = {confirmPasswordFieldName}
                         />
 
                     <Row>
                         <Col xs={6}>
-                            <AuthenticationFirstNameInput
-                                ref="AuthenticationFirstNameInput"
-                                firstName={this.props.firstName}
-                                onChange={this._handleFirstNameInput}
+                            <FirstNameInput
+                                fieldName={firstNameFieldName}
+                                initialValue={this.props.AuthenticationMainStore.firstName}
+                                validateOnChange = {true}
                                 />
                         </Col>
                         <Col xs={6}>
-                            <AuthenticationLastNameInput
-                                ref="AuthenticationLastNameInput"
-                                lastName={this.props.lastName}
-                                onChange={this._handleLastNameInput}/>
+                            <LastNameInput
+                                fieldName={lastNameFieldName}
+                                initialValue={this.props.AuthenticationMainStore.lastName}
+                                validateOnChange = {true}
+                                />
                         </Col>
                     </Row>
                 </Panel>
@@ -103,7 +97,10 @@ CreateUserPage.propTypes = {
 
 };
 
-CreateUserPage = connectToStores(CreateUserPage, [AuthenticationMainStore], function (context, props) {
-    return context.getStore(AuthenticationMainStore).getState();
+CreateUserPage = connectToStores(CreateUserPage, [AuthenticationMainStore, AuthenticationTextInputStore], function (context, props) {
+    return {
+        TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
+        AuthenticationMainStore: context.getStore(AuthenticationMainStore).getState()
+    };
 });
 export default CreateUserPage;
