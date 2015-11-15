@@ -185,6 +185,7 @@ class AuthenticationTextInput extends React.Component {
 
         var textInput =
             <Input
+                {...this.props}
                 type={inputType}
                 placeholder={placeholder}
                 label={label}

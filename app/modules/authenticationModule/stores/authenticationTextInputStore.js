@@ -61,7 +61,7 @@ class AuthenticationTextInputStore extends BaseStore {
     resetStore(payload) {
         if (payload.fieldName != undefined) {
             if (this.propStore[payload.fieldName]) {
-                delete this.propStore[payload.fieldName];
+                 this.propStore[payload.fieldName] = undefined;
             }
         }
         else {
