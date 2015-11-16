@@ -10,14 +10,11 @@ import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
 import PasswordInput from "./FieldInputs/PasswordInput";
-
 import NewPasswordInput from './FieldInputs/NewPasswordInput';
-import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
-import MessagingActions from '../actions/messagingActions';
-import MessagingStore from '../stores/messagingStore';
+import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
 
 var debug = require('debug')('AuthenticationUserSecurityView');
 
@@ -57,7 +54,8 @@ class AuthenticationUserSecurityView extends React.Component {
                     jwt: this.props.jwt,
                     user: this.props.user,
                     password: this.props.TextInputStore[currentPasswordFieldName].fieldValue,
-                    newPassword: this.props.TextInputStore[newPasswordFieldName].fieldValue
+                    newPassword: this.props.TextInputStore[newPasswordFieldName].fieldValue,
+                    messagingName: userSecurityViewMessageName
                 }
             );
         }
@@ -86,12 +84,7 @@ class AuthenticationUserSecurityView extends React.Component {
             changePasswordButton = <Button onClick={this._changePassword}>Change Password</Button>;
         }
 
-        var errorLabel = '';
-        if (this.props.MessagingStore[userSecurityViewMessageName] && this.props.MessagingStore[userSecurityViewMessageName].message) {
-            errorLabel = <TimedAlertBox style={this.props.MessagingStore[userSecurityViewMessageName] ? this.props.MessagingStore[userSecurityViewMessageName].messageStyle : "info"}
-                                        message={this.props.MessagingStore[userSecurityViewMessageName] ? this.props.MessagingStore[userSecurityViewMessageName].message : null }
-                                        appearsUntil={this.props.MessagingStore[userSecurityViewMessageName] ? this.props.MessagingStore[userSecurityViewMessageName].messageValidUntil : null } />;
-        }
+        var errorLabel = <TimedAlertBox messagingName={userSecurityViewMessageName} />;
 
         return (
             <div>
@@ -112,7 +105,6 @@ class AuthenticationUserSecurityView extends React.Component {
                             newPasswordFieldName = {newPasswordFieldName}
                             confirmPasswordFieldName = {confirmPasswordFieldName}
                             />
-
                         {errorLabel}
                         {changePasswordButton}
                     </Panel>
@@ -122,11 +114,10 @@ class AuthenticationUserSecurityView extends React.Component {
     }
 }
 AuthenticationUserSecurityView = connectToStores(AuthenticationUserSecurityView,
-    [AuthenticationTextInputStore, MessagingStore],
+    [AuthenticationTextInputStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
-            MessagingStore: context.getStore(MessagingStore).getState()
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
         };
     });
 

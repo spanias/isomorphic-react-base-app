@@ -4,13 +4,15 @@
  */
 var debug = require('debug')('MessagingStore');
 import {BaseStore} from 'fluxible/addons';
-import Actions from "../actions/constant";
+
+import  Actions from "../actions/constant";
 
 class MessagingStore extends BaseStore {
     constructor(dispatcher) {
         super(dispatcher);
         this.propStore = {};
     }
+
     updateStore(payload) {
         var changes = false;
         debug("Updating store using payload: " , payload);
@@ -56,6 +58,7 @@ class MessagingStore extends BaseStore {
     getState() {
         return this.propStore;
     }
+
     getStateOfField(payload) {
         if (payload) {
             if (this.propStore[payload]) {
@@ -77,6 +80,7 @@ class MessagingStore extends BaseStore {
     }
 }
 MessagingStore.storeName = 'messagingStore';
+
 MessagingStore.handlers = {
     [Actions.UPDATE_MESSAGING_STORE]: 'updateStore',
     [Actions.RESET_MESSAGING_STORE]: 'resetStore'

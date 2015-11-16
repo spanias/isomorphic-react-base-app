@@ -9,12 +9,9 @@ import {Modal, Button, Input, Alert, ModalTrigger} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserView from './UserView';
 import LoginForm from './LoginForm';
-import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
-
-import MessagingActions from '../actions/messagingActions';
-import MessagingStore from '../stores/messagingStore';
 
 var debug = require('debug')('AuthenticationModalView');
 var usernameFieldName = "AuthenticationModalUsernameField";
@@ -68,15 +65,9 @@ class AuthenticationModalView extends React.Component {
         }
 
         var form = '';
-        var alert ='';
+        var alert =<TimedAlertBox messagingName={ModalLoginViewMessageName}/>;
         var rememberMeCheckbox = '';
-        if (this.props.MessagingStore[ModalLoginViewMessageName] && this.props.MessagingStore[ModalLoginViewMessageName].message) {
-            alert = <TimedAlertBox style={this.props.MessagingStore[ModalLoginViewMessageName] ? this.props.MessagingStore[ModalLoginViewMessageName].messageStyle : "info"}
-                                        message={this.props.MessagingStore[ModalLoginViewMessageName] ? this.props.MessagingStore[ModalLoginViewMessageName].message : null }
-                                        appearsUntil={this.props.MessagingStore[ModalLoginViewMessageName] ? this.props.MessagingStore[ModalLoginViewMessageName].messageValidUntil : null } />;
-        }
 
-        //if there is no user logged in show the input form and change the main page buttons
         if (!this.props.loggedIn){
             form = <LoginForm usernameFieldName={usernameFieldName} passwordFieldName={passwordFieldName} onSubmit={this._login} />;
             rememberMeCheckbox = <Input type="checkbox" label="Remember me" ref="rememberMeInput" />;
@@ -117,11 +108,10 @@ class AuthenticationModalView extends React.Component {
     }
 }
 AuthenticationModalView = connectToStores(AuthenticationModalView,
-    [AuthenticationTextInputStore, MessagingStore],
+    [AuthenticationTextInputStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
-            MessagingStore: context.getStore(MessagingStore).getState()
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
         };
     });
 AuthenticationModalView.propTypes = {

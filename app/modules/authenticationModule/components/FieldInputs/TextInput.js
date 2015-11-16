@@ -24,11 +24,12 @@ class AuthenticationTextInput extends React.Component {
         this._onChangeInput = this._onChangeInput.bind(this);
         this._onBlurInput = this._onBlurInput.bind(this);
         this._onFocusInput = this._onFocusInput.bind(this);
-        this._initializeWithProps = this._initializeWithProps.bind(this);
+        this._initializeValueAndValidationWithProps = this._initializeValueAndValidationWithProps.bind(this);
+        this._updateValidityWithProps = this._updateValidityWithProps.bind(this);
     }
 
     componentWillMount (){
-        this._initializeWithProps(this.props)
+        this._initializeValueAndValidationWithProps(this.props)
     }
 
     componentWillReceiveProps(nextProps) {
@@ -36,11 +37,11 @@ class AuthenticationTextInput extends React.Component {
         if (nextProps.initialValue != this.props.initialValue ||
              nextProps.fieldName != this.props.fieldName ||
              nextProps.fieldType != this.props.fieldType ||
-             nextProps.validationFunction != this.props.validationFunction ||
-             nextProps.isValid != undefined) {
-
-            this._initializeWithProps(nextProps)
-
+             nextProps.validationFunction != this.props.validationFunction){
+            this._initializeValueAndValidationWithProps(nextProps);
+        }
+        if (nextProps.isValid != undefined && nextProps.isValid != this.props.isValid ) {
+            this._updateValidityWithProps(nextProps);
         }
     }
 
@@ -54,9 +55,8 @@ class AuthenticationTextInput extends React.Component {
             );
         }
     }
-
-    _initializeWithProps(inProps){
-        if (inProps.initialValue) {
+    _initializeValueAndValidationWithProps(inProps) {
+        if (inProps.initialValue != undefined) {
             context.executeAction(
                 TextInputActions.updateFieldValue,
                 {
@@ -82,7 +82,17 @@ class AuthenticationTextInput extends React.Component {
                     }
                 );
             }
+            if (inProps.fieldType){
+                if (inProps.fieldType == "emailInput"){
+                    //initialize the email input
+                }
+                else if (inProps.fieldType == "passwordInput"){
+                    //initialize the password input
+                }
+            }
         }
+    }
+    _updateValidityWithProps(inProps){
         if (inProps.isValid != undefined && inProps.isValid != this.props.isValid)
         {
             context.executeAction(
@@ -96,14 +106,7 @@ class AuthenticationTextInput extends React.Component {
                 }
             );
         }
-        if (inProps.fieldType){
-            if (inProps.fieldType == "emailInput"){
-                //initialize the email input
-            }
-            else if (inProps.fieldType == "passwordInput"){
-                //initialize the password input
-            }
-        }
+
     }
     _onChangeInput(e) {
         if (this.props.onChange) {

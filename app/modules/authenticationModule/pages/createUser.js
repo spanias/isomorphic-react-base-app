@@ -18,7 +18,7 @@ import LastNameInput from "../components/FieldInputs/LastNameInput";
 import EmailInput from "../components/FieldInputs/EmailInput";
 import NewPasswordInput from '../components/FieldInputs/NewPasswordInput';
 
-import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+import TimedAlertBox from '../../timedAlertBox/components/timedAlertBox';
 
 
 var debug = require('debug')('CreateUserPage');

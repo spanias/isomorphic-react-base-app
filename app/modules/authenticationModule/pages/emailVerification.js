@@ -5,18 +5,15 @@
 
 import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
-import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert, ModalTrigger} from 'react-bootstrap';
+import {ButtonToolbar, Modal, Button, Input, Row, Col, Alert} from 'react-bootstrap';
 
 import AuthenticationActions from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 
 import LoginForm from '../components/LoginForm';
-import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
-
-import MessagingActions from '../actions/messagingActions';
-import MessagingStore from '../stores/messagingStore';
 
 var debug = require('debug')('EmailVerificationPage');
 
@@ -72,16 +69,19 @@ class EmailVerificationPage extends React.Component {
     }
 
     _login(event) {
-        debug("Logging in: ", this.props.TextInputStore[usernameFieldName].fieldValue,this.props.TextInputStore[passwordFieldName].fieldValue )
+        debug (this.props);
         if (!this.props.AuthenticationMainStore.loggedIn) {
-            context.executeAction(
-                AuthenticationActions.login, {
-                    username: this.props.TextInputStore[usernameFieldName].fieldValue,
-                    password: this.props.TextInputStore[passwordFieldName].fieldValue,
-                    rememberMe: false,
-                    messagingName: loginMessageName
-                }
-            );
+            if (this.props.TextInputStore[usernameFieldName] && this.props.TextInputStore[passwordFieldName]) {
+                debug("Logging in: ", this.props.TextInputStore[usernameFieldName].fieldValue, this.props.TextInputStore[passwordFieldName].fieldValue)
+                context.executeAction(
+                    AuthenticationActions.login, {
+                        username: this.props.TextInputStore[usernameFieldName].fieldValue,
+                        password: this.props.TextInputStore[passwordFieldName].fieldValue,
+                        rememberMe: false,
+                        messagingName: loginMessageName
+                    }
+                );
+            }
         }
         else {
             context.executeAction(AuthenticationActions.logout, {});
@@ -92,22 +92,17 @@ class EmailVerificationPage extends React.Component {
     }
     render(){
         var loginForm = '';
-        var loginAlert ='';
+        var loginAlert = <TimedAlertBox messagingName={loginMessageName}/>;
         var loginButton = '';
         var tokenForm = '';
-        var verificationAlert = '';
+        var verificationAlert = <TimedAlertBox messagingName={verifyEmailMessageName}/>;
 
-
-        if (this.props.MessagingStore[loginMessageName] && this.props.MessagingStore[loginMessageName].message) {
-            loginAlert = <TimedAlertBox style={this.props.MessagingStore[loginMessageName] ? this.props.MessagingStore[loginMessageName].messageStyle : "info"}
-                                        message={this.props.MessagingStore[loginMessageName] ? this.props.MessagingStore[loginMessageName].message : null }
-                                        appearsUntil={this.props.MessagingStore[loginMessageName] ? this.props.MessagingStore[loginMessageName].messageValidUntil : null } />;
-        }
+        /*
         if (this.props.MessagingStore[verifyEmailMessageName] && this.props.MessagingStore[verifyEmailMessageName].message) {
             verificationAlert =  <TimedAlertBox style={this.props.MessagingStore[verifyEmailMessageName] ? this.props.MessagingStore[verifyEmailMessageName].messageStyle : "info"}
                                                 message={this.props.MessagingStore[verifyEmailMessageName] ? this.props.MessagingStore[verifyEmailMessageName].message : null }
                                                 appearsUntil={this.props.MessagingStore[verifyEmailMessageName] ? this.props.MessagingStore[verifyEmailMessageName].messageValidUntil : null } />;
-        }
+        }*/
         //if there is no user logged in show the input form and change the main page buttons
         if (!this.props.AuthenticationMainStore.loggedIn){
             loginButton = <Button onClick={this._login} bsStyle="primary">Sign In</Button>;
@@ -151,11 +146,10 @@ EmailVerificationPage.propTypes = {
 
 };
 
-EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore, AuthenticationTextInputStore, MessagingStore], function (context, props) {
+EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore, AuthenticationTextInputStore], function (context, props) {
     return {
         TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
-        AuthenticationMainStore: context.getStore(AuthenticationMainStore).getState(),
-        MessagingStore: context.getStore(MessagingStore).getState()
-        };
+        AuthenticationMainStore: context.getStore(AuthenticationMainStore).getState()
+    };
 });
 export default EmailVerificationPage;

@@ -12,10 +12,8 @@ import AuthenticationActions  from '../actions/authenticationActions';
 import FirstNameInput from "./FieldInputs/FirstNameInput";
 import LastNameInput from "./FieldInputs/LastNameInput";
 import EmailInput from "./FieldInputs/EmailInput";
-import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
-import MessagingActions from '../actions/messagingActions';
-import MessagingStore from '../stores/messagingStore';
+import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
@@ -123,12 +121,7 @@ class AuthenticationUserDetailsView extends React.Component {
             saveButton = <Button onClick={this._updateUserDetails}>Save changes</Button>;
         }
 
-        var errorAlert = '';
-        if (this.props.MessagingStore[userDetailsViewMessageName] && this.props.MessagingStore[userDetailsViewMessageName].message) {
-            errorAlert = <TimedAlertBox style={this.props.MessagingStore[userDetailsViewMessageName] ? this.props.MessagingStore[userDetailsViewMessageName].messageStyle : "info"}
-                                        message={this.props.MessagingStore[userDetailsViewMessageName] ? this.props.MessagingStore[userDetailsViewMessageName].message : null }
-                                        appearsUntil={this.props.MessagingStore[userDetailsViewMessageName] ? this.props.MessagingStore[userDetailsViewMessageName].messageValidUntil : null } />;
-        }
+        var errorAlert = <TimedAlertBox messagingName={userDetailsViewMessageName} />;
         var avatarStyle = {
             "borderRadius": '50px',
             "width": '125px',
@@ -202,11 +195,10 @@ class AuthenticationUserDetailsView extends React.Component {
 }
 
 AuthenticationUserDetailsView = connectToStores(AuthenticationUserDetailsView,
-    [AuthenticationTextInputStore, MessagingStore],
+    [AuthenticationTextInputStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
-            MessagingStore: context.getStore(MessagingStore).getState()
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
         };
     });
 

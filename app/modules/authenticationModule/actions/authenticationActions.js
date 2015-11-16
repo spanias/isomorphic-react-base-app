@@ -5,16 +5,11 @@
 import keyMirror from "react/lib/keyMirror";
 import Actions from "./constant";
 import AuthenticationMainStore from '../stores/authenticationMainStore';
-import MessagingActions  from './messagingActions';
+import {MessagingActions}  from './../../timedAlertBox/index';
 
 var debug = require('debug')('AuthenticationAction');
 var serviceTimeOut = 20000;
 
-/*
- This function is used to save and load the login state store.
- could get the whole store here like this if you wanted to save it to the server:
- var store = context.getStore(exampleStore).getState()
- */
 var AuthenticationActions = module.exports = {
 
     login: function (context, payload, done){
@@ -150,7 +145,6 @@ var AuthenticationActions = module.exports = {
             newPassword: payload.newPassword
         };
 
-        debug("Updating AuthenticationService ->", parameters);
         context.service.update('AuthenticationService', parameters, {}, {timeout: serviceTimeOut}, function (err, data) {
             if (err || !data) {
                 if (payload.messagingName) {
@@ -163,6 +157,7 @@ var AuthenticationActions = module.exports = {
                             message = "Current password cannot be verified! Password not changed!"
                         }
                     }
+
                     context.executeAction(
                         MessagingActions.updateMessage,
                         {
