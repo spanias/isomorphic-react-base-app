@@ -12,6 +12,8 @@ import TextInputActions  from '../../actions/textInputActions';
 import AuthenticationTextInputStore from '../../stores/authenticationTextInputStore';
 import AuthenticationMainStore from '../../stores/authenticationMainStore';
 
+var validationTimer = null;
+var lazyValidationTimeout = 500;
 var debug = require('debug')('AuthenticationTextInput');
 
 class AuthenticationTextInput extends React.Component {
@@ -26,9 +28,10 @@ class AuthenticationTextInput extends React.Component {
         this._onFocusInput = this._onFocusInput.bind(this);
         this._initializeValueAndValidationWithProps = this._initializeValueAndValidationWithProps.bind(this);
         this._updateValidityWithProps = this._updateValidityWithProps.bind(this);
+        this._doValidation=this._doValidation.bind(this);
     }
 
-    componentWillMount (){
+    componentDidMount (){
         this._initializeValueAndValidationWithProps(this.props)
     }
 
@@ -126,23 +129,33 @@ class AuthenticationTextInput extends React.Component {
                 }
             );
             if (this.props.validateOnChange){
-                if (this.props.validationFunction) {
-                    context.executeAction(
-                        TextInputActions.validateFieldValue,
-                        {
-                            fieldType: this.props.fieldType,
-                            fieldName: this.props.fieldName,
-                            validationFunction: this.props.validationFunction,
-                            values: {
-                                fieldValue: e.target.value
-                            }
-                        }
-                    );
+                this._doValidation(e.target.value);
+            }
+            else if (this.props.validateLazyOnChange){
+                if (validationTimer) {
+                    clearTimeout(validationTimer);
                 }
+                var value = e.target.value;
+                validationTimer = setTimeout(function() {this._doValidation(value)}.bind(this), lazyValidationTimeout);
             }
         }
     }
 
+    _doValidation(value){
+        if (this.props.validationFunction) {
+            context.executeAction(
+                TextInputActions.validateFieldValue,
+                {
+                    fieldType: this.props.fieldType,
+                    fieldName: this.props.fieldName,
+                    validationFunction: this.props.validationFunction,
+                    values: {
+                        fieldValue: value
+                    }
+                }
+            );
+        }
+    }
     _hasChanges(currentValue){
         if (this.props.initialValue){
             return (this.props.initialValue != currentValue);
@@ -158,19 +171,7 @@ class AuthenticationTextInput extends React.Component {
         }
         else {
             if (this.props.validateOnBlur){
-                if (this.props.validationFunction) {
-                    context.executeAction(
-                        TextInputActions.validateFieldValue,
-                        {
-                            fieldType: this.props.fieldType,
-                            fieldName: this.props.fieldName,
-                            validationFunction: this.props.validationFunction,
-                            values: {
-                                fieldValue: e.target.value
-                            }
-                        }
-                    );
-                }
+                this._doValidation(e.target.value);
             }
         }
     }
@@ -182,7 +183,7 @@ class AuthenticationTextInput extends React.Component {
 
     render() {
         debug("Rendering");
-        var bsStyle =this.props.TextInputStore[this.props.fieldName] ? (this.props.TextInputStore[this.props.fieldName].isValid ? "success" : "error") : "info";
+        var bsStyle =this.props.TextInputStore[this.props.fieldName] ? (this.props.TextInputStore[this.props.fieldName].isValid ? "success" : "error") : "";
         if (this.props.TextInputStore[this.props.fieldName] && this.props.TextInputStore[this.props.fieldName].fieldStyle){
             bsStyle = this.props.TextInputStore[this.props.fieldName].fieldStyle
         }
@@ -235,6 +236,7 @@ AuthenticationTextInput.propTypes = {
     fieldResetOnUnmount: React.PropTypes.bool,
     initialValue: React.PropTypes.string,
     validateOnChange: React.PropTypes.bool,
+    validateLazyOnChange: React.PropTypes.bool,
     validateOnBlur: React.PropTypes.bool,
     validationFunction: React.PropTypes.func,
     onChange: React.PropTypes.func,

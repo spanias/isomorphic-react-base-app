@@ -42,7 +42,7 @@ class CreateUserPage extends React.Component {
                             <UsernameInput
                                 fieldName={usernameFieldName}
                                 username={this.props.AuthenticationMainStore.username}
-                                validateOnChange={true}
+                                validateLazyOnChange={true}
                                 />
                         </Col>
                         <Col xs={6}>

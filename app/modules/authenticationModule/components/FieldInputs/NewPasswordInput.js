@@ -46,6 +46,7 @@ class AuthenticationNewPasswordInput extends React.Component {
                         placeholder="Confirm password"
                         label="Confirm password"
                         isValid={(this.props.TextInputStore[this.props.newPasswordFieldName] &&
+                                    this.props.TextInputStore[this.props.newPasswordFieldName].isValid &&
                                     this.props.TextInputStore[this.props.confirmPasswordFieldName] &&
                                     this.props.TextInputStore[this.props.newPasswordFieldName].fieldValue == this.props.TextInputStore[this.props.confirmPasswordFieldName].fieldValue)}
                         validationFunction = {this._confirmPasswordFieldValidation}
