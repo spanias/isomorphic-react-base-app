@@ -9,8 +9,8 @@ import {Input, Row, Col, Alert} from 'react-bootstrap';
 import UsernameInput from "./FieldInputs/UsernameInput";
 import PasswordInput from "./FieldInputs/PasswordInput";
 
-import MessagingActions from '../../timedAlertBox/actions/messagingActions';
-import MessagingStore from '../../timedAlertBox/stores/messagingStore';
+import MessagingActions from '../../stateless-notifications/actions/messagingActions';
+import MessagingStore from '../../stateless-notifications/stores/messagingStore';
 
 var debug = require('debug')('AuthenticationLoginView');
 

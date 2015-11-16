@@ -11,7 +11,7 @@ import AuthenticationActions from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 
 import LoginForm from '../components/LoginForm';
-import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 

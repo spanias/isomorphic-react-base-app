@@ -14,17 +14,12 @@ import AuthenticationTextInputStore from '../stores/authenticationTextInputStore
 import FirstNameInput from "../components/FieldInputs/FirstNameInput";
 import UsernameInput from "../components/FieldInputs/UsernameInput";
 import LastNameInput from "../components/FieldInputs/LastNameInput";
-
 import EmailInput from "../components/FieldInputs/EmailInput";
 import NewPasswordInput from '../components/FieldInputs/NewPasswordInput';
-
-import TimedAlertBox from '../../timedAlertBox/components/timedAlertBox';
-
 
 var debug = require('debug')('CreateUserPage');
 
 var usernameFieldName = "AuthenticationCreateUsernameField";
-var passwordFieldName = "AuthenticationCreatePasswordField";
 var emailFieldName = "AuthenticationCreateEmailField";
 var newPasswordFieldName = "AuthenticationCreateNewPasswordField";
 var confirmPasswordFieldName = "AuthenticationCreateConfirmPasswordField";
@@ -34,7 +29,6 @@ var lastNameFieldName = "AuthenticationCreateLastNameField";
 class CreateUserPage extends React.Component {
     constructor(props, context) {
         super(props, context);
-
     }
 
     render() {
@@ -48,6 +42,7 @@ class CreateUserPage extends React.Component {
                             <UsernameInput
                                 fieldName={usernameFieldName}
                                 username={this.props.AuthenticationMainStore.username}
+                                validateOnChange={true}
                                 />
                         </Col>
                         <Col xs={6}>
@@ -55,7 +50,7 @@ class CreateUserPage extends React.Component {
                                 fieldName={emailFieldName}
                                 addonAfter=""
                                 initialValue={this.props.AuthenticationMainStore.email}
-                                validateOnChange = {true}
+                                validateOnChange={true}
                                 />
                         </Col>
                     </Row>

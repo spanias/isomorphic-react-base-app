@@ -10,7 +10,7 @@ import ExampleStore from './app/stores/exampleStore';
 import fetchrPlugin from 'fluxible-plugin-fetchr';
 
 import {AuthenticationMainStore, AuthenticationTextInputStore} from './app/modules/authenticationModule/index';
-import {MessagingStore} from './app/modules/timedAlertBox/index'
+import {MessagingStore} from 'app/modules/stateless-notifications/index'
 
 let app = new Fluxible({
     component: Routes,

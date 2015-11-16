@@ -14,7 +14,7 @@ import NewPasswordInput from './FieldInputs/NewPasswordInput';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
-import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
 
 var debug = require('debug')('AuthenticationUserSecurityView');
 

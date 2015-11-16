@@ -9,7 +9,7 @@ import {Modal, Button, Input, Alert, ModalTrigger} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserView from './UserView';
 import LoginForm from './LoginForm';
-import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 

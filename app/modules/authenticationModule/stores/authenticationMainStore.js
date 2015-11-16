@@ -6,7 +6,7 @@ var debug = require('debug')('AuthenticationMainStore');
 import {BaseStore} from 'fluxible/addons';
 import Actions from "../actions/constant";
 import {DateAdd} from '../utils';
-import MessagingActions  from '../../timedAlertBox/actions/messagingActions';
+import MessagingActions  from '../../stateless-notifications/actions/messagingActions';
 
 class AuthenticationMainStore extends BaseStore {
     constructor(dispatcher) {

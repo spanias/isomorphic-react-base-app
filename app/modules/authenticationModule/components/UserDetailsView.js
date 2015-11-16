@@ -13,7 +13,7 @@ import FirstNameInput from "./FieldInputs/FirstNameInput";
 import LastNameInput from "./FieldInputs/LastNameInput";
 import EmailInput from "./FieldInputs/EmailInput";
 
-import {TimedAlertBox, MessagingActions} from '../../timedAlertBox/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
