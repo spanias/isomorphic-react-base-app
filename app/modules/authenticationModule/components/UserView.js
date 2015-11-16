@@ -5,7 +5,6 @@
 
 import React from 'react';
 import {Tabs, Tab} from 'react-bootstrap';
-import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserDetailsView from './UserDetailsView';
 import AuthenticationUserSecurityView from './UserSecurityView';
 
@@ -31,18 +30,12 @@ class AuthenticationUserView extends React.Component {
                             lastName={this.props.lastName}
                             email={this.props.email}
                             verified={this.props.verified}
-                            changeUserDetailsMessageStyle={this.props.changeUserDetailsMessageStyle}
-                            changeUserDetailsMessage={this.props.changeUserDetailsMessage}
-                            changeUserDetailsMessageValidUntil={this.props.changeUserDetailsMessageValidUntil}
                             />
                     </Tab>
                     <Tab eventKey={2} title="Security">
                         <AuthenticationUserSecurityView
                             jwt={this.props.jwt}
                             user={this.props.user}
-                            changePasswordMessageStyle={this.props.changePasswordMessageStyle}
-                            changePasswordMessage={this.props.changePasswordMessage}
-                            changePasswordMessageValidUntil={this.props.changePasswordMessageValidUntil}
                             />
                     </Tab>
                 </Tabs>
@@ -63,15 +56,7 @@ AuthenticationUserView.propTypes = {
     firstName: React.PropTypes.string,
     lastName: React.PropTypes.string,
     email: React.PropTypes.string,
-    verified: React.PropTypes.bool,
-
-    changePasswordMessageStyle: React.PropTypes.string,
-    changePasswordMessage: React.PropTypes.string,
-    changePasswordMessageValidUntil: React.PropTypes.object,
-
-    changeUserDetailsMessageStyle: React.PropTypes.string,
-    changeUserDetailsMessage: React.PropTypes.string,
-    changeUserDetailsMessageValidUntil: React.PropTypes.object
+    verified: React.PropTypes.bool
 };
 
 export default AuthenticationUserView;

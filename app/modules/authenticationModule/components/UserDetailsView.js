@@ -8,16 +8,22 @@ import {connectToStores} from 'fluxible-addons-react';
 import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
+
 import FirstNameInput from "./FieldInputs/FirstNameInput";
 import LastNameInput from "./FieldInputs/LastNameInput";
 import EmailInput from "./FieldInputs/EmailInput";
 import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
+
+import MessagingActions from '../actions/messagingActions';
+import MessagingStore from '../stores/messagingStore';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
 var emailFieldName =  "AuthenticationEmailInput";
 var firstNameFieldName =  "AuthenticationFirstNameInput";
 var lastNameFieldName =  "AuthenticationLastNameInput";
+
+var userDetailsViewMessageName = "UserDetailsViewMessage";
 
 var debug = require('debug')('AuthenticationUserDetailsView');
 
@@ -35,7 +41,10 @@ class AuthenticationUserDetailsView extends React.Component {
         debug("Calling request verification email!");
         context.executeAction(
             AuthenticationActions.requestVerificationEmail,
-            {jwt: this.props.jwt}
+            {
+                jwt: this.props.jwt,
+                messagingName: userDetailsViewMessageName
+            }
         );
     }
 
@@ -63,12 +72,16 @@ class AuthenticationUserDetailsView extends React.Component {
             {
                 myUser.email = this.props.TextInputStore[emailFieldName].fieldValue;
             }
+
             context.executeAction(
-                AuthenticationActions.updateUserDetailsMessage,
+                MessagingActions.updateMessage,
                 {
-                    message: "Updating user details.",
-                    appearFor: 20,
-                    style: "info"
+                    messageName: userDetailsViewMessageName,
+                    values: {
+                        message: "Updating user details.",
+                        appearFor: 20,
+                        messageStyle: "info"
+                    }
                 }
             );
 
@@ -76,17 +89,21 @@ class AuthenticationUserDetailsView extends React.Component {
                 AuthenticationActions.changeUserDetails,
                 {
                     jwt: this.props.jwt,
-                    myUser: myUser
+                    myUser: myUser,
+                    messagingName: userDetailsViewMessageName
                 }
             );
         }
         else {
             context.executeAction(
-                AuthenticationActions.updateUserDetailsMessage,
+                MessagingActions.updateMessage,
                 {
-                    message: "No changes to perform.",
-                    appearFor: 5,
-                    style: "warning"
+                    messageName: userDetailsViewMessageName,
+                    values: {
+                        message: "No changes to perform.",
+                        appearFor: 5,
+                        messageStyle: "warning"
+                    }
                 }
             );
         }
@@ -107,10 +124,10 @@ class AuthenticationUserDetailsView extends React.Component {
         }
 
         var errorAlert = '';
-        if (this.props.changeUserDetailsMessage) {
-            errorAlert = <TimedAlertBox style={this.props.changeUserDetailsMessageStyle}
-                                        message={this.props.changeUserDetailsMessage}
-                                        appearsUntil={this.props.changeUserDetailsMessageValidUntil}/>;
+        if (this.props.MessagingStore[userDetailsViewMessageName] && this.props.MessagingStore[userDetailsViewMessageName].message) {
+            errorAlert = <TimedAlertBox style={this.props.MessagingStore[userDetailsViewMessageName] ? this.props.MessagingStore[userDetailsViewMessageName].messageStyle : "info"}
+                                        message={this.props.MessagingStore[userDetailsViewMessageName] ? this.props.MessagingStore[userDetailsViewMessageName].message : null }
+                                        appearsUntil={this.props.MessagingStore[userDetailsViewMessageName] ? this.props.MessagingStore[userDetailsViewMessageName].messageValidUntil : null } />;
         }
         var avatarStyle = {
             "borderRadius": '50px',
@@ -133,7 +150,6 @@ class AuthenticationUserDetailsView extends React.Component {
             "fontSize": "24px",
             "paddingLeft": "5px"
         };
-
 
         return (
             <div className="authentication-userView-group">
@@ -186,10 +202,11 @@ class AuthenticationUserDetailsView extends React.Component {
 }
 
 AuthenticationUserDetailsView = connectToStores(AuthenticationUserDetailsView,
-    [AuthenticationTextInputStore],
+    [AuthenticationTextInputStore, MessagingStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
+            MessagingStore: context.getStore(MessagingStore).getState()
         };
     });
 
@@ -202,10 +219,6 @@ AuthenticationUserDetailsView.propTypes = {
     lastName: React.PropTypes.string.isRequired,
     email: React.PropTypes.string.isRequired,
     verified: React.PropTypes.bool.isRequired,
-
-    changeUserDetailsMessageStyle: React.PropTypes.string,
-    changeUserDetailsMessage: React.PropTypes.string,
-    changeUserDetailsMessageValidUntil: React.PropTypes.object
 };
 
 export default AuthenticationUserDetailsView;

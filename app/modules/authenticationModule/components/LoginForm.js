@@ -9,12 +9,16 @@ import {Input, Row, Col, Alert} from 'react-bootstrap';
 import UsernameInput from "./FieldInputs/UsernameInput";
 import PasswordInput from "./FieldInputs/PasswordInput";
 
+import MessagingActions from '../actions/messagingActions';
+import MessagingStore from '../stores/messagingStore';
+
 var debug = require('debug')('AuthenticationLoginView');
 
 class AuthenticationLoginView extends React.Component {
     constructor(props, context) {
         super();
-        this._handleKeyPress = this._handleKeyPress.bind(this);}
+        this._handleKeyPress = this._handleKeyPress.bind(this);
+    }
 
     _handleKeyPress(event) {
         var charCode = event.which || event.charCode || event.keyCode || 0;
@@ -24,7 +28,6 @@ class AuthenticationLoginView extends React.Component {
             }
         }
     }
-
     render() {
         var usernameText = "";
         if (this.props.usernameText) {
@@ -41,18 +44,18 @@ class AuthenticationLoginView extends React.Component {
                             fieldName={this.props.usernameFieldName}
                             initialValue={usernameText}
                             validateOnChange = {true}
-                            onKeyPress={this._handleKeyPress}/>
-
+                            onKeyPress={this._handleKeyPress}
+                        />
                     </Col>
                     <Col xs={6}>
                         <PasswordInput
                             fieldName={this.props.passwordFieldName}
                             initialValue={passwordText}
                             validateOnChange = {true}
-                            onKeyPress={this._handleKeyPress}/>
+                            onKeyPress={this._handleKeyPress}
+                        />
                     </Col>
                 </Row>;
-
         return (<div>{form}</div>);
     }
 }

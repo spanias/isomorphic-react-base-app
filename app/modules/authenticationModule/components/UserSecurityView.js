@@ -16,11 +16,16 @@ import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
+import MessagingActions from '../actions/messagingActions';
+import MessagingStore from '../stores/messagingStore';
+
 var debug = require('debug')('AuthenticationUserSecurityView');
 
 var currentPasswordFieldName = "AuthenticationCurrentPasswordField";
 var newPasswordFieldName = "AuthenticationNewPasswordField";
 var confirmPasswordFieldName = "AuthenticationConfirmPasswordField";
+
+var userSecurityViewMessageName = "UserSecurityViewMessage";
 
 class AuthenticationUserSecurityView extends React.Component {
 
@@ -36,14 +41,16 @@ class AuthenticationUserSecurityView extends React.Component {
             )
         {
             context.executeAction(
-                AuthenticationActions.updateSecurityMessage,
+                MessagingActions.updateMessage,
                 {
-                    message: "Changing password...",
-                    appearFor: 10,
-                    style: "info"
+                    messageName: userSecurityViewMessageName,
+                    values: {
+                        message: "Changing password...",
+                        appearFor: 20,
+                        messageStyle: "info"
+                    }
                 }
             );
-
             context.executeAction(
                 AuthenticationActions.changePassword,
                 {
@@ -56,11 +63,14 @@ class AuthenticationUserSecurityView extends React.Component {
         }
         else{
             context.executeAction(
-                AuthenticationActions.updateSecurityMessage,
+                MessagingActions.updateMessage,
                 {
-                    message: "Cannot validate form. Please re-check details.",
-                    appearFor: 10,
-                    style: "danger"
+                    messageName: userSecurityViewMessageName,
+                    values: {
+                        message: "Cannot validate form. Please re-check details.",
+                        appearFor: 5,
+                        messageStyle: "danger"
+                    }
                 }
             );
         }
@@ -77,10 +87,10 @@ class AuthenticationUserSecurityView extends React.Component {
         }
 
         var errorLabel = '';
-        if (this.props.changePasswordMessage) {
-            errorLabel =
-                <TimedAlertBox style={this.props.changePasswordMessageStyle} message={this.props.changePasswordMessage}
-                               appearsUntil={this.props.changePasswordMessageValidUntil}/>;
+        if (this.props.MessagingStore[userSecurityViewMessageName] && this.props.MessagingStore[userSecurityViewMessageName].message) {
+            errorLabel = <TimedAlertBox style={this.props.MessagingStore[userSecurityViewMessageName] ? this.props.MessagingStore[userSecurityViewMessageName].messageStyle : "info"}
+                                        message={this.props.MessagingStore[userSecurityViewMessageName] ? this.props.MessagingStore[userSecurityViewMessageName].message : null }
+                                        appearsUntil={this.props.MessagingStore[userSecurityViewMessageName] ? this.props.MessagingStore[userSecurityViewMessageName].messageValidUntil : null } />;
         }
 
         return (
@@ -112,20 +122,17 @@ class AuthenticationUserSecurityView extends React.Component {
     }
 }
 AuthenticationUserSecurityView = connectToStores(AuthenticationUserSecurityView,
-    [AuthenticationTextInputStore],
+    [AuthenticationTextInputStore, MessagingStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
+            MessagingStore: context.getStore(MessagingStore).getState()
         };
     });
 
 AuthenticationUserSecurityView.propTypes = {
     jwt: React.PropTypes.string.isRequired,
-    user:React.PropTypes.string.isRequired,
-
-    changePasswordMessageStyle: React.PropTypes.string,
-    changePasswordMessage: React.PropTypes.string,
-    changePasswordMessageValidUntil: React.PropTypes.object
+    user:React.PropTypes.string.isRequired
 };
 
 export default AuthenticationUserSecurityView;

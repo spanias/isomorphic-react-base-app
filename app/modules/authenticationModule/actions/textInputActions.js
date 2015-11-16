@@ -95,3 +95,4 @@ var TextInputActions = module.exports = {
         done();
     }
 }
+export default TextInputActions;

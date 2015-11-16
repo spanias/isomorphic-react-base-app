@@ -11,8 +11,11 @@ export {_AuthenticationActions as AuthenticationActions};
 import _AuthenticationMainStore from  "./stores/authenticationMainStore";
 export {_AuthenticationMainStore as AuthenticationMainStore};
 
-import _AuthenticationEmailInputStore from  "./stores/authenticationTextInputStore";
-export {_AuthenticationEmailInputStore as AuthenticationEmailInputStore};
+import _AuthenticationTextInputStore from  "./stores/authenticationTextInputStore";
+export {_AuthenticationTextInputStore as AuthenticationTextInputStore};
+
+import _MessagingStore from  "./stores/messagingStore";
+export {_MessagingStore as MessagingStore};
 
 import _EmailVerificationPage from  "./pages/emailVerification";
 export {_EmailVerificationPage as EmailVerificationPage};

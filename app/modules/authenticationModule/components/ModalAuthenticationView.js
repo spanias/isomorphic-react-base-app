@@ -13,11 +13,14 @@ import TimedAlertBox from '../../timedAlertBox/timedAlertBox';
 
 import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
 
+import MessagingActions from '../actions/messagingActions';
+import MessagingStore from '../stores/messagingStore';
 
 var debug = require('debug')('AuthenticationModalView');
 var usernameFieldName = "AuthenticationModalUsernameField";
 var passwordFieldName = "AuthenticationModalPasswordField";
 
+var ModalLoginViewMessageName = "ModalLoginViewMessage";
 
 class AuthenticationModalView extends React.Component {
 
@@ -39,7 +42,8 @@ class AuthenticationModalView extends React.Component {
                 AuthenticationActions.login, {
                     username: this.props.TextInputStore[usernameFieldName].fieldValue,
                     password: this.props.TextInputStore[passwordFieldName].fieldValue,
-                    rememberMe: this.refs.rememberMeInput.getChecked()
+                    rememberMe: this.refs.rememberMeInput.getChecked(),
+                    messagingName: ModalLoginViewMessageName
                 }
             );
         }
@@ -66,9 +70,10 @@ class AuthenticationModalView extends React.Component {
         var form = '';
         var alert ='';
         var rememberMeCheckbox = '';
-        if (this.props.loginMessage)
-        {
-            alert= <TimedAlertBox style={this.props.loginMessageStyle} message={this.props.loginMessage} appearsUntil={this.props.loginMessageValidUntil}/>;
+        if (this.props.MessagingStore[ModalLoginViewMessageName] && this.props.MessagingStore[ModalLoginViewMessageName].message) {
+            alert = <TimedAlertBox style={this.props.MessagingStore[ModalLoginViewMessageName] ? this.props.MessagingStore[ModalLoginViewMessageName].messageStyle : "info"}
+                                        message={this.props.MessagingStore[ModalLoginViewMessageName] ? this.props.MessagingStore[ModalLoginViewMessageName].message : null }
+                                        appearsUntil={this.props.MessagingStore[ModalLoginViewMessageName] ? this.props.MessagingStore[ModalLoginViewMessageName].messageValidUntil : null } />;
         }
 
         //if there is no user logged in show the input form and change the main page buttons
@@ -101,14 +106,6 @@ class AuthenticationModalView extends React.Component {
                             lastName = {this.props.lastName}
                             email = {this.props.email}
                             verified = {this.props.verified}
-
-                            changePasswordMessageStyle = {this.props.changePasswordMessageStyle}
-                            changePasswordMessage = {this.props.changePasswordMessage}
-                            changePasswordMessageValidUntil = {this.props.changePasswordMessageValidUntil}
-
-                            changeUserDetailsMessageStyle = {this.props.changeUserDetailsMessageStyle}
-                            changeUserDetailsMessage = {this.props.changeUserDetailsMessage}
-                            changeUserDetailsMessageValidUntil = {this.props.changeUserDetailsMessageValidUntil}
                             />
                     </Modal.Body>
                     <Modal.Footer>
@@ -120,10 +117,11 @@ class AuthenticationModalView extends React.Component {
     }
 }
 AuthenticationModalView = connectToStores(AuthenticationModalView,
-    [AuthenticationTextInputStore],
+    [AuthenticationTextInputStore, MessagingStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
+            MessagingStore: context.getStore(MessagingStore).getState()
         };
     });
 AuthenticationModalView.propTypes = {
@@ -136,21 +134,8 @@ AuthenticationModalView.propTypes = {
     email: React.PropTypes.string,
     verified: React.PropTypes.bool,
 
-    changePasswordMessageStyle: React.PropTypes.string,
-    changePasswordMessage: React.PropTypes.string,
-    changePasswordMessageValidUntil: React.PropTypes.object,
-
-    changeUserDetailsMessageStyle: React.PropTypes.string,
-    changeUserDetailsMessage: React.PropTypes.string,
-    changeUserDetailsMessageValidUntil: React.PropTypes.object,
-
-    loginMessageStyle: React.PropTypes.string,
-    loginMessage: React.PropTypes.string,
-    loginMessageValidUntil: React.PropTypes.object,
-
     hideModal: React.PropTypes.func.isRequired,
     show: React.PropTypes.bool.isRequired
-
 };
 
 export default AuthenticationModalView;

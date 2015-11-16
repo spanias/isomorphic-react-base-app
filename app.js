@@ -9,7 +9,7 @@ import ApplicationStore from './app/stores/ApplicationStore';
 import ExampleStore from './app/stores/exampleStore';
 import fetchrPlugin from 'fluxible-plugin-fetchr';
 
-import { AuthenticationMainStore, AuthenticationEmailInputStore } from './app/modules/authenticationModule/index';
+import { AuthenticationMainStore, AuthenticationTextInputStore, MessagingStore } from './app/modules/authenticationModule/index';
 
 let app = new Fluxible({
     component: Routes,
@@ -17,8 +17,8 @@ let app = new Fluxible({
         ApplicationStore,
         ExampleStore,
         AuthenticationMainStore,
-        AuthenticationEmailInputStore
-
+        AuthenticationTextInputStore,
+        MessagingStore
     ]
 });
 

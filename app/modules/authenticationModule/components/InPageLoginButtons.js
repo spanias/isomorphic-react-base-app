@@ -38,14 +38,12 @@ class AuthenticationPageButtons extends React.Component {
             show: true
         });
         context.executeAction(AuthenticationActions.refreshUser, {jwt: this.props.jwt});
-        context.executeAction(AuthenticationActions.resetMessages, {});
     }
 
     _hideModal() {
         this.setState({
             show: false
         });
-        context.executeAction(AuthenticationActions.resetMessages, {});
     }
     _logout() {
         context.executeAction(AuthenticationActions.logout, {});
