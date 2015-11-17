@@ -183,7 +183,7 @@ class AuthenticationTextInput extends React.Component {
 
     render() {
         debug("Rendering");
-        var bsStyle =this.props.TextInputStore[this.props.fieldName] ? (this.props.TextInputStore[this.props.fieldName].isValid ? "success" : "error") : "";
+        var bsStyle =this.props.TextInputStore[this.props.fieldName] ? (this.props.TextInputStore[this.props.fieldName].isValid ? "success" : "error") : undefined;
         if (this.props.TextInputStore[this.props.fieldName] && this.props.TextInputStore[this.props.fieldName].fieldStyle){
             bsStyle = this.props.TextInputStore[this.props.fieldName].fieldStyle
         }

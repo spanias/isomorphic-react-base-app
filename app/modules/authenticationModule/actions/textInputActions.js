@@ -79,6 +79,7 @@ var TextInputActions = module.exports = {
                 }
             }
         );
+        done();
     },
 
     updateFieldValue: function (context,payload,done) {
