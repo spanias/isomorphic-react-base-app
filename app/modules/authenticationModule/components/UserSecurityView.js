@@ -9,12 +9,8 @@ import {Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
-import PasswordInput from "./FieldInputs/PasswordInput";
-import NewPasswordInput from './FieldInputs/NewPasswordInput';
-
-import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
-
 import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
+import {TextInputStore,PasswordInput,NewPasswordInput} from '../../stateless-input/index';
 
 var debug = require('debug')('AuthenticationUserSecurityView');
 
@@ -75,7 +71,6 @@ class AuthenticationUserSecurityView extends React.Component {
     }
 
     render() {
-
         debug("Rendering");
         var changePasswordButton = <Button disabled>Change Password</Button>;
         if (this.props.TextInputStore[currentPasswordFieldName] && this.props.TextInputStore[currentPasswordFieldName].isValid &&
@@ -114,10 +109,10 @@ class AuthenticationUserSecurityView extends React.Component {
     }
 }
 AuthenticationUserSecurityView = connectToStores(AuthenticationUserSecurityView,
-    [AuthenticationTextInputStore],
+    [TextInputStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            TextInputStore: context.getStore(TextInputStore).getState()
         };
     });
 

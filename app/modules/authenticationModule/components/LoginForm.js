@@ -6,8 +6,8 @@
 import React from 'react';
 import {Input, Row, Col, Alert} from 'react-bootstrap';
 
-import UsernameInput from "./FieldInputs/UsernameInput";
-import PasswordInput from "./FieldInputs/PasswordInput";
+import UsernameInput from "./../../stateless-input/components/UsernameInput";
+import PasswordInput from "./../../stateless-input/components/PasswordInput";
 
 import MessagingActions from '../../stateless-notifications/actions/messagingActions';
 import MessagingStore from '../../stateless-notifications/stores/messagingStore';

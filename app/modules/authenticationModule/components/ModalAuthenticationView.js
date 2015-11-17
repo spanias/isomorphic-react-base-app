@@ -5,13 +5,13 @@
 
 import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
-import {Modal, Button, Input, Alert, ModalTrigger} from 'react-bootstrap';
+import {Modal, Button, Input, Alert} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserView from './UserView';
 import LoginForm from './LoginForm';
-import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
 
-import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
+import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
+import {TextInputStore} from '../../stateless-input/index';
 
 var debug = require('debug')('AuthenticationModalView');
 var usernameFieldName = "AuthenticationModalUsernameField";
@@ -108,10 +108,10 @@ class AuthenticationModalView extends React.Component {
     }
 }
 AuthenticationModalView = connectToStores(AuthenticationModalView,
-    [AuthenticationTextInputStore],
+    [TextInputStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            TextInputStore: context.getStore(TextInputStore).getState()
         };
     });
 AuthenticationModalView.propTypes = {

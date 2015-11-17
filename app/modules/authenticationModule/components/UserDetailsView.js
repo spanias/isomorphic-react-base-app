@@ -9,13 +9,8 @@ import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootst
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
-import FirstNameInput from "./FieldInputs/FirstNameInput";
-import LastNameInput from "./FieldInputs/LastNameInput";
-import EmailInput from "./FieldInputs/EmailInput";
-
 import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
-
-import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
+import {FirstNameInput,LastNameInput,EmailInput,TextInputStore} from '../../stateless-input/index';
 
 var emailFieldName =  "AuthenticationEmailInput";
 var firstNameFieldName =  "AuthenticationFirstNameInput";
@@ -195,13 +190,12 @@ class AuthenticationUserDetailsView extends React.Component {
 }
 
 AuthenticationUserDetailsView = connectToStores(AuthenticationUserDetailsView,
-    [AuthenticationTextInputStore],
+    [TextInputStore],
     function (context, props) {
         return {
-            TextInputStore: context.getStore(AuthenticationTextInputStore).getState()
+            TextInputStore: context.getStore(TextInputStore).getState()
         };
     });
-
 
 AuthenticationUserDetailsView.propTypes = {
     jwt: React.PropTypes.string.isRequired,
@@ -210,7 +204,7 @@ AuthenticationUserDetailsView.propTypes = {
     firstName: React.PropTypes.string.isRequired,
     lastName: React.PropTypes.string.isRequired,
     email: React.PropTypes.string.isRequired,
-    verified: React.PropTypes.bool.isRequired,
+    verified: React.PropTypes.bool.isRequired
 };
 
 export default AuthenticationUserDetailsView;

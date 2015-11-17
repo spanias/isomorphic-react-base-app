@@ -11,7 +11,7 @@ export {_AuthenticationActions as AuthenticationActions};
 import _AuthenticationMainStore from  "./stores/authenticationMainStore";
 export {_AuthenticationMainStore as AuthenticationMainStore};
 
-import _AuthenticationTextInputStore from  "./stores/authenticationTextInputStore";
+import _AuthenticationTextInputStore from  "./../stateless-input/stores/textInputStore";
 export {_AuthenticationTextInputStore as AuthenticationTextInputStore};
 
 import _EmailVerificationPage from  "./pages/emailVerification";

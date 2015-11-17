@@ -9,13 +9,13 @@ import { Panel, Button, Input, Row, Col} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
 import AuthenticationMainStore from '../stores/authenticationMainStore';
-import AuthenticationTextInputStore from '../stores/authenticationTextInputStore';
+import AuthenticationTextInputStore from '../../stateless-input/stores/textInputStore';
 
-import FirstNameInput from "../components/FieldInputs/FirstNameInput";
-import UsernameInput from "../components/FieldInputs/UsernameInput";
-import LastNameInput from "../components/FieldInputs/LastNameInput";
-import EmailInput from "../components/FieldInputs/EmailInput";
-import NewPasswordInput from '../components/FieldInputs/NewPasswordInput';
+import FirstNameInput from "../../stateless-input/components/FirstNameInput";
+import UsernameInput from "../../stateless-input/components/UsernameInput";
+import LastNameInput from "../../stateless-input/components/LastNameInput";
+import EmailInput from "../../stateless-input/components/EmailInput";
+import NewPasswordInput from '../../stateless-input/components/NewPasswordInput';
 
 var debug = require('debug')('CreateUserPage');
 

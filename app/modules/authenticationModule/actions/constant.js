@@ -18,10 +18,6 @@ const Actions = keyMirror({
     REQUEST_EMAIL_VERIFICATION: null,
 
     REFRESH_USER_ACTION: null,
-
-    //TEXT INPUT
-    AUTHENTICATION_UPDATE_TEXTINPUT_STORE: null,
-    AUTHENTICATION_RESET_TEXTINPUT_STORE: null
 });
 
 export default Actions;
