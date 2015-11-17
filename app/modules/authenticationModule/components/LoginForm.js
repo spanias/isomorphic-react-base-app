@@ -6,11 +6,8 @@
 import React from 'react';
 import {Input, Row, Col, Alert} from 'react-bootstrap';
 
-import UsernameInput from "./../../stateless-input/components/UsernameInput";
-import PasswordInput from "./../../stateless-input/components/PasswordInput";
-
-import MessagingActions from '../../stateless-notifications/actions/messagingActions';
-import MessagingStore from '../../stateless-notifications/stores/messagingStore';
+import {UsernameInput, PasswordInput} from "../../stateless-react-input/index";
+import {MessagingActions, MessagingStore} from '../../stateless-react-notifications/index';
 
 var debug = require('debug')('AuthenticationLoginView');
 

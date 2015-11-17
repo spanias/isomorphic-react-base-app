@@ -9,8 +9,8 @@ import {ButtonToolbar, Button, Input, Row, Col, Alert, Panel} from 'react-bootst
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
-import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
-import {FirstNameInput,LastNameInput,EmailInput,TextInputStore} from '../../stateless-input/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-react-notifications/index';
+import {FirstNameInput,LastNameInput,EmailInput,TextInputStore} from '../../stateless-react-input/index';
 
 var emailFieldName =  "AuthenticationEmailInput";
 var firstNameFieldName =  "AuthenticationFirstNameInput";

@@ -9,8 +9,8 @@ import {Button, Input, Row, Col, Alert, Panel} from 'react-bootstrap';
 import {Image, Label} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
-import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
-import {TextInputStore,PasswordInput,NewPasswordInput} from '../../stateless-input/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-react-notifications/index';
+import {TextInputStore,PasswordInput,NewPasswordInput} from '../../stateless-react-input/index';
 
 var debug = require('debug')('AuthenticationUserSecurityView');
 

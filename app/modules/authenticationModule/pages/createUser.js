@@ -5,17 +5,11 @@
 
 import React from 'react';
 import {connectToStores} from 'fluxible-addons-react';
-import { Panel, Button, Input, Row, Col} from 'react-bootstrap';
+import {Panel, Button, Input, Row, Col} from 'react-bootstrap';
 import AuthenticationActions  from '../actions/authenticationActions';
 
 import AuthenticationMainStore from '../stores/authenticationMainStore';
-import AuthenticationTextInputStore from '../../stateless-input/stores/textInputStore';
-
-import FirstNameInput from "../../stateless-input/components/FirstNameInput";
-import UsernameInput from "../../stateless-input/components/UsernameInput";
-import LastNameInput from "../../stateless-input/components/LastNameInput";
-import EmailInput from "../../stateless-input/components/EmailInput";
-import NewPasswordInput from '../../stateless-input/components/NewPasswordInput';
+import {TextInputStore, FirstNameInput, LastNameInput, UsernameInput, EmailInput, NewPasswordInput} from '../../stateless-react-input/index';
 
 var debug = require('debug')('CreateUserPage');
 
@@ -92,9 +86,9 @@ CreateUserPage.propTypes = {
 
 };
 
-CreateUserPage = connectToStores(CreateUserPage, [AuthenticationMainStore, AuthenticationTextInputStore], function (context, props) {
+CreateUserPage = connectToStores(CreateUserPage, [AuthenticationMainStore, TextInputStore], function (context, props) {
     return {
-        TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
+        TextInputStore: context.getStore(TextInputStore).getState(),
         AuthenticationMainStore: context.getStore(AuthenticationMainStore).getState()
     };
 });

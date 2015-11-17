@@ -10,8 +10,8 @@ import AuthenticationActions  from '../actions/authenticationActions';
 import AuthenticationUserView from './UserView';
 import LoginForm from './LoginForm';
 
-import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
-import {TextInputStore} from '../../stateless-input/index';
+import {TimedAlertBox, MessagingActions} from '../../stateless-react-notifications/index';
+import {TextInputStore} from '../../stateless-react-input/index';
 
 var debug = require('debug')('AuthenticationModalView');
 var usernameFieldName = "AuthenticationModalUsernameField";

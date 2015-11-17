@@ -11,9 +11,8 @@ import AuthenticationActions from '../actions/authenticationActions';
 import AuthenticationMainStore from '../stores/authenticationMainStore';
 
 import LoginForm from '../components/LoginForm';
-import {TimedAlertBox, MessagingActions} from '../../stateless-notifications/index';
-
-import AuthenticationTextInputStore from '../../stateless-input/stores/textInputStore';
+import {TimedAlertBox, MessagingActions} from '../../stateless-react-notifications/index';
+import {TextInputStore} from '../../stateless-react-input/index';
 
 var debug = require('debug')('EmailVerificationPage');
 
@@ -146,9 +145,9 @@ EmailVerificationPage.propTypes = {
 
 };
 
-EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore, AuthenticationTextInputStore], function (context, props) {
+EmailVerificationPage = connectToStores(EmailVerificationPage, [AuthenticationMainStore, TextInputStore], function (context, props) {
     return {
-        TextInputStore: context.getStore(AuthenticationTextInputStore).getState(),
+        TextInputStore: context.getStore(TextInputStore).getState(),
         AuthenticationMainStore: context.getStore(AuthenticationMainStore).getState()
     };
 });

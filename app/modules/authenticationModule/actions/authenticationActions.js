@@ -5,7 +5,7 @@
 import keyMirror from "react/lib/keyMirror";
 import Actions from "./constant";
 import AuthenticationMainStore from '../stores/authenticationMainStore';
-import {MessagingActions}  from '../../stateless-notifications/index';
+import {MessagingActions}  from '../../stateless-react-notifications/index';
 
 var debug = require('debug')('AuthenticationAction');
 var serviceTimeOut = 20000;

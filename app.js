@@ -8,9 +8,9 @@ import Routes from './app/components/Routes';
 import ApplicationStore from './app/stores/ApplicationStore';
 import ExampleStore from './app/stores/exampleStore';
 import fetchrPlugin from 'fluxible-plugin-fetchr';
-
-import {AuthenticationMainStore, AuthenticationTextInputStore} from './app/modules/authenticationModule/index';
-import {MessagingStore} from './app/modules/stateless-notifications/index'
+import {AuthenticationMainStore} from './app/modules/authenticationModule/index'
+import {TextInputStore} from './app/modules/stateless-react-input/index';
+import {MessagingStore} from './app/modules/stateless-react-notifications/index'
 
 let app = new Fluxible({
     component: Routes,
@@ -18,7 +18,7 @@ let app = new Fluxible({
         ApplicationStore,
         ExampleStore,
         AuthenticationMainStore,
-        AuthenticationTextInputStore,
+        TextInputStore,
         MessagingStore
     ]
 });
